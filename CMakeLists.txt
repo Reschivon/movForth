@@ -8,5 +8,4 @@ add_executable(movForth
         Interpret/Interpreter.cpp
         Word/Word.cpp
         Interpret/Stack.h
-        Print/PrettyPrinting.h
         )

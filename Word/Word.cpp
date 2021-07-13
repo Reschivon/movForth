@@ -64,10 +64,3 @@ void ForthWord::print_def() {
     for(auto w : definition)
         say " " + w->name;
 }
-
-Branch::Branch(int relative_jmp)
-    : Word("branch", false), relative_jmp(relative_jmp) {}
-
-int Branch::execute() const {
-    return relative_jmp + 1;
-}

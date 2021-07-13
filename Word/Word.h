@@ -11,7 +11,7 @@ namespace mfc {
 
     class Word;
 
-    typedef Word *Word_ptr;
+    typedef Word Word_ptr;
 
     class Word {
     public:
@@ -75,12 +75,6 @@ namespace mfc {
         void print_def();
     private:
         std::vector<Word_ptr> definition;
-    };
-
-    class Branch : Word {
-        int relative_jmp;
-        Branch(int relative_jmp);
-        int execute() const override;
     };
 
 
