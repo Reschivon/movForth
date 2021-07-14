@@ -6,16 +6,17 @@
 #include <vector>
 #include <functional>
 #include <memory>
-#include "../Interpret/Stack.h"
+
 namespace mfc {
 
     class Word;
-
     typedef std::shared_ptr<Word> Word_ptr;
 
     class Word {
+    protected:
+        const std::string name_str;
     public:
-        const std::string name;
+
         bool immediate;
 
         Word(std::string name, bool immediate);
@@ -23,11 +24,9 @@ namespace mfc {
         // returns a branch jump (1 is regular branchless instruction)
         virtual int execute() const = 0;
 
-        bool operator==(Word_ptr e) const {
-            return name == e->name;
-        }
-
         virtual ~Word() = default;
+
+        virtual std::string name();
     };
 
 
@@ -45,15 +44,18 @@ namespace mfc {
     public:
         explicit StatefulPrimitive(std::string name);
         int execute() const override = 0;
+        std::string name() override;
+
         int data;
+    private:
     };
 
     class Literal : public StatefulPrimitive {
     public:
-        explicit Literal(Stack *stack);
+        explicit Literal(std::function<void(int)> add_to_stack);
         int execute() const override;
     private:
-        Stack *stack;
+        std::function<void(int)> add_to_stack;
     };
 
     class Branch : public StatefulPrimitive {

@@ -3,6 +3,8 @@
 #include <iostream>
 #include "Interpreter.h"
 #include <utility>
+#include <iomanip>
+
 #define say std::cout <<
 #define over << std::endl;
 
@@ -10,7 +12,7 @@ using namespace mfc;
 
 Word_ptr Interpreter::find(const std::string& name) {
     auto find_result = std::find_if(dictionary.begin(), dictionary.end(),
-                 [name](Word_ptr& other){return other->name == name;});
+                 [name](Word_ptr& other){return other->name() == name;});
 
     if(find_result == dictionary.end())
         // try primitives
@@ -41,10 +43,10 @@ Interpreter::Interpreter(){
                 int num = stoi(token);
 
                 if(immediate)
-                    stack->push(num);
-                else {
+                    stack->push_num(num);
+                 else {
                     if(auto *forth_word = dynamic_cast<ForthWord*>(dictionary.back().get())){
-                        forth_word->append_xt(std::make_shared<Literal>(stack));
+                        forth_word->append_xt(std::make_shared<Literal>([&](int to_add){stack->push_num(to_add);}));
                         forth_word->append_data(num);
                     }else{
                         std::cout << "attempted to compile LITERAL to a primitive word"
@@ -75,62 +77,89 @@ Interpreter::Interpreter(){
 
 void Interpreter::init_words(){
     // holy fuck what I am I doing here
-    wordGenerator.register_lambda_word("+",[&] {
-            stack->push(stack->pop() + stack->pop());
+    wordGenerator.register_lambda_word("+", [&] {
+            stack->push_num(stack->pop_num() + stack->pop_num());
             return 1;
     });
 
     wordGenerator.register_lambda_word("-", [&] {
-            auto one = stack->pop();
-            auto two = stack->pop();
-            stack->push(two - one);
+            auto one = stack->pop_num();
+            auto two = stack->pop_num();
+            stack->push_num(two - one);
             return 1;
     });
 
 
     wordGenerator.register_lambda_word("*", [&] {
-            stack->push(stack->pop() * stack->pop());
+            stack->push_num(stack->pop_num() * stack->pop_num());
             return 1;
     });
 
 
     wordGenerator.register_lambda_word("/", [&] {
-            stack->push(stack->pop() / stack->pop());
+            stack->push_num(stack->pop_num() / stack->pop_num());
             return 1;
     });
 
     wordGenerator.register_lambda_word("swap", [&] {
-        auto top = stack->pop(), second = stack->pop();
-        stack->push(top);
-        stack->push(second);
+        auto top = stack->pop_num(), second = stack->pop_num();
+        stack->push_num(top);
+        stack->push_num(second);
         return 1;
     });
 
     wordGenerator.register_lambda_word("dup", [&] {
-        stack->push(stack->top());
+        stack->push_num(stack->top_num());
         return 1;
     });
 
     wordGenerator.register_lambda_word("drop", [&] {
-        stack->pop();
+        stack->pop_num();
         return 1;
     });
 
     wordGenerator.register_lambda_word(".", [&] {
-        std::cout << stack->pop() << std::endl;
+        std::cout << stack->pop_num() << std::endl;
         return 1;
     });
 
     wordGenerator.register_lambda_word(".S", [&] {
-        for(auto s : *stack)
-            say s << " ";
+        for(auto i=stack->begin();i < stack->end(); i++)
+            say i->first << " ";
+        return 1;
+    });
+
+    wordGenerator.register_lambda_word("'", [&] {
+        std::string next_token;
+        file >> next_token;
+        auto cfa = find(next_token);
+        if(cfa == nullptr)
+            say "used TICK to consume " << next_token << ", which is not a word" over
+        else
+            stack->push_cfa(cfa);
+        return 1;
+    });
+
+    wordGenerator.register_lambda_word(",", [&] {
+        auto last_word = dynamic_cast<ForthWord*>(dictionary.back().get());
+        if(last_word == nullptr) {
+            std::cout << "attempted to compile to a primitive" << std::endl;
+        }else{
+            if(stack->top_type() == NUMBER)
+                last_word->append_data(stack->pop_num());
+            if(stack->top_type() == CFA) {
+                //say "appending word " << stack->top_CFA()->name_str over // << " to " << last_word->name_str over
+                last_word->append_xt(stack->pop_cfa());
+            }
+        }
         return 1;
     });
 
     wordGenerator.register_lambda_word("see", [&] {
         for(const Word_ptr& word_ptr : dictionary){
-            say "[" + word_ptr->name + "] ";
-            say ((word_ptr->immediate)?"IMM ":" ");
+            say std::setfill(' ') << std::setw(15) << word_ptr->name() + "  ";
+            say ((word_ptr->immediate)?"IMM ":"    ");
+
             auto forth_word = dynamic_cast<ForthWord*>(word_ptr.get());
             if(forth_word != nullptr)
                 forth_word->print_def();
@@ -161,11 +190,12 @@ void Interpreter::init_words(){
 
     wordGenerator.register_type<Branch>("branch");
 
-    wordGenerator.register_type<Literal>("literal", stack);
+    wordGenerator.register_type<Literal>("literal", [&](int to_push){stack->push_num(to_push);});
 
 
     // relative arithmetic ONLY. Spec does not guarantee it
     // points to a specific address
+    // TODO HERE for variables
     wordGenerator.register_lambda_word("here", [&] {
         auto last_word = dynamic_cast<ForthWord*>(dictionary.back().get());
         if(last_word == nullptr)
@@ -173,7 +203,7 @@ void Interpreter::init_words(){
             "This is not supported since it destroys the illusion that you" <<
             "are using an interpreted Forth" << std::endl;
         else
-            stack->push((last_word->definition_size()));
+            stack->push_num((last_word->definition_size()));
         return 1;
     });
 

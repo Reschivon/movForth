@@ -5,12 +5,12 @@
 
 using namespace mfc;
 
-void WordGenerator::register_lambda_word(const std::string& name, const std::function<int()>& action) {
+void WordGenerator::register_lambda_word(std::string name, std::function<int()> action) {
     register_lambda_word(name, false, action);
 }
 
 // TODO figure out WTF is happening that fails with [&]
-void WordGenerator::register_lambda_word(const std::string& name, bool immediate, const std::function<int()>& action) {
+void WordGenerator::register_lambda_word(std::string name, bool immediate, std::function<int()> action) {
     generator_lookup[name] = [=]{
         return std::make_shared<LambdaPrimitive>(name, immediate, action);
     };

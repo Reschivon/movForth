@@ -1,5 +1,13 @@
-: imm immediate here . ;
+: ['] immediate ' ;
 
-: 2- imm 2 imm - imm ;
+: [,] immediate , ;
 
-10 2- .
+: payload 69 . ;
+
+: inject immediate  ['] literal ['] payload [,] ;
+
+: 1+ inject 1 + ;
+
+see
+
+10 1+ .

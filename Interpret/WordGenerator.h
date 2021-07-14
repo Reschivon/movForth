@@ -5,7 +5,6 @@
 #ifndef MOVFORTH_WORDGENERATOR_H
 #define MOVFORTH_WORDGENERATOR_H
 
-
 #include <unordered_map>
 #include <string>
 #include <functional>
@@ -27,9 +26,9 @@ namespace mfc {
             };
         }
 
-        void register_lambda_word(const std::string& name, const std::function<int()>& action);
+        void register_lambda_word(std::string name, std::function<int()> action);
 
-        void register_lambda_word(const std::string& name, bool immediate, const std::function<int()>& action);
+        void register_lambda_word(std::string name, bool immediate, std::function<int()> action);
 
         Word_ptr get(const std::string &name);
     };
