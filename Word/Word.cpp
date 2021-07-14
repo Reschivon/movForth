@@ -43,12 +43,13 @@ ForthWord::ForthWord(std::string name, bool immediate)
 int ForthWord::execute() const {
     for(int i=0; i<definition.size();){
         Word_ptr entry = definition[i];
+        //say "[exec] " << entry->name over
         i += entry->execute();
     }
     return 1;
 }
 void ForthWord::append_data(int data) {
-    auto stateful_primitive = dynamic_cast<StatefulPrimitive*>(definition.back());
+    auto stateful_primitive = dynamic_cast<StatefulPrimitive*>(definition.back().get());
     if(stateful_primitive == nullptr)
         std::cout << "attempted to set data value of " <<
         definition.back()->name <<
@@ -58,7 +59,7 @@ void ForthWord::append_data(int data) {
 }
 
 void ForthWord::append_xt(Word_ptr word_ptr) {
-    definition.push_back(word_ptr);
+    definition.push_back(std::move(word_ptr));
 }
 void ForthWord::print_def() {
     for(auto w : definition)

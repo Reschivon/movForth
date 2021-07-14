@@ -11,7 +11,7 @@ namespace mfc {
 
     class Word;
 
-    typedef Word *Word_ptr;
+    typedef std::shared_ptr<Word> Word_ptr;
 
     class Word {
     public:

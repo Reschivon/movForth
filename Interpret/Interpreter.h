@@ -6,6 +6,7 @@
 #define MOVFORTH_INTERPRETER_H
 #include "../Word/Word.h"
 #include "Stack.h"
+#include "WordGenerator.h"
 #include <fstream>
 #include <memory>
 
@@ -26,9 +27,10 @@ namespace mfc {
         Interpreter();
 
     private:
+        std::ifstream file;
         std::string token_buffer;
         void init_words();
-        std::ifstream file;
+        WordGenerator wordGenerator;
     };
 
 } // namespace
