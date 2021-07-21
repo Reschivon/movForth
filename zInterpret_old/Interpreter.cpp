@@ -22,7 +22,6 @@ Word_ptr Interpreter::find(const std::string& name) {
 }
 
 Interpreter::Interpreter(){
-    stack = new Stack;
     file.open("../boot.fs");
 
     if(!file.is_open()) return;
@@ -30,12 +29,12 @@ Interpreter::Interpreter(){
     init_words();
 
     std::string token;
-    while (file >> token) {
+    while (std::cin >> token) {
         Word_ptr word_ptr = find(token);
         if(!word_ptr)
             word_ptr = wordGenerator.get(token);
 
-        //say "[interpreter] " << token << " [state] " << (immediate?"imm":"comp") over
+        say "[interpreter] " << token << " [state] " << (immediate?"imm":"comp") over
 
         if(word_ptr == nullptr){
             // might be a number
@@ -43,10 +42,10 @@ Interpreter::Interpreter(){
                 int num = stoi(token);
 
                 if(immediate)
-                    stack->push_num(num);
+                    stack.push_num(num);
                  else {
                     if(auto *forth_word = dynamic_cast<ForthWord*>(dictionary.back().get())){
-                        forth_word->append_xt(std::make_shared<Literal>([&](int to_add){stack->push_num(to_add);}));
+                        forth_word->append_xt(wordGenerator.get("literal"));
                         forth_word->append_data(num);
                     }else{
                         std::cout << "attempted to compile LITERAL to a primitive word"
@@ -78,65 +77,65 @@ Interpreter::Interpreter(){
 void Interpreter::init_words(){
     // holy fuck what I am I doing here
     wordGenerator.register_lambda_word("+", [&] {
-            stack->push_num(stack->pop_num() + stack->pop_num());
+            stack.push_num(stack.pop_num() + stack.pop_num());
             return 1;
     });
 
     wordGenerator.register_lambda_word("-", [&] {
-            auto one = stack->pop_num();
-            auto two = stack->pop_num();
-            stack->push_num(two - one);
+            auto one = stack.pop_num();
+            auto two = stack.pop_num();
+            stack.push_num(two - one);
             return 1;
     });
 
 
     wordGenerator.register_lambda_word("*", [&] {
-            stack->push_num(stack->pop_num() * stack->pop_num());
+            stack.push_num(stack.pop_num() * stack.pop_num());
             return 1;
     });
 
 
     wordGenerator.register_lambda_word("/", [&] {
-            stack->push_num(stack->pop_num() / stack->pop_num());
+            stack.push_num(stack.pop_num() / stack.pop_num());
             return 1;
     });
 
     wordGenerator.register_lambda_word("swap", [&] {
-        auto top = stack->pop_num(), second = stack->pop_num();
-        stack->push_num(top);
-        stack->push_num(second);
+        auto top = stack.pop_num(), second = stack.pop_num();
+        stack.push_num(top);
+        stack.push_num(second);
         return 1;
     });
 
     wordGenerator.register_lambda_word("dup", [&] {
-        stack->push_num(stack->top_num());
+        stack.push_num(stack.top_num());
         return 1;
     });
 
     wordGenerator.register_lambda_word("drop", [&] {
-        stack->pop_num();
+        stack.pop_num();
         return 1;
     });
 
     wordGenerator.register_lambda_word(".", [&] {
-        std::cout << stack->pop_num() << std::endl;
+        std::cout << stack.pop_num() << std::endl;
         return 1;
     });
 
     wordGenerator.register_lambda_word(".S", [&] {
-        for(auto i=stack->begin();i < stack->end(); i++)
-            say i->first << " ";
+        for(auto i=stack.begin();i < stack.end(); i++)
+            say i->data_ptr.get()->name() << " ";
+        say "<-top";
+        say std::endl;
         return 1;
     });
 
     wordGenerator.register_lambda_word("'", [&] {
         std::string next_token;
-        file >> next_token;
+        std::cin >> next_token;
         auto cfa = find(next_token);
-        if(cfa == nullptr)
-            say "used TICK to consume " << next_token << ", which is not a word" over
-        else
-            stack->push_cfa(cfa);
+        if(cfa != nullptr)
+            stack.push_cfa(cfa);
         return 1;
     });
 
@@ -145,11 +144,11 @@ void Interpreter::init_words(){
         if(last_word == nullptr) {
             std::cout << "attempted to compile to a primitive" << std::endl;
         }else{
-            if(stack->top_type() == NUMBER)
-                last_word->append_data(stack->pop_num());
-            if(stack->top_type() == CFA) {
-                //say "appending word " << stack->top_CFA()->name_str over // << " to " << last_word->name_str over
-                last_word->append_xt(stack->pop_cfa());
+            if(stack.top_type() == NUMBER)
+                last_word->append_data(stack.pop_num());
+            if(stack.top_type() == CFA) {
+                //say "appending word " << stack.top_CFA()->name_str over // << " to " << last_word->name_str over
+                last_word->append_data(stack.pop_cfa());
             }
         }
         return 1;
@@ -169,7 +168,7 @@ void Interpreter::init_words(){
     });
 
     wordGenerator.register_lambda_word("word", [&] {
-        file >> token_buffer;
+        std::cin >> token_buffer;
         return 1;
     });
 
@@ -190,7 +189,13 @@ void Interpreter::init_words(){
 
     wordGenerator.register_type<Branch>("branch");
 
-    wordGenerator.register_type<Literal>("literal", [&](int to_push){stack->push_num(to_push);});
+    wordGenerator.register_type<Literal>("literal",
+                     [&](int to_push){stack.push_num(to_push);},
+                     [&](Cfa to_push){
+        std::cout << "now pushing cfa to stack: " << to_push.name() << std::endl;
+        auto to_push_cfa = to_push.cfa;
+        //std::cout << "stack top is " << (stack==nullptr) << std::endl;
+        stack.push_cfa(to_push_cfa);});
 
 
     // relative arithmetic ONLY. Spec does not guarantee it
@@ -203,13 +208,13 @@ void Interpreter::init_words(){
             "This is not supported since it destroys the illusion that you" <<
             "are using an interpreted Forth" << std::endl;
         else
-            stack->push_num((last_word->definition_size()));
+            stack.push_num((last_word->definition_size()));
         return 1;
     });
 
     wordGenerator.register_lambda_word("create", [&] {
         std::string next_token;
-        file >> next_token;
+        std::cin >> next_token;
         append(std::make_shared<ForthWord>(ForthWord(next_token, false)));
         return 1;
     });

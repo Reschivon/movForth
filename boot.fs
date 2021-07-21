@@ -2,12 +2,25 @@
 
 : [,] immediate , ;
 
-: payload 69 . ;
+: payload 11 . ;
 
-: inject immediate  ['] literal ['] payload [,] ;
+: inject immediate
+    ['] literal [,]
+    ['] payload [,]
+    ['] , [,]
+;
 
-: 1+ inject 1 + ;
+: postpone immediate
+    literal literal
+    ' ,
+    literal ,
+;
+
+: 1+ postpone payload 1 + ;
+
+21 1+ .
+
+: loop 33 . branch -3 ;
 
 see
 
-10 1+ .

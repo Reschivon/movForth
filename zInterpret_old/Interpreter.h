@@ -16,7 +16,7 @@ namespace mfc {
     public:
         std::vector<Word_ptr> dictionary;
         bool immediate = true;
-        Stack* stack; // mother fucker
+        Stack stack;
 
         Word_ptr find(const std::string &name);
 
