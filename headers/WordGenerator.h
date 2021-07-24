@@ -9,21 +9,13 @@ namespace mfc {
                 generator_lookup;
 
     public:
-        // holy fuck what I am I doing here
-        template<typename T, typename ...Args>
-        void register_type(std::string name, Args... args) {
-            generator_lookup[std::move(name)] = [&]{
-                return new T(std::forward<Args>(args)...);
-            };
-        }
-
-        void register_lambda_word(std::string name, std::function<void(Stack&, IP&)> action) {
+        void register_primitive(std::string name, std::function<void(Stack &, IP &)> action) {
             register_lambda_word(name, false, action);
         }
 
         void register_lambda_word(std::string name, bool immediate, std::function<void(Stack&, IP&)> action){
             generator_lookup[name] = [=]{
-                return new LambdaPrimitive(name, immediate, action);
+                return new Primitive(name, immediate, action);
             };
         }
 
