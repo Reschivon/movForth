@@ -29,19 +29,25 @@ namespace mfc {
         }
 
         Data(std::variant<int, Wordptr> data) : data(data) {}
+    };
 
-        template<typename T>
-        bool is_type(){
-            if(!is_xt())
-                return false;
-            return nullptr != dynamic_cast<T>(as_xt());
+
+
+    class IP{
+        bool isActive = false;
+    public:
+        std::vector<Data>::iterator me;
+
+        IP(std::vector<Data>::iterator in) : me(in) {isActive = true;}
+        IP() : me(nullptr) {}
+        IP operator+=(int i) { //outside the class
+            if(isActive) {
+                return me += i;
+            }
+            return me;
         }
-
-        template<typename T>
-        T as_type(){
-            if(!is_xt())
-                return nullptr;
-            return dynamic_cast<T>(as_xt());
+        bool operator<(const std::vector<Data>::iterator& a){
+            return me < a;
         }
     };
 

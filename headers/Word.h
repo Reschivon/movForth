@@ -9,23 +9,7 @@
 
 namespace mfc{
     class Stack;
-    class IP{
-        bool isActive = false;
-    public:
-        std::vector<Data>::iterator me;
 
-        IP(std::vector<Data>::iterator in) : me(in) {isActive = true;}
-        IP() : me(nullptr) {}
-        IP operator+=(int i) { //outside the class
-            if(isActive) {
-                return me += i;
-            }
-            return me;
-        }
-        bool operator<(const std::vector<Data>::iterator& a){
-            return me < a;
-        }
-    };
 
     // TODO does dyno cast work like <Cast> (no pointer)
     template <typename Cast>
