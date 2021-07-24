@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <iomanip>
 #include "../headers/Interpreter.h"
-#include "../headers/Word.h"
 
 using namespace mfc;
 
@@ -14,7 +13,7 @@ Interpreter::Interpreter() : input("../boot.fs"){
         if(!Wordptr)
             Wordptr = wordGenerator.get(token);
 
-        std::cout << "[interpreter] " << token << std::endl;
+        //std::cout << "[interpreter] " << token << std::endl;
 
         if(Wordptr == nullptr){
             // might be a number
@@ -25,8 +24,8 @@ Interpreter::Interpreter() : input("../boot.fs"){
                     stack.push(num);
                 else {
                     if(auto forth_word = instance_of<ForthWord>(dictionary.back())){
-                        forth_word->append(Data(find("literal")));
-                        forth_word->append(Data(num));
+                        forth_word->add(Data(find("literal")));
+                        forth_word->add(Data(num));
                     }else{
                         std::cout << "attempted to compile LITERAL to a primitive word" << std::endl;
                     }
@@ -45,7 +44,7 @@ Interpreter::Interpreter() : input("../boot.fs"){
                 Wordptr->execute(stack, ippp);
             } else {
                 if(auto forth_word = instance_of<ForthWord>(dictionary.back())){
-                    forth_word->append(Data(Wordptr));
+                    forth_word->add(Data(Wordptr));
                 }else
                     std::cout << "attempted to compile xts to a primitive word"
                               << std::endl;
@@ -69,116 +68,116 @@ Wordptr Interpreter::find(const std::string& name) {
 
 void Interpreter::init_words(){
     // holy fuck what I am I doing here
-    wordGenerator.register_lambda_word("+", [](Stack &stack, IP &i) {
-        stack.push(stack.pop_number() + stack.pop_number());
+    wordGenerator.register_lambda_word("+", [](Stack &s, IP &i) {
+        s.push(s.pop_number() + s.pop_number());
     });
 
-    wordGenerator.register_lambda_word("-", [](Stack &stack, IP &i) {
-        auto one = stack.pop_number();
-        auto two = stack.pop_number();
-        stack.push(two - one);
+    wordGenerator.register_lambda_word("-", [](Stack &s, IP &i) {
+        auto one = s.pop_number();
+        auto two = s.pop_number();
+        s.push(two - one);
         
     });
 
 
-    wordGenerator.register_lambda_word("*", [](Stack &stack, IP &i) {
-        stack.push(stack.pop_number() * stack.pop_number());
+    wordGenerator.register_lambda_word("*", [](Stack &s, IP &i) {
+        s.push(s.pop_number() * s.pop_number());
         
     });
 
 
-    wordGenerator.register_lambda_word("/", [](Stack &stack, IP &i) {
-        stack.push(stack.pop_number() / stack.pop_number());
+    wordGenerator.register_lambda_word("/", [](Stack &s, IP &i) {
+        s.push(s.pop_number() / s.pop_number());
         
     });
 
-    wordGenerator.register_lambda_word("swap", [](Stack &stack, IP &i) {
-        auto top = stack.pop_number(), second = stack.pop_number();
-        stack.push(top);
-        stack.push(second);
+    wordGenerator.register_lambda_word("swap", [](Stack &s, IP &i) {
+        auto top = s.pop_number(), second = s.pop_number();
+        s.push(top);
+        s.push(second);
         
     });
 
-    wordGenerator.register_lambda_word("dup", [](Stack &stack, IP &i) {
-        stack.push(stack.top());
+    wordGenerator.register_lambda_word("dup", [](Stack &s, IP &i) {
+        s.push(s.top());
         
     });
 
-    wordGenerator.register_lambda_word("drop", [](Stack &stack, IP &i) {
-        stack.pop_number();
+    wordGenerator.register_lambda_word("drop", [](Stack &s, IP &i) {
+        s.pop_number();
+    });
+
+    wordGenerator.register_lambda_word(".", [](Stack &s, IP &i) {
+        std::cout << s.pop_number() << std::endl;
         
     });
 
-    wordGenerator.register_lambda_word(".", [](Stack &stack, IP &i) {
-        std::cout << stack.pop_number() << std::endl;
-        
-    });
-
-    wordGenerator.register_lambda_word(".S", [](Stack &stack, IP &i) {
-       stack.for_each([](Data thing) {
-           std::cout << data_to_string(thing) << std::endl;
+    wordGenerator.register_lambda_word(".S", [](Stack &s, IP &i) {
+       std::cout << "Stack size: " << s.size() << " ";
+        s.for_each([](Data thing) {
+           std::cout << data_to_string(thing) << " ";
        });
         std::cout << "<-top";
         std::cout << std::endl;
         
     });
 
-    wordGenerator.register_lambda_word("'", [&](Stack &stack, IP &i) {
+    wordGenerator.register_lambda_word("'", [&](Stack &s, IP &i) {
         std::string next_token = input.next_token();
         auto cfa = find(next_token);
         if(cfa != nullptr)
-            stack.push(cfa);
+            s.push(cfa);
         
     });
 
-    wordGenerator.register_lambda_word(",", [&](Stack &stack, IP &i) {
+    wordGenerator.register_lambda_word(",", [&](Stack &s, IP &i) {
         if(auto last_word = instance_of<ForthWord>(dictionary.back())) {
-            if(stack.top().is_num()) // is int
-                last_word->append(Data(stack.pop_number()));
-            if(stack.top().is_xt()) {
-                //say "appending word " << stack.top_CFA()->name_str over // << " to " << last_word->name_str over
-                last_word->append(Data(stack.pop_word_pointer()));
-            }
+            last_word->add(s.pop());
         }else{
             std::cout << "attempted to compile to a primitive" << std::endl;
         }
-        
     });
 
-    wordGenerator.register_lambda_word("see", [&](Stack &stack, IP &i) {
+    wordGenerator.register_lambda_word("see", [&](Stack &s, IP &i) {
         std::cout << std::endl << "\tSo you want to see?" << std::endl;
 
-        for(const Wordptr word_pointer : dictionary){
+        for(Wordptr word_pointer : dictionary){
             std::cout << std::setfill(' ') << std::setw(15) << word_pointer->to_string() + "  ";
-            std::cout << ((word_pointer->immediate) ? "IMM " : "    ");
+            std::cout << ((word_pointer->immediate) ? "IMM  " : "     ");
 
             if(auto forth_word = instance_of<ForthWord>(word_pointer))
-                forth_word->print_definition();
+                forth_word->definition_to_string();
             std::cout << std::endl;
         }
-
         std::cout << std::endl;
-        
     });
 
-    wordGenerator.register_lambda_word("word", [&](Stack &stack, IP &i) {
-        token_buffer = input.next_token();
-        
-    });
-
-    wordGenerator.register_lambda_word("[", [&](Stack &stack, IP &i) {
+    wordGenerator.register_lambda_word("[", true, [&](Stack &s, IP &i) {
         immediate = true;
-        
     });
 
-    wordGenerator.register_lambda_word("]", [&](Stack &stack, IP &i) {
+    wordGenerator.register_lambda_word("]", [&](Stack &s, IP &i) {
         immediate = false;
-        
     });
 
-    wordGenerator.register_lambda_word("immediate", true, [&](Stack &stack, IP &i) {
+    wordGenerator.register_lambda_word("immediate", true, [&](Stack &s, IP &i) {
         dictionary.back()->immediate = true;
-        
+    });
+
+    wordGenerator.register_lambda_word("@", [&](Stack &s, IP &i) {
+        dictionary.back()->immediate = true;
+    });
+
+    wordGenerator.register_lambda_word("!", [&](Stack &s, IP &i) {
+        int address = stack.pop_number();
+        Data val = stack.pop();
+        auto last_word = instance_of<ForthWord>(dictionary.back());
+        if(!last_word)
+            std::cout << "used ! for an address not in most recent word" << std::endl;
+        else {
+            last_word->set(address, val);
+        }
+
     });
 
     wordGenerator.register_type<Branch>("branch");
@@ -190,28 +189,29 @@ void Interpreter::init_words(){
     // relative arithmetic ONLY. Spec does not guarantee it
     // points to a specific address
     // TODO HERE for variables
-    wordGenerator.register_lambda_word("here", [&](Stack &stack, IP &i) {
-        if(auto last_word = instance_of<ForthWord>(dictionary.back()))
-            std::cout << "attempted to use HERE for purpose other than compilation" <<
-                      "This is not supported since it destroys the illusion that you" <<
+    wordGenerator.register_lambda_word("here", [&](Stack &s, IP &i) {
+        auto last_word = instance_of<ForthWord>(dictionary.back());
+        if(!last_word)
+            std::cout << "attempted to use HERE for purpose other than compilation. " <<
+                      "This is not supported since it destroys the illusion that you " <<
                       "are using an interpreted Forth" << std::endl;
         else
-            stack.push(last_word->definition_size());
+            s.push(last_word->definition_size());
         
     });
 
-    wordGenerator.register_lambda_word("create", [&](Stack &stack, IP &i) {
+    wordGenerator.register_lambda_word("create", [&](Stack &s, IP &i) {
         std::string next_token = input.next_token();
         dictionary.push_back(new ForthWord(next_token, false));
     });
 
     auto colon_word = new ForthWord(":", false);
-    colon_word->append(Data(find("create")));
-    colon_word->append(Data(find("]")));
+    colon_word->add(Data(find("create")));
+    colon_word->add(Data(find("]")));
     dictionary.push_back(colon_word);
 
     auto exit_word = new ForthWord(";", true);
-    exit_word->append(Data(find("[")));
+    exit_word->add(Data(find("[")));
     dictionary.push_back(exit_word);
 }
 

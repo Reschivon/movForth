@@ -13,7 +13,6 @@ namespace mfc {
         file_input input;
         std::vector<Wordptr> dictionary;
         Stack stack;
-        std::string token_buffer;
         bool immediate = true;
         WordGenerator wordGenerator;
 

@@ -22,6 +22,8 @@ namespace mfc {
         }
 
         int pop_number(){
+            if(stack.size() == 0) std::cout << "tried popping empty stack" << std::endl;
+
             if(stack.back().is_num()) { // int
                 auto ret = stack.back().as_num();
                 stack.pop_back();
@@ -35,6 +37,8 @@ namespace mfc {
         }
 
         Wordptr pop_word_pointer(){
+            if(stack.size() == 0) std::cout << "tried popping empty stack" << std::endl;
+
             if(stack.back().is_num()) { // int
                 std::cout << "tried popping int expecting cfa" << std::endl;
                 return nullptr;
@@ -48,6 +52,7 @@ namespace mfc {
         }
 
         Data pop(){
+            if(stack.empty()) std::cout << "tried popping empty stack" << std::endl;
             auto ret = stack.back();
             stack.pop_back();
             return ret;
@@ -55,6 +60,10 @@ namespace mfc {
 
         Data top(){
             return stack.back();
+        }
+
+        int size(){
+            return stack.size();
         }
 
         void for_each(std::function<void(Data)> action){

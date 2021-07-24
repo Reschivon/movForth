@@ -4,23 +4,50 @@
 
 : payload 11 . ;
 
-: inject immediate
-    ['] literal [,]
-    ['] payload [,]
-    ['] , [,]
-;
+: negative -1 * ;
 
-: postpone immediate
-    literal literal
-    ' ,
-    literal ,
-;
+: jump>
+    literal branch ,
+    here 0 , ;
 
-: 1+ postpone payload 1 + ;
+: jumpif>
+    literal branchif ,
+    here 0 , ;
 
-21 1+ .
+: >land
+    dup
+    here - negative
+    swap ! ;
 
-: loop 33 . branch -3 ;
+: land< immediate
+    here ;
+
+: <jump
+    literal branch ,
+    here - , ;
+
+: <jumpif
+    literal branchif ,
+    here - , ;
+
+: if immediate
+    jumpif> ;
+
+: then immediate
+    >land ;
+
+: while immediate
+    land< ;
+
+: loop immediate
+    <jump ;
+
+: loopif immediate
+    <jumpif ;
+
+: r while 69 . 69 . 0 loopif 420 . ;
 
 see
+
+1 r
 

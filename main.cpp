@@ -4,7 +4,6 @@
 
 
 int main() {
-
     mfc::Interpreter interpreter;
 }
 
