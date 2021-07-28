@@ -1,5 +1,5 @@
-#ifndef MOVFORTH_STACK_H
-#define MOVFORTH_STACK_H
+#ifndef MOVFORTH_INTER_STACK_H
+#define MOVFORTH_INTER_STACK_H
 
 #include <iostream>
 #include <variant>

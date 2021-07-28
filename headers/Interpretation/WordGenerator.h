@@ -2,6 +2,9 @@
 #include <iostream>
 #include "Word.h"
 
+#ifndef MOVFORTH_INTER_WORDGEN_H
+#define MOVFORTH_INTER_WORDGEN_H
+
 namespace mfc {
     class WordGenerator {
     private:
@@ -29,3 +32,5 @@ namespace mfc {
     };
 
 }
+
+#endif

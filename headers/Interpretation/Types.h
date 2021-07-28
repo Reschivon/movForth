@@ -1,7 +1,7 @@
 
 
-#ifndef MOVFORTH_TYPES_H
-#define MOVFORTH_TYPES_H
+#ifndef MOVFORTH_INTER_TYPES_H
+#define MOVFORTH_INTER_TYPES_H
 
 namespace mfc {
 

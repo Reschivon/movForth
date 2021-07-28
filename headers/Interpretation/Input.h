@@ -1,5 +1,5 @@
-#ifndef MOVFORTH_INPUT_H
-#define MOVFORTH_INPUT_H
+#ifndef MOVFORTH_INTER_INPUT_H
+#define MOVFORTH_INTER_INPUT_H
 
 #include <string>
 #include <iostream>

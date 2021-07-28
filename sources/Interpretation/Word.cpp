@@ -1,6 +1,6 @@
 #include <utility>
-#include "../headers/Word.h"
-#include "../headers/Stack.h"
+#include "../../headers/Interpretation/Word.h"
+#include "../../headers/Interpretation/Stack.h"
 
 using namespace mfc;
 
@@ -24,7 +24,7 @@ void ForthWord::execute(Stack &stack, IP &ip) {
             it.me->as_xt()->execute(stack, it);
         else
             std::cout <<
-                "Number was not consumed by a word before it, and was erroneously executed"
+                "Number " << it.me->as_num() << " was not consumed by a word before it, and was erroneously executed"
             << std::endl;
     }
 }

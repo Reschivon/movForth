@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <iomanip>
-#include "../headers/Interpreter.h"
+#include "../../headers/Interpretation/Interpreter.h"
 
 using namespace mfc;
 
@@ -187,32 +187,20 @@ void Interpreter::init_words(){
     });
 
     wordGenerator.register_primitive("branch", [&](Stack &s, IP &ip) {
-        ip += 1;
-        Data data = *(ip.me);
-        try {
-            ip += (data.as_num() - 2);
-            // negative jumps go ++ more
-            if (data.as_num() < 0) ip += 1;
-        } catch (const std::exception &e) {
-            std::cout << "fucker: " << e.what() << std::endl;
-        }
+        Data data = *(ip.me + 1);
+
+        ip += data.as_num();
+
     });
 
     wordGenerator.register_primitive("branchif", [&](Stack &s, IP &ip) {
-        ip += 1;
-        Data data = *(ip.me);
+        Data data = *(ip.me + 1);
 
-        if (s.pop_number() > 0) {
-            std::cout << "BB jump" << std::endl;
+        if (s.pop_number() == 0)
+            ip += data.as_num();
+        else
+            ip += 1; // skip the number
 
-            if (data.is_num()) {
-                ip += data.as_num() + 1;
-            } else
-                std::cout << "fuck" << std::endl;
-        } else {
-            std::cout << "BB no jump" << std::endl;
-            //ip += 1;
-        }
     });
 
     wordGenerator.register_primitive("literal", [&](Stack &s, IP &ip) {
@@ -246,5 +234,9 @@ void Interpreter::init_words(){
     auto exit_word = new ForthWord(";", true);
     exit_word->add(Data(find("[")));
     dictionary.push_back(exit_word);
+}
+
+std::vector<Wordptr> Interpreter::get_dictionary() {
+    return std::move(dictionary);
 }
 

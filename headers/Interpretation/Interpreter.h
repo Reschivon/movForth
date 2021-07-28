@@ -1,5 +1,5 @@
-#ifndef MOVFORTH_INTERPRETER_H
-#define MOVFORTH_INTERPRETER_H
+#ifndef MOVFORTH_INTER_INTERPRETER_H
+#define MOVFORTH_INTER_INTERPRETER_H
 
 #include <vector>
 #include "Input.h"
@@ -16,12 +16,12 @@ namespace mfc {
         bool immediate = true;
         WordGenerator wordGenerator;
 
-        Wordptr find(const std::string &name);
-
         void init_words();
 
     public:
+        Wordptr find(const std::string &name);
         Interpreter();
+        std::vector<Wordptr> get_dictionary();
     };
 }
 

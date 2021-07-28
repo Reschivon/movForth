@@ -1,5 +1,5 @@
-#ifndef MOVFORTH_WORD_H
-#define MOVFORTH_WORD_H
+#ifndef MOVFORTH_INTER_WORD_H
+#define MOVFORTH_INTER_WORD_H
 
 #include <unordered_map>
 #include <functional>
@@ -28,7 +28,7 @@ namespace mfc{
         virtual std::string base_string();
     };
 
-    class ForthWord : public Word{
+    class ForthWord : public Word {
         std::vector<Data> definition;
     public:
         ForthWord(std::string name, bool immediate);
@@ -37,10 +37,11 @@ namespace mfc{
         void add(Data data);
         void set(int index, Data value);
         void definition_to_string();
-
         int definition_size();
+        std::vector<Data> get_definition() {
+            return definition;
+        }
     };
-
     class Primitive : public Word{
         std::function<void(Stack&, IP&)> action;
     public:

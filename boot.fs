@@ -33,21 +33,28 @@
 : if immediate
     jumpif> ;
 
+: else immediate
+    jump>
+    swap >land ;
+
 : then immediate
     >land ;
 
 : while immediate
     land< ;
 
-: loop immediate
+: repeat immediate
     <jump ;
 
-: loopif immediate
+: repeatif immediate
     <jumpif ;
 
-: r while 69 . 69 . 0 loopif 420 . ;
+: test if 69 . 69 . else 420 . 420 . then ;
 
-see
+: consume . . . ;
 
-1 r
+: compile , , , ;
 
+: produce 1 2 3 ;
+
+: tri produce consume compile ;
