@@ -19,4 +19,4 @@ add_executable(movForth
         headers/Util.h
         sources/Cyclic/Structures.cpp
         headers/Print.h
-        )
+        sources/Print.cpp)

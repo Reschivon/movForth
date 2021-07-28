@@ -7,7 +7,8 @@
 #include "../Interpretation/Types.h"
 
 namespace sym {
-    Wordptr symbolize_word(mfc::Wordptr wordptr);
+    Wordptr stack_analysis(mfc::Wordptr wordptr);
+    Wordptr generate_ir(Wordptr wordptr);
 }
 
 #endif

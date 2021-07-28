@@ -4,31 +4,36 @@
 #ifndef MOVFORTH_PRINT_H
 #define MOVFORTH_PRINT_H
 
-inline void print(){
+extern int _indent;
+
+template <typename... Args>
+inline void print(Args&&... args)
+{
+    for(int i = 0; i < _indent; i++)
+        std::cout <<"\t";
+
+    ((std::cout << std::forward<Args>(args)), ...);
+}
+
+template <typename... Args>
+inline void println(Args&&... args){
+    print(args...);
     std::cout << std::endl;
 }
-
-template <typename Arg, typename... Args>
-inline void print(Arg&& arg, Args&&... args)
-{
-    std::cout << std::forward<Arg>(arg);
-    ((std::cout << ' ' << std::forward<Args>(args)), ...);
-}
-
-template <typename Arg, typename... Args>
-inline void println(Arg&& arg, Args&&... args){
-    print(arg, args...);
-    print("\n");
-    std::cout.flush();
-}
-template <typename Arg, typename... Args>
-inline void dln(Arg&& arg, Args&&... args){
-    if(false)
+template <typename... Args>
+inline void dln(Args&&... args){
+    if(true)
     {
-        print(arg, args...);
-        print("\n");
-        std::cout.flush();
+        print(args...);
+        std::cout << std::endl;
     }
+}
+
+inline void indent(){
+    _indent++;
+}
+inline void unindent(){
+    _indent--;
 }
 
 #endif

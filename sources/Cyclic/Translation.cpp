@@ -1,5 +1,5 @@
 
-#include "../../headers/Symbolic//Translation.h"
+#include "../../headers/Symbolic/Translation.h"
 
 using namespace sym;
 
