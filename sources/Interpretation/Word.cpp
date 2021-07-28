@@ -18,14 +18,12 @@ ForthWord::ForthWord(std::string name, bool immediate) : Word(std::move(name), i
 void ForthWord::execute(Stack &stack, IP &ip) {
     for(IP it(definition.begin()); it < definition.end(); it+=1) {
 
-        //std::cout << "       [exec] " << ((*(it.me)).is_xt()?(*(it.me)).as_xt()->to_string():std::to_string((*(it.me)).as_num())) << " " << std::endl;
+        //println("       [exec] ", ((*(it.me)).is_xt()?(*(it.me)).as_xt()->to_string():std::to_string((*(it.me)).as_num())), " ");
 
         if(it.me->is_xt())
             it.me->as_xt()->execute(stack, it);
         else
-            std::cout <<
-                "Number " << it.me->as_num() << " was not consumed by a word before it, and was erroneously executed"
-            << std::endl;
+           println("Number ", it.me->as_num(), " was not consumed by a word before it, and was erroneously executed");
     }
 }
 void ForthWord::add(Data data){
@@ -39,7 +37,7 @@ void ForthWord::definition_to_string() {
             h = std::to_string(thing.as_num());
         if(thing.is_xt())
             h = thing.as_xt()->to_string();
-        std::cout << h << " ";
+        print(h, " ");
     }
 }
 

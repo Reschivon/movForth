@@ -11,10 +11,12 @@ add_executable(movForth
         sources/Interpretation/Word.cpp
         headers/Interpretation/Stack.h
         headers/Interpretation/Types.h
-        headers/Cyclic/Structures.h
-        sources/Cyclic/DictConversion.cpp
-        headers/Cyclic/DictConversion.h
+        headers/Symbolic/Structures.h
+        sources/Cyclic/SymbolicPass.cpp
+        headers/Symbolic/SymbolicPass.h
         sources/Cyclic/Translation.cpp
-        headers/Cyclic/Translation.h
+        headers/Symbolic/Translation.h
         headers/Util.h
-        sources/Cyclic/Structures.cpp)
+        sources/Cyclic/Structures.cpp
+        headers/Print.h
+        )

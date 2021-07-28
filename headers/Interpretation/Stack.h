@@ -4,6 +4,7 @@
 #include <iostream>
 #include <variant>
 #include "Word.h"
+#include "../../headers/Print.h"
 
 namespace mfc {
 
@@ -22,7 +23,7 @@ namespace mfc {
         }
 
         int pop_number(){
-            if(stack.size() == 0) std::cout << "tried popping empty stack" << std::endl;
+            if(stack.size() == 0) println("tried popping empty stack");
 
             if(stack.back().is_num()) { // int
                 auto ret = stack.back().as_num();
@@ -30,14 +31,14 @@ namespace mfc {
                 return ret;
             }
             if(stack.back().is_xt()) { // word ptr
-                std::cout << "tried popping cfa expecting int" << std::endl;
+                println("tried popping cfa expecting int");
                 return 0;
             }
             return 0;
         }
 
         Wordptr pop_word_pointer(){
-            if(stack.size() == 0) std::cout << "tried popping empty stack" << std::endl;
+            if(stack.size() == 0) println("tried popping empty stack");
 
             if(stack.back().is_num()) { // int
                 std::cout << "tried popping int expecting cfa" << std::endl;
@@ -52,7 +53,7 @@ namespace mfc {
         }
 
         Data pop(){
-            if(stack.empty()) std::cout << "tried popping empty stack" << std::endl;
+            if(stack.empty()) println("tried popping empty stack");
             auto ret = stack.back();
             stack.pop_back();
             return ret;

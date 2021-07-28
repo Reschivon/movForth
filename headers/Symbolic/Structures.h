@@ -1,12 +1,13 @@
 
-#ifndef MOVFORTH_CYC_TYPES_H
-#define MOVFORTH_CYC_TYPES_H
+#ifndef MOVFORTH_SYM_TYPES_H
+#define MOVFORTH_SYM_TYPES_H
 
 #include <string>
 #include <variant>
 #include <vector>
 #include <iostream>
 #include "../Util.h"
+#include "../Print.h"
 
 namespace sym {
 
@@ -74,13 +75,13 @@ namespace sym {
         bool new_word = false;
 
         void definition_to_string(){
-            std::cout << "[" << name << "]" << std::endl;
-            std::cout << "input parameters: " << stack_pop << std::endl;
-            std::cout << "output frames: " << stack_push << std::endl;
-            std::cout << std::endl;
+            println("[", name, "]");
+            println("input parameters: ", stack_pop);
+            println("output frames: ", stack_push);
+            print();
             for(auto thing : definition)
-                std::cout << thing->name << " ";
-            std::cout << std::endl;
+                print(thing->name, " ");
+           print();
         }
     };
 

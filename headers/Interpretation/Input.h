@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include "../Print.h"
 
 namespace mfc {
 
@@ -38,7 +39,7 @@ namespace mfc {
         explicit file_input(std::string path) {
             file.open(path);
             if (!file.is_open())
-                std::cout << "Cannot open file " << std::endl;
+                println("Cannot open file");
         }
 
         std::string next_token() override {

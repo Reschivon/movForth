@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iomanip>
 #include "../../headers/Interpretation/Interpreter.h"
+#include "../../headers/Print.h"
 
 using namespace mfc;
 
@@ -13,7 +14,7 @@ Interpreter::Interpreter() : input("../boot.fs"){
         if(!Wordptr)
             Wordptr = wordGenerator.get(token);
 
-        //std::cout << "[interpreter] " << token << std::endl;
+        //println( << "[interpreter] ", token);
 
         if(Wordptr == nullptr){
             // might be a number
@@ -30,9 +31,9 @@ Interpreter::Interpreter() : input("../boot.fs"){
                         forth_word->add(Data(find("literal")));
                         forth_word->add(Data(num));
                     }else{
-                        std::cout <<
+                        println(
                             "attempted to compile LITERAL to a primitive word"
-                        << std::endl;
+                        );
                     }
 
                 }
@@ -58,9 +59,9 @@ Interpreter::Interpreter() : input("../boot.fs"){
                 if(forth_word){
                     forth_word->add(Data(Wordptr));
                 }else
-                    std::cout <<
+                    println(
                         "attempted to compile xts to a primitive word"
-                    << std::endl;
+                    );
             }
         }
 
@@ -116,16 +117,15 @@ void Interpreter::init_words(){
     });
 
     wordGenerator.register_primitive(".", [](Stack &s, IP &i) {
-        std::cout << s.pop_number() << std::endl;
+        println("{}", s.pop_number());
     });
 
     wordGenerator.register_primitive(".S", [](Stack &s, IP &i) {
-        std::cout << "Stack size: " << s.size() << " ";
+        print("Stack size: " + std::to_string(s.size()));
         s.for_each([](Data thing) {
-            std::cout << data_to_string(thing) << " ";
+            print(data_to_string(thing), " ");
         });
-        std::cout << "<-top";
-        std::cout << std::endl;
+        println("<-top");
     });
 
     wordGenerator.register_primitive("'", [&](Stack &s, IP &i) {
@@ -139,23 +139,23 @@ void Interpreter::init_words(){
         if (auto last_word = try_cast<ForthWord>(dictionary.back())) {
             last_word->add(s.pop());
         } else {
-            std::cout << "attempted to compile to a primitive" << std::endl;
+            println("attempted to compile to a primitive");
         }
     });
 
     wordGenerator.register_primitive("see", [&](Stack &s, IP &i) {
-        std::cout << std::endl << "\tSo you want to see?" << std::endl;
+        println("\n\tSo you want to see?");
 
         for (Wordptr word_pointer : dictionary) {
             std::cout << std::setfill(' ') << std::setw(15) <<
                       word_pointer->to_string() + "  ";
-            std::cout << ((word_pointer->immediate) ? "IMM  " : "     ");
+            print((word_pointer->immediate) ? "IMM  " : "     ");
 
             if (auto forth_word = try_cast<ForthWord>(word_pointer))
                 forth_word->definition_to_string();
-            std::cout << std::endl;
+            print();
         }
-        std::cout << std::endl;
+        print();
     });
 
     wordGenerator.register_lambda_word("[", true, [&](Stack &s, IP &i) {
@@ -179,8 +179,7 @@ void Interpreter::init_words(){
         Data val = stack.pop();
         auto last_word = try_cast<ForthWord>(dictionary.back());
         if (!last_word)
-            std::cout << "used ! for an address not in most recent word"
-                      << std::endl;
+           println("used ! for an address not in most recent word");
         else {
             last_word->set(address, val);
         }
@@ -215,7 +214,7 @@ void Interpreter::init_words(){
     wordGenerator.register_primitive("here", [&](Stack &s, IP &i) {
         auto last_word = try_cast<ForthWord>(dictionary.back());
         if (!last_word)
-            std::cout << "Define some words before calling HERE" << std::endl;
+            println("Define some words before calling HERE");
         else
             s.push(last_word->definition_size());
     });

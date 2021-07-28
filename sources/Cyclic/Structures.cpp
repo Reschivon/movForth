@@ -1,18 +1,18 @@
-#include "../../headers/Cyclic/Structures.h"
+#include "../../headers/Symbolic//Structures.h"
 
 using namespace sym;
 
 Stack* Stack::propagate(sym::Wordptr base, sym::Wordptr seq){
     auto next_stack = new Stack;
 
-    std::cout << "add " << seq->name << " to " << base->name << "'s stack" << std::endl;
+    dln("add", seq->name, " to ", base->name, "'s stack");
 
     int to_pop = seq->stack_pop;
     int not_popped = data.size() - to_pop;
     int last_index = data.size() - 1;
     if(not_popped < 0){
         for(int i = 0; i < -not_popped; i++){
-            std::cout << seq->name << " needed one more input" << std::endl;
+            dln(seq->name + " needed one more input");
             data.push_back(Node{.backward = new Word{.name = "__input"}});
             base->stack_pop++;
         }
@@ -32,7 +32,7 @@ Stack* Stack::propagate(sym::Wordptr base, sym::Wordptr seq){
         next_stack->data.push_back(Node{point});
     }
 
-    std::cout << "stack size: " << next_stack->data.size() << std::endl;
+    dln("stack size: ", next_stack->data.size());
 
     return next_stack;
 }

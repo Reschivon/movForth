@@ -1,13 +1,14 @@
 
-#include "../../headers/Cyclic/DictConversion.h"
-
 #include <vector>
 #include <set>
+#include "../../headers/Symbolic/SymbolicPass.h"
 #include "../../headers/Interpretation/Word.h"
+#include "../../headers/Symbolic/Structures.h"
+#include "../../headers/Print.h"
 
 using namespace sym;
 
-// primitives only (static instances)
+// primitives (static instances)
 std::unordered_map<std::string, Wordptr> primitive_lookup = {
         {"+",        new Word{.name = "+",         .stack_pop = 2, .stack_push = 1}},
         {"-",        new Word{.name = "-",         .stack_pop = 2, .stack_push = 1}},
@@ -46,17 +47,17 @@ bool is_stateful(Wordptr wordptr){
 // use the same sub definitions
 std::unordered_map<mfc::Wordptr, Wordptr> converted_words;
 
-Data mfc_data_to_cyc_data(mfc::Data data){
+Data symbolize_data(mfc::Data data){
     if(data.is_num())
         return Data(data.as_num());
     if(data.is_xt()){}
-        return Data(mfc_word_to_cyc_word(data.as_xt()));
+        return Data(symbolize_word(data.as_xt()));
 }
 
-Wordptr sym::mfc_word_to_cyc_word(mfc::Wordptr wordptr){
+Wordptr sym::symbolize_word(mfc::Wordptr wordptr){
     auto converted = converted_words.find(wordptr);
     if(converted != converted_words.end()) {
-        std::cout << wordptr->to_string() << " already analysed, skipping" << std::endl;
+        dln(wordptr->to_string(), " already analysed, skipping");
         return converted->second;
     }
 
@@ -71,43 +72,42 @@ Wordptr sym::mfc_word_to_cyc_word(mfc::Wordptr wordptr){
         // is a forth word
         auto *new_word = new Word{.name = name};
 
-        std::cout << "\nanalyse " << new_word->name << std::endl;
+        dln("\nanalyse ", new_word->name);
 
-        auto definition = forth_word->get_definition();
-        for (int index = 0; index < definition.size(); index++)
+        converted_words[wordptr] = new_word;
+
+        new_word->first_stack = new Stack;
+        Stack* next_stack = new_word->first_stack;
+        for (int i = 0; i < forth_word->get_definition().size(); i++)
         {
-            sym::Word *current_definee = mfc_word_to_cyc_word(definition[index].as_xt());
+            mfc::Data definition_slot = forth_word->get_definition()[i];
 
+            sym::Word *current_definee = symbolize_word(definition_slot.as_xt());
             new_word->definition.push_back(current_definee);
 
             if(is_stateful(current_definee))
             {
                 // treat next word as data and add data to definee
-                auto next_thing = mfc_data_to_cyc_data(definition[++index]);
+                auto next_thing = symbolize_data(definition_slot);
                 current_definee->data_push.push_back(next_thing);
+                i++;
             }
-            new_word->acquire_side_effects(current_definee);
-        }
-        converted_words[wordptr] = new_word;
 
-        // now the stack analysis pass
-        new_word->first_stack = new Stack;
-        Stack* next_stack = new_word->first_stack;
-        for (auto thing : new_word->definition)
-        {
+            new_word->acquire_side_effects(current_definee);
+
             Stack* curr_stack = next_stack;
-            next_stack = curr_stack->propagate(new_word, thing);
+            next_stack = curr_stack->propagate(new_word, current_definee);
         }
         new_word->last_stack = next_stack;
 
         new_word->stack_push = new_word->last_stack->data.size();
 
-        std::cout << "finished " << new_word->name << ": +" << new_word->stack_push << " -" << new_word->stack_pop << "\n\n";
+        dln("finished ", new_word->name, ": +", new_word->stack_push, " -", new_word->stack_pop, "\n");
 
 
         return new_word;
     }
 
-    std::cout << "fuck" << std::endl;
+    println("fuck");
     return nullptr;
 }
