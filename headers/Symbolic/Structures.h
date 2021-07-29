@@ -38,8 +38,8 @@ namespace sym {
     };
 
     struct RegisterID{
-        unsigned int ID;
-        enum registerType {NORMAL, PARAM} register_type;
+        unsigned int ID = -1;
+        enum registerType {UNDEF, NORMAL, PARAM} register_type = UNDEF;
 
         RegisterID operator++(int val){
             ID++;
@@ -47,7 +47,17 @@ namespace sym {
         }
 
         std::string to_string(){
-            return (register_type==NORMAL?"(register ":"(input ") + std::to_string(ID) + ")";
+            switch (register_type)
+            {
+                case NORMAL:
+                    return "(register "+ std::to_string(ID) + ")";
+                case PARAM:
+                    return "(input "+ std::to_string(ID) + ")";
+                case UNDEF:
+                    return "(undefined "+ std::to_string(ID) + ")";
+                default:
+                    return "(fucked "+ std::to_string(ID) + ")";
+            }
         }
     };
 
@@ -79,20 +89,32 @@ namespace sym {
         }
     };
 
-    struct Stack{
-        std::vector<Node*> nodes;
-
-        Stack* propagate(sym::Wordptr base, sym::Wordptr next_word, RegisterGenerator& register_generator);
+    struct NodeList : std::vector<Node*>{
+        Node* push_back(Node* push){
+            std::vector<Node*>::push_back(push);
+            return back();
+        }
     };
 
+
+    struct Stack{
+        NodeList nodes;
+
+        Stack* propagate(sym::Wordptr base, sym::Wordptr next_word, RegisterGenerator& register_generator);
+
+    private:
+        void link_next_standard(Stack *next_stack, sym::Wordptr next_word, RegisterGenerator& register_generator);
+        void link_next_swap    (Stack *next_stack, sym::Wordptr next_word, RegisterGenerator& register_generator);
+        void link_next_dup     (Stack *next_stack, sym::Wordptr next_word, RegisterGenerator& register_generator);
+    };
 
     class Word {
     public:
         std::vector<Wordptr> definition;
         std::vector<Stack*> stacks;
         std::string name;
-        std::vector<Node*> pop_nodes;
-        std::vector<Node*> push_nodes;
+        NodeList pop_nodes;
+        NodeList push_nodes;
 
         void acquire_side_effects(Word* other){
             // pop and push handled elsewhere

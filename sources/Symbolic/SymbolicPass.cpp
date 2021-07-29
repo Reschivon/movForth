@@ -13,9 +13,9 @@ const std::unordered_map<std::string, Wordptr> primitive_lookup = {
         {"-",        new Word{.name = "-",         .num_popped = 2, .num_pushed = 1}},
         {"*",        new Word{.name = "*",         .num_popped = 2, .num_pushed = 1}},
         {"/",        new Word{.name = "/",         .num_popped = 2, .num_pushed = 1}},
-        {"swap",     new Word{.name = "swap"}},
-        {"dup",      new Word{.name = "dup"}},
-        {"drop",     new Word{.name = "drop"}},
+        {"swap",     new Word{.name = "swap",      .num_popped = 2, .num_pushed = 2}},
+        {"dup",      new Word{.name = "dup",       .num_popped = 1, .num_pushed = 2}},
+        {"drop",     new Word{.name = "drop",      .num_popped = 1}},
         {".",        new Word{.name = ".",         .num_popped = 1}},
         {".S",       new Word{.name = ".S"}},
         {"'",        new Word{.name = "'",         .consume_token = true, .data_push = std::vector<Data>{Data(nullptr)}}},
@@ -74,9 +74,6 @@ Wordptr sym::stack_analysis(mfc::Wordptr wordptr){
         // is a forth word: pass over its definition to compute side effects
         auto *new_word = new Word{.name = name};
 
-        println("\nanalyse ", new_word->name);
-        indent();
-
         // initialize the symbolic stack's starting state
         // we will update its state as we pass over xts
         auto* next_stack = new Stack;
@@ -105,18 +102,11 @@ Wordptr sym::stack_analysis(mfc::Wordptr wordptr){
             Stack* curr_stack = next_stack;
             new_word->stacks.push_back(curr_stack);
             next_stack = curr_stack->propagate(new_word, current_definee, register_generator);
-
-            println("finished simulating ", current_definee->name,
-                    " with pop nodes:", current_definee->pop_nodes.size(),
-                    " and push nodes:", current_definee->push_nodes.size());
         }
         // the pushed side effect is the same as remaining stack frames
         auto *last_stack = next_stack;
         new_word->stacks.push_back(last_stack);
         new_word->num_pushed = last_stack->nodes.size();
-
-        unindent();
-        println("finished effects for ", new_word->name, ": +", new_word->num_pushed, " -", new_word->num_popped, "\n");
 
         // cache this word for the future
         converted_words[wordptr] = new_word;
@@ -134,7 +124,7 @@ Wordptr sym::generate_ir(Wordptr wordptr){
         Stack *stack = wordptr->stacks[i];
         Wordptr sub_def = wordptr->definition[i];
 
-        /*println();
+        println();
         println("[stack]");
         println("pop from ids:");
         for(auto node : stack->nodes)
@@ -142,7 +132,7 @@ Wordptr sym::generate_ir(Wordptr wordptr){
 
         println("push to ids:");
         for(auto node : stack->nodes)
-            println("   ", node->forward_id.to_string());*/
+            println("   ", node->forward_id.to_string());
 
         println();
         println("[", sub_def->name, "]");

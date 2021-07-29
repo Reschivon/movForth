@@ -51,10 +51,10 @@
 
 : test if 69 . 69 . else 420 . 420 . then ;
 
-: consume . . . ;
+: consume . . ;
 
-: compile , , , ;
+: compile , , ;
 
-: produce 1 2 3 ;
+: produce 1 2 ;
 
-: tri produce consume compile ;
+: tri produce swap consume compile ;

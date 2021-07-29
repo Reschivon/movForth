@@ -5,10 +5,9 @@
 int main() {
     mfc::Interpreter interpreter;
 
-    auto to_compile = interpreter.find("tri");
-    auto converted_word = sym::stack_analysis(to_compile);
+    auto word_to_compile = interpreter.find("tri");
 
-    // converted_word->definition_to_string();
+    auto converted_word = sym::stack_analysis(word_to_compile);
 
     sym::generate_ir(converted_word);
 }
