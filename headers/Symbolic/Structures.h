@@ -6,6 +6,7 @@
 #include <variant>
 #include <vector>
 #include <iostream>
+#include <functional>
 #include "../Util.h"
 #include "../Print.h"
 
@@ -94,6 +95,10 @@ namespace sym {
             std::vector<Node*>::push_back(push);
             return back();
         }
+
+        Node* penultimate(){
+            return operator[](size() - 2);
+        }
     };
 
 
@@ -139,8 +144,26 @@ namespace sym {
         unsigned int num_pushed = (0);
         std::vector<Data> data_push;
         unsigned int compiled_slots = 0; // TODO still unsure how to handle memory
-        enum interpret_state{ NONE, TOCOMPILE, TOINTERPRET} interpret_state = NONE;
+        enum interpret_state{NONE, TOCOMPILE, TOINTERPRET} interpret_state = NONE;
         bool define_new_word = false;
+
+        std::function<std::vector<RegisterID>(std::vector<RegisterID>, RegisterGenerator&)>
+                register_passthrough = Word::default_register_passthrough;
+
+        static constexpr auto default_register_passthrough = [](std::vector<RegisterID> inputs, RegisterGenerator& rgen) {
+            std::vector<RegisterID> ret;
+            for(auto reg : inputs)
+                ret.push_back(rgen.get());
+            return ret;
+        };
+
+        static constexpr auto swap_register_passthrough = [](std::vector<RegisterID> inputs, RegisterGenerator& rgen) {
+            return std::vector<RegisterID>{inputs.back(), inputs[inputs.size()-2]};
+        };
+
+        static constexpr auto dup_register_passthrough = [](std::vector<RegisterID> inputs, RegisterGenerator& rgen) {
+            return std::vector<RegisterID>{inputs.back(), inputs.back()};
+        };
 
         void definition_to_string(){
             println("[", name, "]");
@@ -152,7 +175,6 @@ namespace sym {
            print();
         }
     };
-
 }
 
 #endif

@@ -13,8 +13,8 @@ const std::unordered_map<std::string, Wordptr> primitive_lookup = {
         {"-",        new Word{.name = "-",         .num_popped = 2, .num_pushed = 1}},
         {"*",        new Word{.name = "*",         .num_popped = 2, .num_pushed = 1}},
         {"/",        new Word{.name = "/",         .num_popped = 2, .num_pushed = 1}},
-        {"swap",     new Word{.name = "swap",      .num_popped = 2, .num_pushed = 2}},
-        {"dup",      new Word{.name = "dup",       .num_popped = 1, .num_pushed = 2}},
+        {"swap",     new Word{.name = "swap",      .num_popped = 2, .num_pushed = 2, .register_passthrough = Word::swap_register_passthrough}},
+        {"dup",      new Word{.name = "dup",       .num_popped = 1, .num_pushed = 2, .register_passthrough = Word::dup_register_passthrough}},
         {"drop",     new Word{.name = "drop",      .num_popped = 1}},
         {".",        new Word{.name = ".",         .num_popped = 1}},
         {".S",       new Word{.name = ".S"}},
@@ -124,7 +124,7 @@ Wordptr sym::generate_ir(Wordptr wordptr){
         Stack *stack = wordptr->stacks[i];
         Wordptr sub_def = wordptr->definition[i];
 
-        println();
+        /*println();
         println("[stack]");
         println("pop from ids:");
         for(auto node : stack->nodes)
@@ -132,7 +132,7 @@ Wordptr sym::generate_ir(Wordptr wordptr){
 
         println("push to ids:");
         for(auto node : stack->nodes)
-            println("   ", node->forward_id.to_string());
+            println("   ", node->forward_id.to_string());*/
 
         println();
         println("[", sub_def->name, "]");

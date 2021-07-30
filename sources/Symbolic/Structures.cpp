@@ -14,7 +14,6 @@ using namespace sym;
  */
 
 void Stack::link_next_standard(Stack *next_stack, sym::Wordptr next_word, RegisterGenerator& register_generator){
-    // next stack to next word
     for(int put = 0; put < next_word->num_pushed; put++)
     {
         next_stack->nodes.push_back(
@@ -31,21 +30,14 @@ void Stack::link_next_standard(Stack *next_stack, sym::Wordptr next_word, Regist
 
 // assuming next_word is of type swap
 void Stack::link_next_swap(Stack *next_stack, sym::Wordptr next_word, RegisterGenerator &register_generator) {
-    // next stack to next word
-    next_stack->nodes.push_back(new Node());
-    next_stack->nodes.push_back(new Node());
+    Node* their_penult = next_stack->nodes.push_back(new Node());
+    Node* their_top    = next_stack->nodes.push_back(new Node());
 
-    next_word->push_nodes.push_back(new Node());
-    next_word->push_nodes.push_back(new Node());
+    Node* my_penult_push = next_word->push_nodes.push_back(new Node());
+    Node* my_top_push    = next_word->push_nodes.push_back(new Node());
 
-    Node* my_top_push = next_word->push_nodes.back();
-    Node* my_penult_push = next_word->push_nodes[next_word->push_nodes.size() - 2];
-
-    RegisterID my_penult_pop = next_word->pop_nodes[0]->backward_id;
-    RegisterID my_top_pop = next_word->pop_nodes[1]->backward_id;
-
-    Node* their_top = next_stack->nodes.back();
-    Node* their_penult = next_stack->nodes[next_stack->nodes.size() - 2];
+    RegisterID my_penult_pop = next_word->pop_nodes.penultimate()->backward_id;
+    RegisterID my_top_pop = next_word->pop_nodes.back()->backward_id;
 
     Node::link(my_top_push, their_top, my_penult_pop);
     Node::link(my_penult_push, their_penult, my_top_pop);
@@ -53,20 +45,13 @@ void Stack::link_next_swap(Stack *next_stack, sym::Wordptr next_word, RegisterGe
 
 // assuming next_word is of type dup
 void Stack::link_next_dup(Stack *next_stack, sym::Wordptr next_word, RegisterGenerator& register_generator){
-    // next stack to next word
-    next_stack->nodes.push_back(new Node());
-    next_stack->nodes.push_back(new Node());
+    Node* my_penult_push = next_word->push_nodes.push_back(new Node());
+    Node* my_top_push    = next_word->push_nodes.push_back(new Node());
 
-    next_word->push_nodes.push_back(new Node());
-    next_word->push_nodes.push_back(new Node());
-
-    Node* my_top_push = next_word->push_nodes.back();
-    Node* my_penult_push = next_word->push_nodes[0];
+    Node* their_penult = next_stack->nodes.push_back(new Node());
+    Node* their_top    = next_stack->nodes.push_back(new Node());
 
     RegisterID my_top_pop = next_word->pop_nodes.back()->backward_id;
-
-    Node* their_top = next_stack->nodes.back();
-    Node* their_penult = next_stack->nodes[next_stack->nodes.size()-2];
 
     Node::link(my_top_push, their_penult, my_top_pop);
     Node::link(my_penult_push, their_top, my_top_pop);
@@ -97,7 +82,8 @@ Stack* Stack::propagate(sym::Wordptr base, sym::Wordptr next_word, RegisterGener
 
     int last_index = nodes.size() - 1;
 
-    // link next word and this stack (top - middle)
+    // link this stack and next word (top - middle)
+
     // Do not optimize out `take <= last_index` because the vector size
     // changes during iteration
     for(int take = nodes.size() - to_be_popped; take <= last_index; take++)
@@ -110,7 +96,7 @@ Stack* Stack::propagate(sym::Wordptr base, sym::Wordptr next_word, RegisterGener
         Node::link(my_node, their_node, my_node->backward_id);
     }
 
-    // link next stack and this stack (middle - bottom)
+    // link this stack and next stack (middle - bottom)
     while (not_popped --> 0)
     {
         next_stack->nodes.push_back(new Node());
@@ -121,6 +107,7 @@ Stack* Stack::propagate(sym::Wordptr base, sym::Wordptr next_word, RegisterGener
         Node::link(my_node, their_node, my_node->backward_id);
     }
 
+    // link next stack and next word
     if(next_word->name == "swap")
         link_next_swap(next_stack, next_word, register_generator);
     else if(next_word->name == "dup")
