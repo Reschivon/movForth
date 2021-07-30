@@ -13,8 +13,8 @@ const std::unordered_map<std::string, Wordptr> primitive_lookup = {
         {"-",        new Word{.name = "-",         .num_popped = 2, .num_pushed = 1}},
         {"*",        new Word{.name = "*",         .num_popped = 2, .num_pushed = 1}},
         {"/",        new Word{.name = "/",         .num_popped = 2, .num_pushed = 1}},
-        {"swap",     new Word{.name = "swap",      .num_popped = 2, .num_pushed = 2, .register_passthrough = Word::swap_register_passthrough}},
-        {"dup",      new Word{.name = "dup",       .num_popped = 1, .num_pushed = 2, .register_passthrough = Word::dup_register_passthrough}},
+        {"swap",     new Word{.name = "swap",      .num_popped = 2, .num_pushed = 2, .register_passthrough = Word::swap_node_passthrough}},
+        {"dup",      new Word{.name = "dup",       .num_popped = 1, .num_pushed = 2, .register_passthrough = Word::dup_node_passthrough}},
         {"drop",     new Word{.name = "drop",      .num_popped = 1}},
         {".",        new Word{.name = ".",         .num_popped = 1}},
         {".S",       new Word{.name = ".S"}},
@@ -83,7 +83,7 @@ Wordptr sym::stack_analysis(mfc::Wordptr wordptr){
             mfc::Data current_data = forth_word->get_definition()[i];
 
             // assume the current xt is a word
-            auto *current_definee = copy_of(stack_analysis(current_data.as_xt()));
+            auto *current_definee = shallow_copy(stack_analysis(current_data.as_xt()));
             new_word->definition.push_back(current_definee);
 
             // collapse nodes literals into the word that owns them

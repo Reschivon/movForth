@@ -13,13 +13,22 @@ using namespace sym;
  * number of stack frames.
  */
 
-void Stack::link_next_standard(Stack *next_stack, sym::Wordptr next_word, RegisterGenerator& register_generator){
+void Stack::link_next_standard(sym::Wordptr next_word, Stack *next_stack, RegisterGenerator &register_generator) {
+    auto output_register_list = next_word->register_passthrough(
+                        next_word->pop_nodes.backward_registers_to_vector(),
+                        register_generator);
+
     for(int put = 0; put < next_word->num_pushed; put++)
     {
-        next_stack->nodes.push_back(
-                !next_word->data_push.empty() ? new Node{.data = copy_of(
-                        &(next_word->data_push[0]))} : new Node());
+        Node* to_push_to_stack;
+        if(!next_word->data_push.empty())
+            to_push_to_stack = new Node{.data = shallow_copy(
+                    &(next_word->data_push[0]))};
+        else
+            to_push_to_stack = new Node();
+
         next_word->push_nodes.push_back(new Node());
+        next_stack->nodes.push_back(to_push_to_stack);
 
         Node *my_node = next_word->push_nodes.back();
         Node *their_node = next_stack->nodes.back();
@@ -29,7 +38,7 @@ void Stack::link_next_standard(Stack *next_stack, sym::Wordptr next_word, Regist
 }
 
 // assuming next_word is of type swap
-void Stack::link_next_swap(Stack *next_stack, sym::Wordptr next_word, RegisterGenerator &register_generator) {
+void Stack::link_next_swap(sym::Wordptr next_word, Stack *next_stack, RegisterGenerator &register_generator) {
     Node* their_penult = next_stack->nodes.push_back(new Node());
     Node* their_top    = next_stack->nodes.push_back(new Node());
 
@@ -109,11 +118,11 @@ Stack* Stack::propagate(sym::Wordptr base, sym::Wordptr next_word, RegisterGener
 
     // link next stack and next word
     if(next_word->name == "swap")
-        link_next_swap(next_stack, next_word, register_generator);
+        link_next_swap(next_word, next_stack, register_generator);
     else if(next_word->name == "dup")
         link_next_dup(next_stack, next_word, register_generator);
     else
-        link_next_standard(next_stack, next_word, register_generator);
+        link_next_standard(next_word, next_stack, register_generator);
 
     return next_stack;
 }

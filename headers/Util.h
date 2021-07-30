@@ -10,7 +10,7 @@ void append_to_vector(std::vector<T> base, std::vector<T> to_add){
 }
 
 template <typename T>
-T* copy_of(T *in){
+T* shallow_copy(T *in){
   return new T(*in);
 }
 

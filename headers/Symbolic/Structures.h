@@ -99,6 +99,13 @@ namespace sym {
         Node* penultimate(){
             return operator[](size() - 2);
         }
+
+        std::vector<RegisterID> backward_registers_to_vector(){
+            std::vector<RegisterID> ret;
+            for(auto node : *this)
+                ret.push_back(node->backward_id);
+            return ret;
+        }
     };
 
 
@@ -108,8 +115,10 @@ namespace sym {
         Stack* propagate(sym::Wordptr base, sym::Wordptr next_word, RegisterGenerator& register_generator);
 
     private:
-        void link_next_standard(Stack *next_stack, sym::Wordptr next_word, RegisterGenerator& register_generator);
-        void link_next_swap    (Stack *next_stack, sym::Wordptr next_word, RegisterGenerator& register_generator);
+        void link_next_standard(sym::Wordptr next_word, Stack *next_stack,
+                                RegisterGenerator &register_generator);
+        void link_next_swap(sym::Wordptr next_word, Stack *next_stack,
+                            RegisterGenerator &register_generator);
         void link_next_dup     (Stack *next_stack, sym::Wordptr next_word, RegisterGenerator& register_generator);
     };
 
@@ -148,21 +157,32 @@ namespace sym {
         bool define_new_word = false;
 
         std::function<std::vector<RegisterID>(std::vector<RegisterID>, RegisterGenerator&)>
-                register_passthrough = Word::default_register_passthrough;
+                register_passthrough = Word::default_node_passthrough;
 
-        static constexpr auto default_register_passthrough = [](std::vector<RegisterID> inputs, RegisterGenerator& rgen) {
-            std::vector<RegisterID> ret;
-            for(auto reg : inputs)
-                ret.push_back(rgen.get());
+        static constexpr auto default_node_passthrough = [](NodeList inputs, RegisterGenerator& rgen) {
+            NodeList ret;
+            for(auto reg : inputs.backward_registers_to_vector())
+                ret.push_back(new Node{.forward_id = rgen.get()});
             return ret;
         };
 
-        static constexpr auto swap_register_passthrough = [](std::vector<RegisterID> inputs, RegisterGenerator& rgen) {
-            return std::vector<RegisterID>{inputs.back(), inputs[inputs.size()-2]};
+        static constexpr auto swap_node_passthrough = [](NodeList inputs, RegisterGenerator& rgen) {
+            NodeList ret;
+            ret.push_back(new Node{.forward_id = inputs.back()->backward_id});
+            ret.push_back(new Node{.forward_id = inputs[inputs.size() - 2]->backward_id});
+
+            Node::link(inputs.penultimate(), ret.back(),        inputs.penultimate()->backward_id);
+            Node::link(inputs.back(),        ret.penultimate(), inputs.back()->backward_id);
+
+            return ret;
         };
 
-        static constexpr auto dup_register_passthrough = [](std::vector<RegisterID> inputs, RegisterGenerator& rgen) {
-            return std::vector<RegisterID>{inputs.back(), inputs.back()};
+        static constexpr auto dup_node_passthrough = [](NodeList inputs, RegisterGenerator& rgen) {
+            NodeList ret;
+            ret.push_back(new Node{.forward_id = inputs.back()->backward_id});
+            ret.push_back(new Node{.forward_id = inputs.back()->backward_id});
+
+            Node::link(inputs.back())
         };
 
         void definition_to_string(){
