@@ -37,8 +37,13 @@ namespace sym{
 
             if(other.define_new_word) define_new_word = true;
         }
+
     };
 
+    struct StackEffector{
+        NodeList pop_nodes;
+        NodeList push_nodes;
+    };
 
     class Word {
     public:
@@ -50,13 +55,9 @@ namespace sym{
         NodeList my_graphs_outputs;
         NodeList my_graphs_inputs;
 
-        void propagate(sym::Wordptr sub_word, NodeList &stack, RegisterGenerator& register_generator);
-
         void definition_to_string();
 
-    //private:
-        NodeList pop_nodes;
-        NodeList push_nodes;
+        std::vector<StackEffector> stack_effectors;
     };
 }
 

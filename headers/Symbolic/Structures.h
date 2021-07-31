@@ -84,12 +84,12 @@ namespace sym {
         Register edge_register;
         Register forward_edge_register;
 
-        static void link(Node* back, Node* front, Register id){
+        static void link(Node *back, Node *front, Register id){
             front->target = back;
             front->edge_register = id;
         }
 
-        static void link_bidirection(Node* back, Node* front, Register id){
+        static void link_bidirection(Node *back, Node *front, Register id){
             front->target = back;
             front->edge_register = id;
 
@@ -99,19 +99,14 @@ namespace sym {
 
     // thin wrapper for convenience
     struct NodeList : std::vector<Node*>{
-        Node* push_back(Node* push){
+        Node* push_back(Node *push){
             std::vector<Node*>::push_back(push);
             return back();
         }
 
-        Node* pop_back(){
-            auto top = back();
-            std::vector<Node*>::pop_back();
-            return top;
-        }
-
-        Node* penultimate(){
-            return operator[](size() - 2);
+        Node* push_front(Node *push){ // bad perf, but keeping it simple
+            std::vector<Node*>::insert(begin(), push);
+            return back();
         }
 
         unsigned int size(){
@@ -122,6 +117,11 @@ namespace sym {
             to.insert(to.end(), std::make_move_iterator(from.end() - num),
                       std::make_move_iterator(from.end()));
             from.erase(from.end() - num, from.end());
+        }
+
+    private:
+        Node pop_back(){ // hide it! NodeList is strictly increasing
+            return {};
         }
     };
 }
