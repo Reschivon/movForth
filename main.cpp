@@ -4,11 +4,12 @@
 
 int main() {
     mfc::Interpreter interpreter;
+    sym::StackGrapher stackGrapher;
 
     auto word_to_compile = interpreter.find("tri");
 
-    auto converted_word = sym::stack_analysis(word_to_compile);
+    auto converted_word = stackGrapher.compute_effects(word_to_compile);
 
-    sym::generate_ir(converted_word);
+    //stackGrapher.generate_ir(converted_word);
 }
 

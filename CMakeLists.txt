@@ -15,6 +15,5 @@ add_executable(movForth
         headers/Symbolic/SymbolicPass.h
         sources/Symbolic/Translation.cpp
         headers/Util.h
-        sources/Symbolic/Structures.cpp
         headers/Print.h
-        sources/Print.cpp)
+        sources/Print.cpp headers/Symbolic/Word.cpp headers/Symbolic/Word.h)

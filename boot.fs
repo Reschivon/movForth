@@ -57,4 +57,6 @@
 
 : produce 1 2 ;
 
-: tri produce swap consume compile ;
+: swip swap ;
+
+: tri produce swip consume compile ;

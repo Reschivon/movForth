@@ -38,11 +38,11 @@ namespace sym {
         explicit Data(std::variant<int, Wordptr, std::nullptr_t> data) : data(data) {}
     };
 
-    struct RegisterID{
+    struct Register{
         unsigned int ID = -1;
         enum registerType {UNDEF, NORMAL, PARAM} register_type = UNDEF;
 
-        RegisterID operator++(int val){
+        Register operator++(int val){
             ID++;
             return *this;
         }
@@ -63,136 +63,57 @@ namespace sym {
     };
 
     struct RegisterGenerator{
-        RegisterID get(){
-            return current_id++;
+        Register get(){
+            auto ret = current_id;
+            current_id++;
+            return ret;
         }
-        RegisterID get_param(){
-            return current_param_id++;
+        Register get_param(){
+            auto ret = current_param_id;
+            current_param_id++;
+            return ret;
         }
-    //private:
-        RegisterID current_id = {1, RegisterID::NORMAL};
-        RegisterID current_param_id = {1, RegisterID::PARAM};
+
+    private:
+        Register current_id = {0, Register::NORMAL};
+        Register current_param_id = {0, Register::PARAM};
     };
 
     struct Node{
-        Node* backward = nullptr;
-        Node* forward = nullptr;
-        RegisterID forward_id;
-        RegisterID backward_id;
+        Node* target = nullptr;
+        Register edge_register;
 
-        Data* data = nullptr;
-
-        static void link(Node* back, Node* front, RegisterID id){
-            back->forward = front;
-            front->backward = back;
-            back->forward_id = id;
-            front->backward_id = id;
+        static void link(Node* back, Node* front, Register id){
+            front->target = back;
+            front->edge_register = id;
         }
     };
 
+    // thin wrapper for convenience
     struct NodeList : std::vector<Node*>{
         Node* push_back(Node* push){
             std::vector<Node*>::push_back(push);
             return back();
         }
 
+        Node* pop_back(){
+            auto top = back();
+            std::vector<Node*>::pop_back();
+            return top;
+        }
+
         Node* penultimate(){
             return operator[](size() - 2);
         }
 
-        std::vector<RegisterID> backward_registers_to_vector(){
-            std::vector<RegisterID> ret;
-            for(auto node : *this)
-                ret.push_back(node->backward_id);
-            return ret;
-        }
-    };
-
-
-    struct Stack{
-        NodeList nodes;
-
-        Stack* propagate(sym::Wordptr base, sym::Wordptr next_word, RegisterGenerator& register_generator);
-
-    private:
-        void link_next_standard(sym::Wordptr next_word, Stack *next_stack,
-                                RegisterGenerator &register_generator);
-        void link_next_swap(sym::Wordptr next_word, Stack *next_stack,
-                            RegisterGenerator &register_generator);
-        void link_next_dup     (Stack *next_stack, sym::Wordptr next_word, RegisterGenerator& register_generator);
-    };
-
-    class Word {
-    public:
-        std::vector<Wordptr> definition;
-        std::vector<Stack*> stacks;
-        std::string name;
-        NodeList pop_nodes;
-        NodeList push_nodes;
-
-        void acquire_side_effects(Word* other){
-            // pop and push handled elsewhere
-
-            if(other->consume_token) consume_token = true;
-
-            append_to_vector(data_push, other->data_push);
-
-            compiled_slots += other->compiled_slots;
-
-            if(other->interpret_state != NONE)
-                interpret_state = other->interpret_state;
-
-            if(other->define_new_word) define_new_word = true;
+        unsigned int size(){
+            return (unsigned int) std::vector<Node*>::size();
         }
 
-        // input
-        unsigned int num_popped = 0;
-        bool consume_token = false; // ONLY for single token consumers, leave out "
-
-        // output
-        unsigned int num_pushed = (0);
-        std::vector<Data> data_push;
-        unsigned int compiled_slots = 0; // TODO still unsure how to handle memory
-        enum interpret_state{NONE, TOCOMPILE, TOINTERPRET} interpret_state = NONE;
-        bool define_new_word = false;
-
-        std::function<std::vector<RegisterID>(std::vector<RegisterID>, RegisterGenerator&)>
-                register_passthrough = Word::default_node_passthrough;
-
-        static constexpr auto default_node_passthrough = [](NodeList inputs, RegisterGenerator& rgen) {
-            NodeList ret;
-            for(auto reg : inputs.backward_registers_to_vector())
-                ret.push_back(new Node{.forward_id = rgen.get()});
-            return ret;
-        };
-
-        static constexpr auto swap_node_passthrough = [](NodeList inputs, RegisterGenerator& rgen) {
-            NodeList ret;
-            ret.push_back(new Node{.forward_id = inputs.back()->backward_id});
-            ret.push_back(new Node{.forward_id = inputs[inputs.size() - 2]->backward_id});
-
-            Node::link(inputs.penultimate(), ret.back(),        inputs.penultimate()->backward_id);
-            Node::link(inputs.back(),        ret.penultimate(), inputs.back()->backward_id);
-
-            return ret;
-        };
-
-        static constexpr auto dup_node_passthrough = [](NodeList inputs, RegisterGenerator& rgen) {
-            NodeList ret;
-            ret.push_back(new Node{.forward_id = inputs.back()->backward_id});
-            ret.push_back(new Node{.forward_id = inputs.back()->backward_id});
-
-            Node::link(inputs.back())
-        };
-
-        void definition_to_string(){
-            println("[", name, "]");
-            println("input parameters: ", num_popped);
-            println("output frames: ", num_pushed);
-            print();
-            for(auto thing : definition)
-                print(thing->name, " ");
-           print();
+        static void move_top_elements(NodeList &from, NodeList &to, int num){
+            to.insert(to.end(), std::make_move_iterator(from.end() - num),
+                      std::make_move_iterator(from.end()));
+            from.erase(from.end() - num, from.end());
         }
     };
 }
