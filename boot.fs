@@ -51,12 +51,10 @@
 
 : test if 69 . 69 . else 420 . 420 . then ;
 
-: consume . . ;
+: p 1 2 ;
 
-: compile , , ;
+: print . . . ;
 
-: produce 1 2 ;
+: fib dup rot + dup . ;
 
-: swip swap ;
-
-: tri produce swip consume compile ;
+p fib fib fib fib fib fib fib fib fib

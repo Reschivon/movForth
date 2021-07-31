@@ -82,10 +82,18 @@ namespace sym {
     struct Node{
         Node* target = nullptr;
         Register edge_register;
+        Register forward_edge_register;
 
         static void link(Node* back, Node* front, Register id){
             front->target = back;
             front->edge_register = id;
+        }
+
+        static void link_bidirection(Node* back, Node* front, Register id){
+            front->target = back;
+            front->edge_register = id;
+
+            back->forward_edge_register = id;
         }
     };
 

@@ -14,7 +14,7 @@ Interpreter::Interpreter() : input("../boot.fs"){
         if(!Wordptr)
             Wordptr = wordGenerator.get(token);
 
-        //println( << "[interpreter] ", token);
+        //println("[interpreter] ", token);
 
         if(Wordptr == nullptr){
             // might be a number
@@ -108,6 +108,16 @@ void Interpreter::init_words(){
         s.push(second);
     });
 
+    wordGenerator.register_primitive("rot", [](Stack &s, IP &i) {
+        auto top = s.pop_number();
+        auto second = s.pop_number();
+        auto third = s.pop_number();
+
+        s.push(second);// third
+        s.push(top);   // second
+        s.push(third); // top
+    });
+
     wordGenerator.register_primitive("dup", [](Stack &s, IP &i) {
         s.push(s.top());
     });
@@ -117,11 +127,10 @@ void Interpreter::init_words(){
     });
 
     wordGenerator.register_primitive(".", [](Stack &s, IP &i) {
-        println("{}", s.pop_number());
+        println(s.pop_number());
     });
 
     wordGenerator.register_primitive(".S", [](Stack &s, IP &i) {
-        print("Stack size: " + std::to_string(s.size()));
         s.for_each([](Data thing) {
             print(data_to_string(thing), " ");
         });
@@ -153,9 +162,9 @@ void Interpreter::init_words(){
 
             if (auto forth_word = try_cast<ForthWord>(word_pointer))
                 forth_word->definition_to_string();
-            print();
+            println();
         }
-        print();
+        println();
     });
 
     wordGenerator.register_lambda_word("[", true, [&](Stack &s, IP &i) {

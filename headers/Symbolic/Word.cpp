@@ -32,7 +32,6 @@ void Word::propagate(Wordptr sub_word, NodeList &stack, RegisterGenerator &regis
 
         my_graphs_inputs.push_back(input_node);
         dln("needs extra input; id: ", input_register.to_string());
-
     }
 
     // pop input nodes from stack
@@ -57,15 +56,12 @@ void Word::propagate(Wordptr sub_word, NodeList &stack, RegisterGenerator &regis
     for(auto push_node : sub_word->push_nodes){
         Register aRegister;
         if(push_node->target != nullptr){ // it was linked in the [cross internally] step
-            aRegister = Register{
-                        .ID = push_node->edge_register.ID,
-                        .register_type = Register::PARAM};
+            aRegister = push_node->edge_register;
         }else{
             aRegister = register_generator.get();
         }
 
-        stack.push_back(new Node{
-                .target = push_node,
-                .edge_register = aRegister});
+        stack.push_back(new Node);
+        Node::link_bidirection(push_node, stack.back(), aRegister);
     }
 }

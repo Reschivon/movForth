@@ -9,6 +9,7 @@
 using namespace sym;
 
 static const std::vector<std::pair<int,int>> swap_oi_pairs = {{1, 0}, {0,1}};
+static const std::vector<std::pair<int,int>> rot_oi_pairs = {{2,0}, {1,2}, {0,1}};
 static const std::vector<std::pair<int,int>> dup_oi_pairs = {{1,0}, {0,0}};
 
 // primitives (static instances)
@@ -19,6 +20,8 @@ const std::unordered_map<std::string, Wordptr> primitive_lookup = {
         {"/",        new Word{.name = "/",         .effects = {.num_popped = 2, .num_pushed = 1}}},
         {"swap",     new Word{.name = "swap",      .effects = {.num_popped = 2, .num_pushed = 2,
                                                                .output_input_pairs = swap_oi_pairs}}},
+       {"rot",     new Word{.name = "rot",         .effects = {.num_popped = 3, .num_pushed = 3,
+                                                               .output_input_pairs = rot_oi_pairs}}},
         {"dup",      new Word{.name = "dup",       .effects = {.num_popped = 1, .num_pushed = 2,
                                                                .output_input_pairs = dup_oi_pairs}}},
         {"drop",     new Word{.name = "drop",      .effects = {.num_popped = 1}}},
@@ -88,7 +91,8 @@ Wordptr StackGrapher::compute_effects(mfc::Wordptr original_word){
         return converted;
     }
 
-    // never happens
+    dln("word is null");
+
     return nullptr;
 }
 
@@ -164,12 +168,13 @@ void StackGrapher::retrieve_push_pop_effects(Wordptr word) {
     }
 
     // push pop effects
-    println("pops: ", word->my_graphs_inputs.size(), " pushes: ", word->my_graphs_outputs.size());
+    dln("pops: ", word->my_graphs_inputs.size(), " pushes: ", word->my_graphs_outputs.size());
     word->effects.num_pushed = word->my_graphs_outputs.size();
     word->effects.num_popped = word->my_graphs_inputs.size();
 }
 
 Wordptr StackGrapher::generate_ir(Wordptr wordptr){
+    println("============[", wordptr->name, "]===========");
     for(auto sub_def : wordptr->definition){
         /*println();
         println("[stack]");
@@ -187,9 +192,9 @@ Wordptr StackGrapher::generate_ir(Wordptr wordptr){
         for(auto node : sub_def->pop_nodes)
             println("   ", node->edge_register.to_string());
 
-//        println("push to ids:");
-//        for(auto node : sub_def->push_nodes)
-//            println("   ", node->forward_id.to_string());
+        println("push to ids:");
+        for(auto node : sub_def->push_nodes)
+            println("   ", node->forward_edge_register.to_string());
     }
 
     return wordptr;
