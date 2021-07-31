@@ -16,6 +16,8 @@ void Word::propagate(Wordptr sub_word, NodeList &stack, RegisterGenerator &regis
     dln("[", sub_word->name, "]");
     dln("pops: ", sub_word->effects.num_popped, " pushes: ", sub_word->effects.num_pushed);
 
+    sub_word->pop_nodes.clear();
+
     // add necessary input nodes
     unsigned int nodes_from_input = 0;
     unsigned int nodes_from_stack = sub_word->effects.num_popped;
@@ -45,7 +47,6 @@ void Word::propagate(Wordptr sub_word, NodeList &stack, RegisterGenerator &regis
 
     // cross internally
     for(auto out_in_pair : sub_word->effects.output_input_pairs){
-
         auto pop_node = sub_word->pop_nodes[out_in_pair.second];
         auto push_node = sub_word->push_nodes[out_in_pair.first];
 
@@ -64,4 +65,5 @@ void Word::propagate(Wordptr sub_word, NodeList &stack, RegisterGenerator &regis
         stack.push_back(new Node);
         Node::link_bidirection(push_node, stack.back(), aRegister);
     }
+
 }
