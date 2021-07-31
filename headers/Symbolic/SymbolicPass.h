@@ -17,6 +17,7 @@ namespace sym {
         void graph_pass(Wordptr word);
         void retrieve_push_pop_effects(Wordptr word);
     public:
+        Wordptr flatten(mfc::Wordptr input);
         Wordptr compute_effects(mfc::Wordptr original_word);
         Wordptr generate_ir(Wordptr wordptr);
     };

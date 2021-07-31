@@ -51,10 +51,12 @@
 
 : test if 69 . 69 . else 420 . 420 . then ;
 
-: p 1 2 ;
+: whop 1 ;
 
-: print . . . ;
+: whoop whop whop whop whop whop ;
 
-: fib dup rot + dup . ;
+: dip . ;
 
-p fib fib fib fib fib fib fib fib fib
+: diip dip dip dip dip dip dip dip dip ;
+
+: go whoop whoop diip diip  ;

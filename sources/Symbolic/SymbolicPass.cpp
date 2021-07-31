@@ -1,6 +1,7 @@
 
 #include <vector>
 #include <set>
+#include <stack>
 #include "../../headers/Symbolic/SymbolicPass.h"
 #include "../../headers/Interpretation/Word.h"
 #include "../../headers/Print.h"
@@ -78,12 +79,9 @@ Wordptr StackGrapher::compute_effects(mfc::Wordptr original_word){
         dln("compute effects for [", original_word->base_string(), "]");
         indent();
 
-
-        auto converted = conversion_pass(forth_word);
-
-        graph_pass(converted);
-
-        retrieve_push_pop_effects(converted);
+            auto converted = conversion_pass(forth_word);
+            graph_pass(converted);
+            retrieve_push_pop_effects(converted);
 
         unindent();
 
@@ -93,6 +91,35 @@ Wordptr StackGrapher::compute_effects(mfc::Wordptr original_word){
     dln("word is null");
 
     return nullptr;
+}
+
+Wordptr StackGrapher::flatten(mfc::Wordptr input){
+    auto *big_bertha = new mfc::ForthWord(input->base_string(), false);
+
+    std::stack<mfc::Wordptr> to_add;
+    to_add.push(input);
+
+    while (!to_add.empty()){
+        auto current = to_add.top();
+        to_add.pop();
+
+        auto fw_maybe = dynamic_cast<mfc::ForthWord*>(current);
+        if(fw_maybe != nullptr){
+            auto def = fw_maybe->get_definition();
+            for (auto dat = def.rbegin(); dat != def.rend(); dat++ ) {
+                if(dat->is_xt())
+                    to_add.push(dat->as_xt());
+            }
+        }else{
+            // is primitive
+            big_bertha->add(mfc::Data(current));
+        }
+    }
+
+    dln(input->base_string(), " flattened. Definition:");
+    big_bertha->definition_to_string();
+
+    return compute_effects(big_bertha);
 }
 
 Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word){
@@ -143,7 +170,7 @@ void propagate_stack(NodeList &stack, const Effects& effects, Wordptr base, Regi
                                         .target = input_node,
                                         .edge_register = input_register});
         base->my_graphs_inputs.push_front(input_node);
-        dln("needs extra input; id: ", input_register.to_string());
+        dln("needs extra input ", input_register.to_string());
     }
 
     // pop input nodes from stack
