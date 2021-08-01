@@ -12,10 +12,8 @@
 
 /*
  * So many graphs! Graphs, graphs, everywhere!
- * Crisscrossed pointers and recursive structures,
- * multiple operations and general D I S S O N A N C E
  *
- * tl;dr it was a lot easier to use raw pointers than
+ * It was a lot easier to use raw pointers than
  * to deal with references and shared_ptr
  */
 
@@ -26,16 +24,19 @@ namespace sym {
     typedef Word *Wordptr;
 
     class Data {
-        std::variant<int, Wordptr, std::nullptr_t> data{};
+        std::variant<std::nullptr_t, int, Wordptr> data{};
     public:
-        bool is_num() {return data.index() == 0;}
-        bool is_xt() {return data.index() == 1;}
-        bool is_unknown() {return data.index() == 2;};
+        bool is_num() {return data.index() == 1;}
+        bool is_xt() {return data.index() == 2;}
+        bool is_unknown() {return data.index() == 0;};
 
+        std::string type(){
+            switch(data.index()) {case 1: return "number"; case 2: return "xt"; case 0: return "unknown";};
+        }
         int as_num() {return std::get<int>(data);}
         Wordptr as_xt() {return std::get<Wordptr>(data);}
 
-        explicit Data(std::variant<int, Wordptr, std::nullptr_t> data) : data(data) {}
+        explicit Data(std::variant<std::nullptr_t, int, Wordptr> data) : data(data) {}
     };
 
     struct Register{
@@ -119,10 +120,7 @@ namespace sym {
             from.erase(from.end() - num, from.end());
         }
 
-    private:
-        Node pop_back(){ // hide it! NodeList is strictly increasing
-            return {};
-        }
+        Node pop_back() = delete; // hide it! NodeList is strictly increasing
     };
 }
 

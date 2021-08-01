@@ -14,6 +14,6 @@ int main() {
 
     converted_word->definition_to_string();
 
-    // stackGrapher.generate_ir(converted_word);
+    stackGrapher.generate_ir(converted_word);
 }
 

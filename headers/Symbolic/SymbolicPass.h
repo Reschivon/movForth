@@ -15,6 +15,7 @@ namespace sym {
         Data symbolize_data(mfc::Data data);
         Wordptr conversion_pass(mfc::ForthWord *wordptr);
         void graph_pass(Wordptr word);
+        void branching_pass(Wordptr word);
         void retrieve_push_pop_effects(Wordptr word);
     public:
         Wordptr compute_effects_flattened(mfc::Wordptr input);
