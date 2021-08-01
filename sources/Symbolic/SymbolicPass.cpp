@@ -135,7 +135,7 @@ Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word){
         // assume the current xt is a word
         // (all data cells should have been integrated in the previous loop)
         auto *current_definee = compute_effects(current_data.as_xt());
-        new_word->definition.push_back(current_definee);
+        new_word->stack_effectors.push_back(Instruction{.linked_word = current_definee});
 
         // collapse nodes literals into the word that owns them
         if(is_stateful(current_definee->name))
@@ -145,7 +145,8 @@ Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word){
             current_definee->effects.data_push.push_back(next_thing);
 
             // unfortunate, but we must keep the offset of branch the same
-            new_word->definition.push_back(new Word{.name = "nop"});
+            new_word->stack_effectors.push_back(Instruction{
+                                            .linked_word = new Word{.name = "nop"}});
 
             i++;
         }
@@ -157,11 +158,10 @@ Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word){
     return new_word;
 }
 
-void propagate_stack(NodeList &stack, const Effects& effects, Wordptr base, RegisterGenerator &register_generator) {
-    dln("pops: ", effects.num_popped, " pushes: ", effects.num_pushed);
+void propagate_stack(NodeList &stack, Instruction& instruction, Wordptr base, RegisterGenerator &register_generator) {
+    auto effects = instruction.linked_word->effects;
 
-    base->stack_effectors.emplace_back();
-    auto &stack_effector = base->stack_effectors.back();
+    dln("pops: ", effects.num_popped, " pushes: ", effects.num_pushed);
 
     // add necessary input nodes
     unsigned int nodes_from_input = 0;
@@ -173,7 +173,7 @@ void propagate_stack(NodeList &stack, const Effects& effects, Wordptr base, Regi
     while (nodes_from_input --> 0){
         Register input_register = register_generator.get_param();
         auto input_node = new Node;
-        stack_effector.pop_nodes.push_back(new Node{
+        instruction.pop_nodes.push_back(new Node{
                                         .target = input_node,
                                         .edge_register = input_register});
         base->my_graphs_inputs.push_front(input_node);
@@ -181,25 +181,25 @@ void propagate_stack(NodeList &stack, const Effects& effects, Wordptr base, Regi
     }
 
     // pop input nodes from stack
-    NodeList::move_top_elements(stack, stack_effector.pop_nodes, nodes_from_stack);
+    NodeList::move_top_elements(stack, instruction.pop_nodes, nodes_from_stack);
 
     // make empty output nodes
     for(int i = 0; i < effects.num_pushed; i++){
-        stack_effector.push_nodes.push_back(new Node);
+        instruction.push_nodes.push_back(new Node);
     }
 
     // cross internally
     for(auto out_in_pair : effects.output_input_pairs){
         // dln("cross internal o", out_in_pair.second, " with ",out_in_pair.first);
 
-        auto pop_node = stack_effector.pop_nodes[out_in_pair.second];
-        auto push_node = stack_effector.push_nodes[out_in_pair.first];
+        auto pop_node = instruction.pop_nodes[out_in_pair.second];
+        auto push_node = instruction.push_nodes[out_in_pair.first];
 
         Node::link(pop_node, push_node, pop_node->edge_register);
     }
 
     // push output nodes to stack
-    for(auto push_node : stack_effector.push_nodes){
+    for(auto push_node : instruction.push_nodes){
         Register aRegister;
         if(push_node->target != nullptr) // it was linked in the [cross internally] step
             aRegister = push_node->edge_register;
@@ -211,10 +211,10 @@ void propagate_stack(NodeList &stack, const Effects& effects, Wordptr base, Regi
     }
 
     println("pop from ids:");
-    for(auto node : stack_effector.pop_nodes)
+    for(auto node : instruction.pop_nodes)
         println("   ", node->edge_register.to_string());
     dln("push to ids");
-    for(auto thing : stack_effector.push_nodes)
+    for(auto thing : instruction.push_nodes)
         dln("   ", thing->forward_edge_register.to_string());
 }
 
@@ -224,15 +224,16 @@ void StackGrapher::graph_pass(Wordptr word){
     auto &running_stack = *(new NodeList);
     RegisterGenerator register_generator;
 
-    for (auto definee : word->definition)
+    for (auto instruction : word->stack_effectors)
     {
+        auto definee = instruction.linked_word;
         // update the word's total Effects
         word->effects.acquire_side_effects(definee->effects);
 
         // propagate the stack state
         dln();
         dln("[", definee->name, "]");
-        propagate_stack(running_stack, definee->effects, word, register_generator);
+        propagate_stack(running_stack, instruction, word, register_generator);
 
         dln();
         dln("intermediate stack: ");
@@ -274,7 +275,7 @@ Wordptr StackGrapher::generate_ir(Wordptr wordptr){
     println("============[", wordptr->name, "]===========");
     for(int i = 0; i < wordptr->stack_effectors.size(); i++){
         auto stack_effector = wordptr->stack_effectors[i];
-        auto sub_word  = wordptr->definition[i];
+        auto sub_word = stack_effector.linked_word;
         /*println();
         println("[stack]");
         println("pop from ids:");

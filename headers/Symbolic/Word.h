@@ -40,9 +40,10 @@ namespace sym{
 
     };
 
-    struct StackEffector{
+    struct Instruction{
         NodeList pop_nodes;
         NodeList push_nodes;
+        Wordptr linked_word;
     };
 
     class Word {
@@ -51,13 +52,13 @@ namespace sym{
         Effects effects;
 
         // components for graph
-        std::vector<Wordptr> definition;
+        //std::vector<Wordptr> definition;
         NodeList my_graphs_outputs;
         NodeList my_graphs_inputs;
 
         void definition_to_string();
 
-        std::vector<StackEffector> stack_effectors;
+        std::vector<Instruction> stack_effectors;
     };
 }
 
