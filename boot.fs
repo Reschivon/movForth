@@ -50,13 +50,3 @@
     <jumpif ;
 
 : test if 69 . 69 . else 420 . 420 . then ;
-
-: whop 1 ;
-
-: whoop whop whop whop whop whop ;
-
-: dip . ;
-
-: diip dip dip dip dip dip dip dip dip ;
-
-: go whoop whoop diip diip  ;

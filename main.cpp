@@ -6,14 +6,14 @@ int main() {
     mfc::Interpreter interpreter;
     sym::StackGrapher stackGrapher;
 
-    auto word_to_compile = interpreter.find("go");
+    auto word_to_compile = interpreter.find("test");
 
-//    auto converted_word = stackGrapher.compute_effects(word_to_compile);
-//
-//    stackGrapher.generate_ir(converted_word);
+    auto converted_word = stackGrapher.compute_effects(word_to_compile);
 
-    auto converted_word = stackGrapher.flatten(word_to_compile);
+//    auto converted_word = stackGrapher.compute_effects_flattened(word_to_compile);
 
-    stackGrapher.generate_ir(converted_word);
+    converted_word->definition_to_string();
+
+    // stackGrapher.generate_ir(converted_word);
 }
 

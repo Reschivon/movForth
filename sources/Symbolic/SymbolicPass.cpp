@@ -3,7 +3,6 @@
 #include <set>
 #include <stack>
 #include "../../headers/Symbolic/SymbolicPass.h"
-#include "../../headers/Interpretation/Word.h"
 #include "../../headers/Print.h"
 #include "../../headers/Symbolic/Word.h"
 
@@ -43,11 +42,11 @@ const std::unordered_map<std::string, Wordptr> primitive_lookup = {
         {"create",   new Word{.name = "create",    .effects = {.consume_token = true, .define_new_word = true}}}
 };
 
-bool is_stateful(Wordptr wordptr){
+bool is_stateful(std::string name){
     if(
-            wordptr->name == "literal"||
-            wordptr->name == "branch" ||
-            wordptr->name == "branchif")
+            name == "literal"||
+            name == "branch" ||
+            name == "branchif")
         return true;
     return false;
 }
@@ -93,7 +92,7 @@ Wordptr StackGrapher::compute_effects(mfc::Wordptr original_word){
     return nullptr;
 }
 
-Wordptr StackGrapher::flatten(mfc::Wordptr input){
+Wordptr StackGrapher::compute_effects_flattened(mfc::Wordptr input){
     auto *big_bertha = new mfc::ForthWord(input->base_string(), false);
 
     std::stack<mfc::Wordptr> to_add;
@@ -119,10 +118,14 @@ Wordptr StackGrapher::flatten(mfc::Wordptr input){
     dln(input->base_string(), " flattened. Definition:");
     big_bertha->definition_to_string();
 
-    return compute_effects(big_bertha);
+    auto converted = compute_effects(big_bertha);
+
+    return converted;
 }
 
+
 Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word){
+
     auto *new_word = new Word{.name = original_word->base_string()};
 
     for (int i = 0; i < original_word->get_definition().size(); i++)
@@ -135,11 +138,15 @@ Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word){
         new_word->definition.push_back(current_definee);
 
         // collapse nodes literals into the word that owns them
-        if(is_stateful(current_definee))
+        if(is_stateful(current_definee->name))
         {
             // treat next word as nodes and add nodes to definee
             auto next_thing = symbolize_data(current_data);
             current_definee->effects.data_push.push_back(next_thing);
+
+            // unfortunate, but we must keep the offset of branch the same
+            new_word->definition.push_back(new Word{.name = "nop"});
+
             i++;
         }
 
