@@ -243,6 +243,8 @@ void StackGrapher::graph_pass(Wordptr word) {
     for (auto instruction : word->instructions)
     {
         auto definee = instruction->linked_word;
+        if(definee->name == "nop")
+            continue;
         // update the word's total Effects
         word->effects.acquire_side_effects(definee->effects);
 
@@ -293,41 +295,81 @@ void StackGrapher::retrieve_push_pop_effects(Wordptr word) {
     word->effects.num_popped = word->my_graphs_inputs.size();
 }
 
+/*
+ * Wow the readability of this pass is fucked!
+ * What is going on???
+ */
+
 void StackGrapher::branching_pass(Wordptr word) {
     dln();
     dln("Branching pass for [", word->name, "]");
 
-    // add nop instruction at end
-    // for some jumps that end there
-
-    word->instructions.push_back(new Instruction(Word::nop));
+    // add ret instruction at end
+    // since branches may point there (and it helps with IR generation)
+    word->instructions.push_back(new ReturnInstruction());
 
     for (int i = 0; i < word->instructions.size(); i++)
     {
-        auto &instruction = word->instructions[i];
-        if (instruction->linked_word->name == "branch")
+        auto instruction = word->instructions[i];
+        if (instruction->linked_word && instruction->linked_word->name == "branch")
         {
             int jump_rel = instruction->data.as_num();
             int jump_index = i + jump_rel + 1;
-            auto *bbe = new BasicBlockEntry{.target = word->instructions[jump_index]};
-            instruction->as_branch()->jump_to = bbe;
-            word->BasicBlockEntries.insert(bbe);
+            instruction->as_branch()->jump_to = word->EntryPointingAt(word->instructions[jump_index]);
         }
-        if (instruction->linked_word->name == "branchif")
+        if (instruction->linked_word && instruction->linked_word->name == "branchif")
         {
             int jump_rel = instruction->data.as_num();
             int jump_index = i + jump_rel + 1;
-            auto *bbe = new BasicBlockEntry{.target = word->instructions[jump_index]};
-            instruction->as_branchif()->jump_to_far = bbe;
-            word->BasicBlockEntries.insert(bbe);
+            instruction->as_branchif()->jump_to_far = word->EntryPointingAt( word->instructions[jump_index]);
 
             jump_rel = 1;
             jump_index = i + jump_rel + 1;
-            bbe = new BasicBlockEntry{.target = word->instructions[jump_index]};
-            instruction->as_branchif()->jump_to_close = bbe;
-            word->BasicBlockEntries.insert(bbe);
+            instruction->as_branchif()->jump_to_close = word->EntryPointingAt(word->instructions[jump_index]);
         }
     }
+
+    // clear nop
+    std::vector<Instruction*> nopless;
+    for(auto thing : word->instructions){
+        if(thing->linked_word->name == "nop")
+            continue;
+        nopless.push_back(thing);
+    }
+    word->instructions = std::move(nopless);
+
+    println("bb entries:", word->BasicBlockEntries.size());
+    for(auto thing = word->BasicBlockEntries.begin(); thing != word->BasicBlockEntries.end(); thing++){
+        println("   ", (*thing)->target->linked_word->name);
+    }
+
+    // make sure the end of each basic block has a jump (if only just a 1 cell jump)
+    auto j = word->BasicBlockEntries.begin();
+    for(int i = 0; i < word->instructions.size()-1; i++){
+        auto instruction = word->instructions[i];
+        auto next_instruction = word->instructions[i+1];
+
+        println("ins ", instruction->linked_word->name);
+
+        // next instruction is the start of basic block
+        // BUT current instruction is not a branch
+        if(next_instruction == (*j)->target){
+            println("   next is bbe");
+            j++;
+
+            if(!Instruction::is_jumpy(instruction)){
+                println("   and no jump");
+
+                auto new_intr = new BranchInstruction(new Word{.name = "branch"});
+                new_intr->jump_to = word->EntryPointingAt(next_instruction);
+                word->instructions.insert(word->instructions.begin() + i + 1, new_intr);
+                i++;
+            }
+        }
+    }
+
+    // of course there is an implicit basic block: at the start of the definition
+    word->EntryPointingAt(word->instructions[0]);
 }
 
 Wordptr StackGrapher::generate_ir(Wordptr wordptr) {

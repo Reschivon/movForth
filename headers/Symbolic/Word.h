@@ -39,6 +39,7 @@ namespace sym{
 
     struct BranchInstruction;
     struct BranchIfInstruction;
+    struct ReturnInstruction;
     struct Instruction{
         NodeList pop_nodes;
         NodeList push_nodes;
@@ -46,8 +47,11 @@ namespace sym{
         Wordptr linked_word;
         Data data = Data(nullptr); // acquired from next in token list
 
+        static bool is_jumpy(Instruction*);
+
         BranchInstruction* as_branch();
         BranchIfInstruction* as_branchif();
+        ReturnInstruction* as_return();
         explicit Instruction(Wordptr linked_word) : linked_word(linked_word) {}
     };
 
@@ -64,6 +68,15 @@ namespace sym{
         BasicBlockEntry *jump_to_far = nullptr;
         BranchIfInstruction(Wordptr linked_word) : Instruction(linked_word){}
     };
+    struct ReturnInstruction : Instruction{
+        ReturnInstruction();
+    };
+
+    struct cmp{
+        auto operator() (BasicBlockEntry* a, BasicBlockEntry* b) const{
+            return a->target < b->target;
+        };
+    };
 
     class Word {
     public:
@@ -77,12 +90,19 @@ namespace sym{
 
         void definition_to_string();
 
-        std::set<BasicBlockEntry*> BasicBlockEntries;
+        std::set<BasicBlockEntry*, cmp> BasicBlockEntries;
+
+        BasicBlockEntry* EntryPointingAt(Instruction* target){
+            auto *bbe = new BasicBlockEntry{.target = target};
+            BasicBlockEntries.insert(bbe);
+            return bbe;
+        }
 
         std::vector<Instruction*> instructions;
 
         static Wordptr nop;
     };
+
 }
 
 #endif //MOVFORTH_WORD_H
