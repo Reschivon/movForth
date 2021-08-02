@@ -381,13 +381,15 @@ Wordptr StackGrapher::generate_ir(Wordptr wordptr) {
     for (auto instruction : wordptr->instructions)
     {
         println("[", instruction->linked_word->name, "]");
-        println("pops registers:");
+        print("pops:  ");
         for (auto node : instruction->pop_nodes)
-            println("   ", node->edge_register.to_string());
+            print(" ", node->edge_register.to_string());
+        println();
 
-        println("pushes registers:");
+        print("pushes:");
         for (auto node : instruction->push_nodes)
-            println("   ", node->forward_edge_register.to_string());
+            print(" ", node->forward_edge_register.to_string());
+        println();
         println();
     }
 
