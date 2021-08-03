@@ -297,7 +297,8 @@ void StackGrapher::retrieve_push_pop_effects(Wordptr word) {
 
 /*
  * Wow the readability of this pass is fucked!
- * What is going on???
+ *
+ * Future note: What is going on?
  */
 
 void StackGrapher::branching_pass(Wordptr word) {
@@ -315,17 +316,17 @@ void StackGrapher::branching_pass(Wordptr word) {
         {
             int jump_rel = instruction->data.as_num();
             int jump_index = i + jump_rel + 1;
-            instruction->as_branch()->jump_to = word->EntryPointingAt(word->instructions[jump_index]);
+            instruction->as_branch()->jump_to = word->EntryPointingAt(word->instructions.begin() + jump_index);
         }
         if (instruction->linked_word && instruction->linked_word->name == "branchif")
         {
             int jump_rel = instruction->data.as_num();
             int jump_index = i + jump_rel + 1;
-            instruction->as_branchif()->jump_to_far = word->EntryPointingAt( word->instructions[jump_index]);
+            instruction->as_branchif()->jump_to_far = word->EntryPointingAt( word->instructions.begin() + jump_index);
 
             jump_rel = 1;
             jump_index = i + jump_rel + 1;
-            instruction->as_branchif()->jump_to_close = word->EntryPointingAt(word->instructions[jump_index]);
+            instruction->as_branchif()->jump_to_close = word->EntryPointingAt(word->instructions.begin() + jump_index);
         }
     }
 
@@ -338,26 +339,27 @@ void StackGrapher::branching_pass(Wordptr word) {
     }
     word->instructions = std::move(nopless);
 
-    println("bb entries:", word->BasicBlockEntries.size());
-    for(auto thing = word->BasicBlockEntries.begin(); thing != word->BasicBlockEntries.end(); thing++){
-        println("   ", (*thing)->target->linked_word->name);
+    println("bb entries:", word->basic_block_entries.size());
+    for(auto basic_block_entries : word->basic_block_entries){
+        println("   ", (*(basic_block_entries->target))->linked_word->name);
     }
 
     // make sure the end of each basic block has a jump (if only just a 1 cell jump)
-    auto j = word->BasicBlockEntries.begin();
+    auto j = word->basic_block_entries.begin();
     for(int i = 0; i < word->instructions.size()-1; i++){
-        auto instruction = word->instructions[i];
-        auto next_instruction = word->instructions[i+1];
+        auto instruction = word->instructions.begin() + i;
+        auto next_instruction = word->instructions.begin() + (i+1);
 
-        println("ins ", instruction->linked_word->name);
+        println("ins ", (*instruction)->linked_word->name);
 
         // next instruction is the start of basic block
-        // BUT current instruction is not a branch
-        if(next_instruction == (*j)->target){
+        if(*next_instruction == *(*j)->target){
             println("   next is bbe");
             j++;
+            (*word->basic_block_entries.rbegin())->end = next_instruction;
 
-            if(!Instruction::is_jumpy(instruction)){
+            // BUT current instruction is not a branch
+            if(!Instruction::is_jumpy(*instruction)){
                 println("   and no jump");
 
                 auto new_intr = new BranchInstruction(new Word{.name = "branch"});
@@ -369,15 +371,25 @@ void StackGrapher::branching_pass(Wordptr word) {
     }
 
     // of course there is an implicit basic block: at the start of the definition
-    word->EntryPointingAt(word->instructions[0]);
+    word->EntryPointingAt(word->instructions.begin());
 }
 
 Wordptr StackGrapher::generate_ir(Wordptr wordptr) {
     println("============[", wordptr->name, "]===========");
     println("Basic block entry points:");
-    int i=0; for(auto bbe : wordptr->BasicBlockEntries)
-        println("index ", i++, ": ", bbe->target->linked_word->name);
+
+    for(auto bbe : wordptr->basic_block_entries){
+        println("index ", bbe->index);
+        println("index ", (*bbe->target)->linked_word->name);
+
+        for(auto it = bbe->target; it != bbe->end; it++){
+            print((*it)->linked_word->name);
+        }
+        println();
+    }
     println();
+
+
     for (auto instruction : wordptr->instructions)
     {
         println("[", instruction->linked_word->name, "]");

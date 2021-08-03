@@ -55,8 +55,19 @@ namespace sym{
         explicit Instruction(Wordptr linked_word) : linked_word(linked_word) {}
     };
 
+    struct BBEgen{
+        unsigned int get(){
+            println("given ", id);
+            return id++;
+        }
+    private:
+        unsigned int id = 0;
+    };
+
     struct BasicBlockEntry {
-        Instruction *target;
+        std::vector<Instruction*>::iterator target;
+        std::vector<Instruction*>::iterator end;
+        unsigned int index; // like Register but I was lazy
     };
 
     struct BranchInstruction : Instruction {
@@ -90,17 +101,21 @@ namespace sym{
 
         void definition_to_string();
 
-        std::set<BasicBlockEntry*, cmp> BasicBlockEntries;
+        std::set<BasicBlockEntry*, cmp> basic_block_entries;
 
-        BasicBlockEntry* EntryPointingAt(Instruction* target){
+        BasicBlockEntry* EntryPointingAt(std::vector<Instruction*>::iterator target){
             auto *bbe = new BasicBlockEntry{.target = target};
-            BasicBlockEntries.insert(bbe);
+            auto success = basic_block_entries.insert(bbe);
+            if(success.second) // newly inserted bbe
+                (*success.first)->index = bbe_gen.get();
             return bbe;
         }
 
         std::vector<Instruction*> instructions;
 
         static Wordptr nop;
+
+        BBEgen bbe_gen;
     };
 
 }
