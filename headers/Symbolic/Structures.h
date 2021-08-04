@@ -40,7 +40,7 @@ namespace sym {
     };
 
     struct Register{
-        unsigned int ID = -1;
+        int ID = -1;
         enum registerType {UNDEF, NORMAL, PARAM} register_type = UNDEF;
 
         Register operator++(int val){

@@ -117,8 +117,7 @@ Wordptr StackGrapher::compute_effects_flattened(mfc::Wordptr input) {
                 if (dat->is_xt())
                     to_add.push(dat->as_xt());
             }
-        } else
-        {
+        } else{
             // is primitive
             big_bertha->add(mfc::Data(current));
         }
@@ -245,6 +244,7 @@ void StackGrapher::graph_pass(Wordptr word) {
         auto definee = instruction->linked_word;
         if(definee->name == "nop")
             continue;
+
         // update the word's total Effects
         word->effects.acquire_side_effects(definee->effects);
 
@@ -374,7 +374,7 @@ void StackGrapher::branching_pass(Wordptr word) {
     word->EntryPointingAt(word->instructions.begin());
 }
 
-Wordptr StackGrapher::generate_ir(Wordptr wordptr) {
+Wordptr StackGrapher::show_word_info(Wordptr wordptr) {
     println("============[", wordptr->name, "]===========");
     println("Basic block entry points:");
 

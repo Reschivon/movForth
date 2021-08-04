@@ -1,9 +1,12 @@
 
 #include "headers/Interpretation/Interpreter.h"
 #include "headers/Symbolic/SymbolicPass.h"
+#include "headers/Generation/IRGenerator.h"
 
 int main() {
-    mfc::Interpreter interpreter;
+    hello_word();
+
+    /*mfc::Interpreter interpreter;
     sym::StackGrapher stackGrapher;
 
     auto word_to_compile = interpreter.find("test");
@@ -14,6 +17,8 @@ int main() {
 
     converted_word->definition_to_string();
 
-    stackGrapher.generate_ir(converted_word);
+    stackGrapher.show_word_info(converted_word);*/
+
+
 }
 

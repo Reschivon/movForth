@@ -5,6 +5,7 @@
 #include <functional>
 #include <variant>
 #include <iostream>
+#include <string>
 #include "Types.h"
 
 namespace mfc{

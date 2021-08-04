@@ -21,7 +21,7 @@ inline void println(Args&&... args){
 }
 template <typename... Args>
 inline void dln(Args&&... args){
-    if(true)
+    if(true) // Debug toggle - not the best, but works for now
     {
         println(args...);
     }

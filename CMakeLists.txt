@@ -3,6 +3,23 @@ project(movForth)
 
 set(CMAKE_CXX_STANDARD 20)
 
+find_package(LLVM REQUIRED CONFIG PATHS "D:/llvm-bin/")
+
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
+message(STATUS "Include_directories ${LLVM_INCLUDE_DIRS}")
+
+set(llvm_libs "D:/llvm-bin/lib")
+
+message(STATUS "Libs at ${llvm_libs}")
+
+include_directories(${LLVM_INCLUDE_DIRS})
+separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
+add_definitions(${LLVM_DEFINITIONS_LIST})
+
+llvm_map_components_to_libnames(llvm_libs support core irreader)
+
 add_executable(movForth
         main.cpp
         sources/Interpretation/Interpreter.cpp
@@ -16,4 +33,6 @@ add_executable(movForth
         sources/Symbolic/Translation.cpp
         headers/Util.h
         headers/Print.h
-        sources/Print.cpp headers/Symbolic/Word.cpp headers/Symbolic/Word.h)
+        sources/Print.cpp headers/Symbolic/Word.cpp headers/Symbolic/Word.h headers/Generation/IRGenerator.h)
+
+target_link_libraries(movForth ${llvm_libs})

@@ -39,7 +39,7 @@ namespace mfc {
         std::vector<Data>::iterator me;
 
         IP(std::vector<Data>::iterator in) : me(in) {isActive = true;}
-        IP() : me(nullptr) {}
+        IP() {}
         IP operator+=(int i) { //outside the class
             if(isActive) {
                 return me += i;

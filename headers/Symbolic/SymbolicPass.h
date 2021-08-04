@@ -20,7 +20,7 @@ namespace sym {
     public:
         Wordptr compute_effects_flattened(mfc::Wordptr input);
         Wordptr compute_effects(mfc::Wordptr original_word);
-        Wordptr generate_ir(Wordptr wordptr);
+        Wordptr show_word_info(Wordptr wordptr);
     };
 }
 
