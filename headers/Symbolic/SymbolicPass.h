@@ -13,7 +13,7 @@ namespace sym {
         std::unordered_map<mfc::Wordptr, Wordptr> visited_words;
         Data symbolize_data(mfc::Data data);
         Wordptr conversion_pass(mfc::ForthWord *wordptr);
-        void graph_pass(Wordptr word);
+        void stack_graph_pass(Wordptr word);
         void branching_pass(Wordptr word);
         void retrieve_push_pop_effects(Wordptr word);
     public:

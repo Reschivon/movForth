@@ -47,8 +47,7 @@ Interpreter::Interpreter() : input("../boot.fs"){
                 //dln("execute word ", Wordptr->base_string());
                 Wordptr->execute(stack, dummy_ip);
             } else {
-                auto forth_word =
-                        try_cast<ForthWord>(dictionary.back());
+                auto forth_word = try_cast<ForthWord>(dictionary.back());
 
                 if(forth_word){
                     //dln("compile FW ", Wordptr->base_string());

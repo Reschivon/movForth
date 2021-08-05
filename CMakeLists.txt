@@ -33,12 +33,12 @@ add_executable(movForth
         sources/Interpretation/Interpreter.cpp
         headers/Interpretation/Stack.h
 
-        #headers/Symbolic/Word.cpp
-        #sources/Symbolic/SymbolicPass.cpp
-        #sources/Symbolic/Translation.cpp
+        headers/Symbolic/Word.cpp
+        sources/Symbolic/SymbolicPass.cpp
+        sources/Symbolic/Translation.cpp
 
 
-        #headers/Generation/IRGenerator.h
+        headers/Generation/IRGenerator.h
         )
 
 target_link_libraries(movForth ${llvm_libs})

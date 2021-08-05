@@ -53,8 +53,9 @@ Data StackGrapher::symbolize_data(mfc::Data data) {
         return Data(data.as_num());
     if (data.is_xt())
         return Data(compute_effects(data.as_xt()));
-
-    dln("FUCK");
+    if(data.is_undef())
+        return Data(nullptr);
+    println("FUCK");
     return Data(nullptr);
 }
 
@@ -71,8 +72,7 @@ Wordptr StackGrapher::compute_effects(mfc::Wordptr original_word) {
     if (dynamic_cast<mfc::Primitive *>(original_word))
     {
         // is a primitive: return the singleton of the primitive
-        Wordptr word_singleton = primitive_lookup.at(
-                original_word->base_string());
+        Wordptr word_singleton = primitive_lookup.at(original_word->base_string());
         return word_singleton;
 
     } else if (auto forth_word = dynamic_cast<mfc::ForthWord *>(original_word))
@@ -82,7 +82,7 @@ Wordptr StackGrapher::compute_effects(mfc::Wordptr original_word) {
         indent();
 
         auto converted = conversion_pass(forth_word);
-        graph_pass(converted);
+        stack_graph_pass(converted);
         retrieve_push_pop_effects(converted);
         branching_pass(converted);
 
@@ -108,15 +108,13 @@ Wordptr StackGrapher::compute_effects_flattened(mfc::Wordptr input) {
         auto current = to_add.top();
         to_add.pop();
 
-        auto fw_maybe = dynamic_cast<mfc::ForthWord *>(current);
-        if (fw_maybe != nullptr)
+        auto forth_word = dynamic_cast<mfc::ForthWord *>(current);
+        if (forth_word != nullptr)
         {
-            auto def = fw_maybe->get_definition();
+            auto def = forth_word->get_definition();
             for (auto dat = def.rbegin(); dat != def.rend(); dat++)
-            {
-                if (dat->is_xt())
-                    to_add.push(dat->as_xt());
-            }
+                to_add.push(*dat);
+
         } else{
             // is primitive
             big_bertha->add(mfc::Data(current));
@@ -138,11 +136,12 @@ Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word) {
 
     for (int i = 0; i < original_word->get_definition().size(); i++)
     {
-        mfc::Data current_data = original_word->get_definition()[i];
+        mfc::Wordptr old_word = original_word->get_definition()[i];
 
         // assume the current xt is a word
         // (all data cells should have been integrated in the previous loop)
-        auto *current_definee = compute_effects(current_data.as_xt());
+        auto *current_definee = compute_effects(old_word);
+
         if(current_definee->name == "branch")
             new_word->instructions.push_back(new BranchInstruction(current_definee));
         else if(current_definee->name == "branchif")
@@ -150,17 +149,7 @@ Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word) {
         else
             new_word->instructions.push_back(new Instruction(current_definee));
 
-        // collapse nodes literals into the word that owns them
-        if (is_stateful(current_definee->name))
-        {
-            i++;
-            // add next cell to current Instruction
-            auto data = symbolize_data(original_word->get_definition()[i]);
-            new_word->instructions.back()->data = data;
-
-            // unfortunate, but we must keep the offset of branch the same
-            new_word->instructions.push_back(new Instruction(Word::nop));
-        }
+        new_word->instructions.back()->data = symbolize_data(old_word->data);
 
         // cache this word for the future
         visited_words[original_word] = new_word;
@@ -233,7 +222,7 @@ void propagate_stack(NodeList &stack, Instruction *instruction, Wordptr base,
         dln("   ", thing->forward_edge_register.to_string());
 }
 
-void StackGrapher::graph_pass(Wordptr word) {
+void StackGrapher::stack_graph_pass(Wordptr word) {
     // the stack is a constantly updated list of
     // loose pop nodes that the next word might need
     auto &running_stack = *(new NodeList);
@@ -340,9 +329,8 @@ void StackGrapher::branching_pass(Wordptr word) {
     word->instructions = std::move(nopless);
 
     println("bb entries:", word->basic_block_entries.size());
-    for(auto basic_block_entries : word->basic_block_entries){
+    for(auto basic_block_entries : word->basic_block_entries)
         println("   ", (*(basic_block_entries->target))->linked_word->name);
-    }
 
     // make sure the end of each basic block has a jump (if only just a 1 cell jump)
     auto j = word->basic_block_entries.begin();
