@@ -8,39 +8,35 @@
 
 using namespace sym;
 
-static const std::vector<std::pair<int, int>> swap_oi_pairs = {{1, 0},
-                                                               {0, 1}};
-static const std::vector<std::pair<int, int>> rot_oi_pairs = {{2, 0},
-                                                              {1, 2},
-                                                              {0, 1}};
-static const std::vector<std::pair<int, int>> dup_oi_pairs = {{1, 0},
-                                                              {0, 0}};
+static const std::vector<std::pair<int, int>> swap_oi_pairs = {{1, 0}, {0, 1}};
+static const std::vector<std::pair<int, int>> rot_oi_pairs = {{2, 0}, {1, 2}, {0, 1}};
+static const std::vector<std::pair<int, int>> dup_oi_pairs = {{1, 0}, {0, 0}};
 
 // primitives (static instances)
-const std::unordered_map<std::string, Wordptr> primitive_lookup = {
-        {"+",         new Word{.name = "+",         .effects = {.num_popped = 2, .num_pushed = 1}}},
-        {"-",         new Word{.name = "-",         .effects = {.num_popped = 2, .num_pushed = 1}}},
-        {"*",         new Word{.name = "*",         .effects = {.num_popped = 2, .num_pushed = 1}}},
-        {"/",         new Word{.name = "/",         .effects = {.num_popped = 2, .num_pushed = 1}}},
-        {"swap",      new Word{.name = "swap",      .effects = {.num_popped = 2, .num_pushed = 2, .out_in_pairs = swap_oi_pairs}}},
-        {"rot",       new Word{.name = "rot",       .effects = {.num_popped = 3, .num_pushed = 3, .out_in_pairs = rot_oi_pairs}}},
-        {"dup",       new Word{.name = "dup",       .effects = {.num_popped = 1, .num_pushed = 2, .out_in_pairs = dup_oi_pairs}}},
-        {"drop",      new Word{.name = "drop",      .effects = {.num_popped = 1}}},
-        {".",         new Word{.name = ".",         .effects = {.num_popped = 1}}},
-        {".S",        new Word{.name = ".S"}},
-        {"'",         new Word{.name = "'",         .effects = {.consume_token = true,}}},
-        {",",         new Word{.name = ",",         .effects = {.num_popped = 1,       .compiled_slots = 1}}},
-        {"see",       new Word{.name = "see"}},
-        {"[",         new Word{.name = "[",         .effects = {.interpret_state = sym::Effects::TOINTERPRET}}},
-        {"]",         new Word{.name = "]",         .effects = {.interpret_state = sym::Effects::TOCOMPILE}}},
-        {"immediate", new Word{.name = "immediate"}}, // very rare this ends up in compiled code, consider warn on encounter
-        {"@",         new Word{.name = "@",         .effects = {.num_popped = 1, .num_pushed = 1}}},
-        {"!",         new Word{.name = "!",         .effects = {.num_popped = 2,}}},
-        {"branch",    new Word{.name = "branch"}},
-        {"branchif",  new Word{.name = "branchif",  .effects = {.num_popped = 1}}},
-        {"literal",   new Word{.name = "literal",   .effects = {.num_pushed = 1}}},
-        {"here",      new Word{.name = "here",      .effects = {.num_pushed = 1}}},
-        {"create",    new Word{.name = "create",    .effects = {.consume_token = true, .define_new_word = true}}}
+static const std::unordered_map<std::string, Wordptr> primitive_lookup = {
+        {"+",         new Word("+",         {.num_popped = 2, .num_pushed = 1})},
+        {"-",         new Word("-",         {.num_popped = 2, .num_pushed = 1})},
+        {"*",         new Word("*",         {.num_popped = 2, .num_pushed = 1})},
+        {"/",         new Word("/",         {.num_popped = 2, .num_pushed = 1})},
+        {"swap",      new Word("swap",      Effects{.num_popped = 2, .num_pushed = 2, .out_in_pairs = swap_oi_pairs})},
+        {"rot",       new Word("rot",       Effects{.num_popped = 3, .num_pushed = 3, .out_in_pairs = rot_oi_pairs})},
+        {"dup",       new Word("dup",       Effects{.num_popped = 1, .num_pushed = 2, .out_in_pairs = dup_oi_pairs})},
+        {"drop",      new Word("drop",      {.num_popped = 1})},
+        {".",         new Word(".",         {.num_popped = 1})},
+        {".S",        new Word(".S",        Effects::neutral)},
+        {"'",         new Word("'",         {.consume_token = true,})},
+        {",",         new Word(",",         {.num_popped = 1,  .compiled_slots = 1})},
+        {"see",       new Word("see",       Effects::neutral)},
+        {"[",         new Word("[",         {.interpret_state = sym::Effects::TOINTERPRET})},
+        {"]",         new Word("]",         {.interpret_state = sym::Effects::TOCOMPILE})},
+        {"immediate", new Word("immediate", Effects::neutral)}, // very rare this ends up in compiled code, consider warn on encounter
+        {"@",         new Word("@",         {.num_popped = 1, .num_pushed = 1})},
+        {"!",         new Word("!",         {.num_popped = 2,})},
+        {"branch",    new Word("branch",    Effects::neutral)},
+        {"branchif",  new Word("branchif",  {.num_popped = 1})},
+        {"literal",   new Word("literal",   {.num_pushed = 1})},
+        {"here",      new Word("here",      {.num_pushed = 1})},
+        {"create",    new Word("create",    {.consume_token = true, .define_new_word = true})}
 };
 
 bool is_stateful(std::string name) {
@@ -132,7 +128,8 @@ Wordptr StackGrapher::compute_effects_flattened(mfc::Wordptr input) {
 
 Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word) {
 
-    auto *new_word = new Word{.name = original_word->base_string()};
+    //auto *new_word = new Word{.name = original_word->base_string()};
+    std::vector<Instruction*> new_instructions;
 
     for (int i = 0; i < original_word->get_definition().size(); i++)
     {
@@ -143,17 +140,19 @@ Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word) {
         auto *current_definee = compute_effects(old_word);
 
         if(current_definee->name == "branch")
-            new_word->instructions.push_back(new BranchInstruction(current_definee));
+            new_instructions.push_back(new BranchInstruction(current_definee));
         else if(current_definee->name == "branchif")
-            new_word->instructions.push_back(new BranchIfInstruction(current_definee));
+            new_instructions.push_back(new BranchIfInstruction(current_definee));
         else
-            new_word->instructions.push_back(new Instruction(current_definee));
+            new_instructions.push_back(new Instruction(current_definee));
 
-        new_word->instructions.back()->data = symbolize_data(old_word->data);
-
-        // cache this word for the future
-        visited_words[original_word] = new_word;
+        new_instructions.back()->data = symbolize_data(old_word->data);
     }
+    auto new_word = new Word(original_word->base_string(), Effects::neutral);
+    new_word->instructions = std::move(new_instructions);
+
+    // cache this word for the future
+    visited_words[original_word] = new_word;
 
     return new_word;
 }
@@ -305,28 +304,23 @@ void StackGrapher::branching_pass(Wordptr word) {
         {
             int jump_rel = instruction->data.as_num();
             int jump_index = i + jump_rel + 1;
-            instruction->as_branch()->jump_to = word->EntryPointingAt(word->instructions.begin() + jump_index);
+            instruction->as_branch()->jump_to = word->block_pointing_at(
+                    word->instructions.begin() + jump_index);
         }
         if (instruction->linked_word && instruction->linked_word->name == "branchif")
         {
             int jump_rel = instruction->data.as_num();
             int jump_index = i + jump_rel + 1;
-            instruction->as_branchif()->jump_to_far = word->EntryPointingAt( word->instructions.begin() + jump_index);
+            instruction->as_branchif()->jump_to_far = word->block_pointing_at(
+                    word->instructions.begin() + jump_index);
 
             jump_rel = 1;
             jump_index = i + jump_rel + 1;
-            instruction->as_branchif()->jump_to_close = word->EntryPointingAt(word->instructions.begin() + jump_index);
+            instruction->as_branchif()->jump_to_close = word->block_pointing_at(
+                    word->instructions.begin() + jump_index);
         }
     }
 
-    // clear nop
-    std::vector<Instruction*> nopless;
-    for(auto thing : word->instructions){
-        if(thing->linked_word->name == "nop")
-            continue;
-        nopless.push_back(thing);
-    }
-    word->instructions = std::move(nopless);
 
     println("bb entries:", word->basic_block_entries.size());
     for(auto basic_block_entries : word->basic_block_entries)
@@ -350,8 +344,8 @@ void StackGrapher::branching_pass(Wordptr word) {
             if(!Instruction::is_jumpy(*instruction)){
                 println("   and no jump");
 
-                auto new_intr = new BranchInstruction(new Word{.name = "branch"});
-                new_intr->jump_to = word->EntryPointingAt(next_instruction);
+                auto new_intr = new BranchInstruction(primitive_lookup.at("branch"));
+                new_intr->jump_to = word->block_pointing_at(next_instruction);
                 word->instructions.insert(word->instructions.begin() + i + 1, new_intr);
                 i++;
             }
@@ -359,7 +353,7 @@ void StackGrapher::branching_pass(Wordptr word) {
     }
 
     // of course there is an implicit basic block: at the start of the definition
-    word->EntryPointingAt(word->instructions.begin());
+    word->block_pointing_at(word->instructions.begin());
 }
 
 Wordptr StackGrapher::show_word_info(Wordptr wordptr) {

@@ -1,5 +1,6 @@
 
 #include <set>
+#include <utility>
 #include "Structures.h"
 
 #ifndef MOVFORTH_WORD_H
@@ -35,6 +36,7 @@ namespace sym{
             if(other.define_new_word) define_new_word = true;
         }
 
+        static Effects neutral;
     };
 
     struct BranchInstruction;
@@ -91,8 +93,11 @@ namespace sym{
 
     class Word {
     public:
-        std::string name;
+        const std::string name;
         Effects effects;
+
+        explicit Word(const std::string& name, Effects effects)
+                : name(name), effects(effects) {}
 
         // components for graph
         //std::vector<Wordptr> definition;
@@ -103,7 +108,7 @@ namespace sym{
 
         std::set<BasicBlockEntry*, cmp> basic_block_entries;
 
-        BasicBlockEntry* EntryPointingAt(std::vector<Instruction*>::iterator target){
+        BasicBlockEntry* block_pointing_at(std::vector<Instruction*>::iterator target){
             auto *bbe = new BasicBlockEntry{.target = target};
             auto success = basic_block_entries.insert(bbe);
             if(success.second) // newly inserted bbe
@@ -112,8 +117,6 @@ namespace sym{
         }
 
         std::vector<Instruction*> instructions;
-
-        static Wordptr nop;
 
         BBEgen bbe_gen;
     };

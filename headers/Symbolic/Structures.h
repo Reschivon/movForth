@@ -119,8 +119,6 @@ namespace sym {
                       std::make_move_iterator(from.end()));
             from.erase(from.end() - num, from.end());
         }
-
-        Node pop_back() = delete; // hide it! NodeList is strictly increasing
     };
 }
 

@@ -3,6 +3,8 @@
 
 using namespace sym;
 
+Effects Effects::neutral{};
+
 void Word::definition_to_string() {
     println("[", name, "]");
     println("input parameters: ", effects.num_popped, " output frames: ", effects.num_pushed);
@@ -10,8 +12,6 @@ void Word::definition_to_string() {
         print(thing->linked_word->name, " ");
     println();
 }
-
-Wordptr Word::nop = new Word{.name = "nop"};
 
 BranchInstruction *Instruction::as_branch() {
     return (BranchInstruction*)(this);
@@ -29,4 +29,4 @@ ReturnInstruction *Instruction::as_return() {
     return (ins->linked_word->name == "branch" || ins->linked_word->name == "branchif");
 }
 
-ReturnInstruction::ReturnInstruction() : Instruction(new Word{.name = "return"}){}
+ReturnInstruction::ReturnInstruction() : Instruction(new Word("return", Effects::neutral)){}
