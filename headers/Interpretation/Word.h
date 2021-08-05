@@ -21,10 +21,13 @@ namespace mfc{
         std::string name;
     public:
         bool immediate;
+        const bool stateful;
+        Data data = Data(nullptr); // has value if stateful
 
-       virtual void execute(Stack &stack, IP &ip) = 0;
+        virtual void execute(Stack &stack, IP &ip) = 0;
+        virtual Wordptr clone() = 0;
 
-        Word(std::string name, bool immediate);
+        Word(std::string name, bool immediate, bool stateful);
         virtual std::string to_string();
         virtual std::string base_string();
     };
@@ -35,6 +38,7 @@ namespace mfc{
         ForthWord(std::string name, bool immediate);
 
         void execute(Stack &stack, IP &ip) override;
+        Wordptr clone() override;
         void add(Data data);
         void set(int index, Data value);
         void definition_to_string();
@@ -44,19 +48,12 @@ namespace mfc{
         }
     };
     class Primitive : public Word{
-        std::function<void(Stack&, IP&)> action;
+        std::function<void(Stack&, Data data, IP&)> action;
     public:
-        Primitive(std::string name, bool immediate, std::function<void(Stack&, IP&)> action);
+        Primitive(std::string name, bool immediate, std::function<void(Stack&, Data data, IP&)> action, bool stateful);
         void execute(Stack &stack, IP &ip) override;
+        Wordptr clone() override;
     };
-
-    static inline std::string data_to_string(Data &data){
-        if(data.is_xt())
-            return data.as_xt()->to_string();
-        if(data.is_num())
-            return std::to_string(data.as_num());
-        return "shit";
-    }
 }
 
 #endif

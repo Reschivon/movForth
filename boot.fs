@@ -7,12 +7,14 @@
 : negative -1 * ;
 
 : jump>
+    here
     literal branch ,
-    here 0 , ;
+            0      , ;
 
 : jumpif>
+    here
     literal branchif ,
-    here 0 , ;
+            0        , ;
 
 : >land
     dup
@@ -34,8 +36,8 @@
     jumpif> ;
 
 : else immediate
-    jump>
-    swap >land ;
+    >land
+    jump> ;
 
 : then immediate
     >land ;
@@ -46,9 +48,13 @@
 : repeat immediate
     <jump ;
 
+see
+
 : repeatif immediate
     <jumpif ;
 
 : test if 69 . 69 . else 420 . 420 . then ;
 
 see
+
+0 test

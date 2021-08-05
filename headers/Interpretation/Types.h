@@ -10,14 +10,20 @@ namespace mfc {
     typedef Word *Wordptr;
 
     class Data {
-        std::variant<int, Wordptr> data;
+        std::variant<std::nullptr_t, int, Wordptr> data;
     public:
+        Data(std::variant< std::nullptr_t, int, Wordptr> data) : data(data) {}
+
         bool is_num() {
-            return data.index() == 0;
+            return data.index() == 1;
         }
 
         bool is_xt() {
-            return data.index() == 1;
+            return data.index() == 2;
+        }
+
+        bool is_undef() {
+            return data.index() == 0;
         }
 
         int as_num() {
@@ -28,10 +34,10 @@ namespace mfc {
             return std::get<Wordptr>(data);
         }
 
-        Data(std::variant<int, Wordptr> data) : data(data) {}
+        std::string to_string();
+
+        Data clone();
     };
-
-
 
     class IP{
         bool isActive = false;
