@@ -4,7 +4,6 @@
 #define MOVFORTH_SYM_SYMBOLICPASS_H
 
 #include "../Symbolic/Structures.h"
-#include "../Interpretation/Types.h"
 #include "../Interpretation/Word.h"
 #include "Word.h"
 

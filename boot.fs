@@ -48,8 +48,6 @@
 : repeat immediate
     <jump ;
 
-see
-
 : repeatif immediate
     <jumpif ;
 

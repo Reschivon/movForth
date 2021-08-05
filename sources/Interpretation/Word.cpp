@@ -4,7 +4,8 @@
 
 using namespace mfc;
 
-Word::Word(std::string name, bool immediate, bool stateful) : name(std::move(name)), immediate(immediate), stateful(stateful) {}
+Word::Word(std::string name, bool immediate, bool stateful)
+        : name(std::move(name)), immediate(immediate), stateful(stateful) {}
 
 std::string Word::to_string() {
     if(stateful)
@@ -39,32 +40,25 @@ void ForthWord::execute(Stack &stack, IP &ip) {
 
         //println("       [exec] ", ((*(it.me)).is_xt()?(*(it.me)).as_xt()->to_string():std::to_string((*(it.me)).as_num())), " ");
 
-        if(it.me->is_xt())
-            it.me->as_xt()->execute(stack, it);
-        else
-           println("Number ", it.me->as_num(), " was not consumed by a word before it, and was erroneously executed");
+        (*it.me)->execute(stack, it);
+
     }
 }
 void ForthWord::add(Data data){
-    if(!definition.empty() && // there exists something
-        definition.back().is_xt() && // this something is a word (with Data field)
-        definition.back().as_xt()->stateful && // this word uses the data field
-        definition.back().as_xt()->data.is_undef()){ // we didn't already set the data field
-        definition.back().as_xt()->data = data;
+    if(!definition.empty() && // there exists a word
+        definition.back()->stateful && // this word uses the data field
+        definition.back()->data.is_undef()){ // we didn't already set the data field
+        definition.back()->data = data;
+    }else if(data.is_xt()){
+        definition.push_back(data.as_xt());
     }else{
-        definition.push_back(data);
+        println("Adding a number to a definition is forbidden");
     }
 }
 
 void ForthWord::definition_to_string() {
-    for(Data thing : definition) {
-        std::string h;
-        if(thing.is_num())
-            h = std::to_string(thing.as_num());
-        if(thing.is_xt())
-            h = thing.as_xt()->to_string();
-        print(h, " ");
-    }
+    for(Wordptr thing : definition)
+        print(thing->to_string(), " ");
 }
 
 int ForthWord::definition_size() {
@@ -72,8 +66,7 @@ int ForthWord::definition_size() {
 }
 
 void ForthWord::set(int index, Data value) {
-    if(definition[index].is_xt())
-        definition[index].as_xt()->data = value;
+        definition[index]->data = value;
 }
 
 Wordptr ForthWord::clone() {
