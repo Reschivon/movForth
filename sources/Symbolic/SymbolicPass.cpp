@@ -2,9 +2,9 @@
 #include <vector>
 #include <set>
 #include <stack>
-#include "../../headers/symbolic/symbolicPass.h"
+#include "../../headers/Symbolic/SymbolicPass.h"
 #include "../../headers/Print.h"
-#include "../../headers/symbolic/sWord.h"
+#include "../../headers/Symbolic/sWord.h"
 
 using namespace mov;
 
@@ -45,11 +45,11 @@ bool is_stateful(std::string name) {
 
 
 sData StackGrapher::symbolize_data(mov::iData data) {
-    if (data.type() == mov::iData::number)
-        return sData(data.to_type<mov::iData::number_t>());
-    if (data.type() == mov::iData::iword)
-        return sData(compute_effects(data.to_type<mov::iData::iword_t>()));
-    if(data.type() == mov::iData::empty)
+    if (data.is_number())
+        return sData(data.as_number());
+    if (data.is_word())
+        return sData(compute_effects(data.as_word()));
+    if(data.is_empty())
         return sData(nullptr);
     println("FUCK");
     return sData(nullptr);

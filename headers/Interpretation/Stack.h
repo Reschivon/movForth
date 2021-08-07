@@ -25,12 +25,12 @@ namespace mov {
         int pop_number(){
             if(stack.empty()) println("tried popping empty stack");
 
-            if(stack.back().type() == iData::number) { // int
-                auto ret = stack.back().to_type<iData::number_t>();
+            if(stack.back().is_number()) { // int
+                auto ret = stack.back().as_number();
                 stack.pop_back();
                 return ret;
             }
-            if(stack.back().type() == iData::iword) { // iWord ptr
+            if(stack.back().is_word()) { // iWord ptr
                 println("tried popping cfa expecting int");
                 return 0;
             }
@@ -40,12 +40,12 @@ namespace mov {
         iWordptr pop_iWord_pointer(){
             if(stack.size() == 0) println("tried popping empty stack");
 
-            if(stack.back().type() == iData::number) { // int
+            if(stack.back().is_number()) { // int
                 std::cout << "tried popping int expecting cfa" << std::endl;
                 return nullptr;
             }
-            if(stack.back().type() == iData::iword) { // iWord ptr
-                auto ret = stack.back().to_type<iData::iword_t>();
+            if(stack.back().is_word()) { // iWord ptr
+                auto ret = stack.back().as_word();
                 stack.pop_back();
                 return ret;
             }

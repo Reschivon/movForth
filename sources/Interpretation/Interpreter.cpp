@@ -187,12 +187,12 @@ void Interpreter::init_words(){
     });
 
     iWordGenerator.register_primitive("branch", [&](Stack &s, iData data, IP &ip) {
-        ip += data.to_type<iData::number_t>();
+        ip += data.as_number();
     }, true);
 
     iWordGenerator.register_primitive("branchif", [&](Stack &s, iData data, IP &ip) {
         if (s.pop_number() == 0)
-            ip += data.to_type<iData::number_t>();
+            ip += data.as_number();
     }, true);
 
     iWordGenerator.register_primitive("literal", [&](Stack &s, iData data, IP &ip) {

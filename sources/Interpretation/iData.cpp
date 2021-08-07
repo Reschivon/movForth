@@ -6,17 +6,17 @@
 using namespace mov;
 
 iData iData::clone(){
-    if(type() == iword)
-        return iData(to_type<iword_t>()->clone());
-    if(type() == number)
-        return iData(to_type<number_t>());
+    if(is_word())
+        return iData(as_word()->clone());
+    if(is_number())
+        return iData(as_number());
     return iData(nullptr);
 }
 
 std::string iData::to_string(){
-    if(type() == iword)
-        return to_type<iword_t>()->to_string();
-    if(type() == number)
-        return std::to_string(to_type<number_t>());
+    if(is_word())
+        return as_word()->to_string();
+    if(is_number())
+        return std::to_string(as_number());
     return "undef";
 }

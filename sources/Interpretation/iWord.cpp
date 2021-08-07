@@ -32,10 +32,10 @@ void ForthWord::execute(Stack &stack, IP &ip) {
 void ForthWord::add(iData data){
     if(!definition.empty() && // there exists a word
         definition.back()->stateful && // this word uses the data field
-        definition.back()->data.type() == iData::empty){ // we didn't already set the data field
+        definition.back()->data.is_empty()){ // we didn't already set the data field
         definition.back()->data = data;
-    }else if(data.type() == iData::iword){
-        definition.push_back(data.to_type<iData::iword_t>());
+    }else if(data.is_word()){
+        definition.push_back(data.as_word());
     }else{
         println("Adding a number to a definition is forbidden");
     }
