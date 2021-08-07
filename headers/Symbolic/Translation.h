@@ -5,7 +5,7 @@
 #include "Structures.h"
 
 namespace sym{
-    void convert(sym::Wordptr wordptr);
+    void convert(sym::sWordptr wordptr);
 }
 
 #endif //MOVFORTH_TRANSLATION_H

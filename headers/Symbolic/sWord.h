@@ -46,7 +46,7 @@ namespace sym{
         NodeList pop_nodes;
         NodeList push_nodes;
 
-        Wordptr linked_word;
+        sWordptr linked_word;
         Data data = Data(nullptr); // acquired from next in token list
 
         static bool is_jumpy(Instruction*);
@@ -54,7 +54,7 @@ namespace sym{
         BranchInstruction* as_branch();
         BranchIfInstruction* as_branchif();
         ReturnInstruction* as_return();
-        explicit Instruction(Wordptr linked_word) : linked_word(linked_word) {}
+        explicit Instruction(sWordptr linked_word) : linked_word(linked_word) {}
     };
 
     struct BBEgen{
@@ -74,12 +74,12 @@ namespace sym{
 
     struct BranchInstruction : Instruction {
         BasicBlockEntry *jump_to = nullptr;
-        explicit BranchInstruction(Wordptr linked_word) : Instruction(linked_word){}
+        explicit BranchInstruction(sWordptr linked_word) : Instruction(linked_word){}
     };
     struct BranchIfInstruction : Instruction {
         BasicBlockEntry *jump_to_close = nullptr;
         BasicBlockEntry *jump_to_far = nullptr;
-        BranchIfInstruction(Wordptr linked_word) : Instruction(linked_word){}
+        BranchIfInstruction(sWordptr linked_word) : Instruction(linked_word){}
     };
     struct ReturnInstruction : Instruction{
         ReturnInstruction();
@@ -91,12 +91,12 @@ namespace sym{
         };
     };
 
-    class Word {
+    class sWord {
     public:
         const std::string name;
         Effects effects;
 
-        explicit Word(const std::string& name, Effects effects)
+        explicit sWord(const std::string& name, Effects effects)
                 : name(name), effects(effects) {}
 
         // components for graph

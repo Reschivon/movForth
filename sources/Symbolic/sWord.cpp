@@ -1,11 +1,11 @@
 
-#include "iWord.h"
+#include "../../headers/Symbolic/sWord.h"
 
 using namespace sym;
 
 Effects Effects::neutral{};
 
-void Word::definition_to_string() {
+void sWord::definition_to_string() {
     println("[", name, "]");
     println("input parameters: ", effects.num_popped, " output frames: ", effects.num_pushed);
     for(auto &thing : instructions)
@@ -29,4 +29,4 @@ ReturnInstruction *Instruction::as_return() {
     return (ins->linked_word->name == "branch" || ins->linked_word->name == "branchif");
 }
 
-ReturnInstruction::ReturnInstruction() : Instruction(new Word("return", Effects::neutral)){}
+ReturnInstruction::ReturnInstruction() : Instruction(new sWord("return", Effects::neutral)){}

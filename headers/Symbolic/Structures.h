@@ -19,12 +19,12 @@
 
 namespace sym {
 
-    class Word;
+    class sWord;
 
-    typedef Word *Wordptr;
+    typedef sWord *sWordptr;
 
     class Data {
-        std::variant<std::nullptr_t, int, Wordptr> data{};
+        std::variant<std::nullptr_t, int, sWordptr> data{};
     public:
         bool is_num() {return data.index() == 1;}
         bool is_xt() {return data.index() == 2;}
@@ -34,9 +34,9 @@ namespace sym {
             switch(data.index()) {case 1: return "number"; case 2: return "xt"; case 0: return "unknown";};
         }
         int as_num() {return std::get<int>(data);}
-        Wordptr as_xt() {return std::get<Wordptr>(data);}
+        sWordptr as_xt() {return std::get<sWordptr>(data);}
 
-        explicit Data(std::variant<std::nullptr_t, int, Wordptr> data) : data(data) {}
+        explicit Data(std::variant<std::nullptr_t, int, sWordptr> data) : data(data) {}
     };
 
     struct Register{

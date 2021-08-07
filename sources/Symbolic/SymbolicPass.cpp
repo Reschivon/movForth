@@ -4,7 +4,7 @@
 #include <stack>
 #include "../../headers/Symbolic/SymbolicPass.h"
 #include "../../headers/Print.h"
-#include "../../headers/Symbolic/iWord.h"
+#include "../../headers/Symbolic/sWord.h"
 
 using namespace sym;
 
@@ -13,30 +13,30 @@ static const std::vector<std::pair<int, int>> rot_oi_pairs = {{2, 0}, {1, 2}, {0
 static const std::vector<std::pair<int, int>> dup_oi_pairs = {{1, 0}, {0, 0}};
 
 // primitives (static instances)
-static const std::unordered_map<std::string, Wordptr> primitive_lookup = {
-        {"+",         new Word("+",         {.num_popped = 2, .num_pushed = 1})},
-        {"-",         new Word("-",         {.num_popped = 2, .num_pushed = 1})},
-        {"*",         new Word("*",         {.num_popped = 2, .num_pushed = 1})},
-        {"/",         new Word("/",         {.num_popped = 2, .num_pushed = 1})},
-        {"swap",      new Word("swap",      Effects{.num_popped = 2, .num_pushed = 2, .out_in_pairs = swap_oi_pairs})},
-        {"rot",       new Word("rot",       Effects{.num_popped = 3, .num_pushed = 3, .out_in_pairs = rot_oi_pairs})},
-        {"dup",       new Word("dup",       Effects{.num_popped = 1, .num_pushed = 2, .out_in_pairs = dup_oi_pairs})},
-        {"drop",      new Word("drop",      {.num_popped = 1})},
-        {".",         new Word(".",         {.num_popped = 1})},
-        {".S",        new Word(".S",        Effects::neutral)},
-        {"'",         new Word("'",         {.consume_token = true,})},
-        {",",         new Word(",",         {.num_popped = 1,  .compiled_slots = 1})},
-        {"see",       new Word("see",       Effects::neutral)},
-        {"[",         new Word("[",         {.interpret_state = sym::Effects::TOINTERPRET})},
-        {"]",         new Word("]",         {.interpret_state = sym::Effects::TOCOMPILE})},
-        {"immediate", new Word("immediate", Effects::neutral)}, // very rare this ends up in compiled code, consider warn on encounter
-        {"@",         new Word("@",         {.num_popped = 1, .num_pushed = 1})},
-        {"!",         new Word("!",         {.num_popped = 2,})},
-        {"branch",    new Word("branch",    Effects::neutral)},
-        {"branchif",  new Word("branchif",  {.num_popped = 1})},
-        {"literal",   new Word("literal",   {.num_pushed = 1})},
-        {"here",      new Word("here",      {.num_pushed = 1})},
-        {"create",    new Word("create",    {.consume_token = true, .define_new_word = true})}
+static const std::unordered_map<std::string, sWordptr> primitive_lookup = {
+        {"+",         new sWord("+",         {.num_popped = 2, .num_pushed = 1})},
+        {"-",         new sWord("-",         {.num_popped = 2, .num_pushed = 1})},
+        {"*",         new sWord("*",         {.num_popped = 2, .num_pushed = 1})},
+        {"/",         new sWord("/",         {.num_popped = 2, .num_pushed = 1})},
+        {"swap",      new sWord("swap",      Effects{.num_popped = 2, .num_pushed = 2, .out_in_pairs = swap_oi_pairs})},
+        {"rot",       new sWord("rot",       Effects{.num_popped = 3, .num_pushed = 3, .out_in_pairs = rot_oi_pairs})},
+        {"dup",       new sWord("dup",       Effects{.num_popped = 1, .num_pushed = 2, .out_in_pairs = dup_oi_pairs})},
+        {"drop",      new sWord("drop",      {.num_popped = 1})},
+        {".",         new sWord(".",         {.num_popped = 1})},
+        {".S",        new sWord(".S",        Effects::neutral)},
+        {"'",         new sWord("'",         {.consume_token = true,})},
+        {",",         new sWord(",",         {.num_popped = 1,  .compiled_slots = 1})},
+        {"see",       new sWord("see",       Effects::neutral)},
+        {"[",         new sWord("[",         {.interpret_state = sym::Effects::TOINTERPRET})},
+        {"]",         new sWord("]",         {.interpret_state = sym::Effects::TOCOMPILE})},
+        {"immediate", new sWord("immediate", Effects::neutral)}, // very rare this ends up in compiled code, consider warn on encounter
+        {"@",         new sWord("@",         {.num_popped = 1, .num_pushed = 1})},
+        {"!",         new sWord("!",         {.num_popped = 2,})},
+        {"branch",    new sWord("branch",    Effects::neutral)},
+        {"branchif",  new sWord("branchif",  {.num_popped = 1})},
+        {"literal",   new sWord("literal",   {.num_pushed = 1})},
+        {"here",      new sWord("here",      {.num_pushed = 1})},
+        {"create",    new sWord("create",    {.consume_token = true, .define_new_word = true})}
 };
 
 bool is_stateful(std::string name) {
@@ -55,7 +55,7 @@ Data StackGrapher::symbolize_data(mfc::Data data) {
     return Data(nullptr);
 }
 
-Wordptr StackGrapher::compute_effects(mfc::iWordptr original_word) {
+sWordptr StackGrapher::compute_effects(mfc::iWordptr original_word) {
     // check to see if we have passed over this word already
     // if so, return a pointer to it
     auto cached = visited_words.find(original_word);
@@ -68,7 +68,7 @@ Wordptr StackGrapher::compute_effects(mfc::iWordptr original_word) {
     if (dynamic_cast<mfc::Primitive *>(original_word))
     {
         // is a primitive: return the singleton of the primitive
-        Wordptr word_singleton = primitive_lookup.at(original_word->base_string());
+        sWordptr word_singleton = primitive_lookup.at(original_word->base_string());
         return word_singleton;
 
     } else if (auto forth_word = dynamic_cast<mfc::ForthWord *>(original_word))
@@ -93,7 +93,7 @@ Wordptr StackGrapher::compute_effects(mfc::iWordptr original_word) {
     return nullptr;
 }
 
-Wordptr StackGrapher::compute_effects_flattened(mfc::iWordptr input) {
+sWordptr StackGrapher::compute_effects_flattened(mfc::iWordptr input) {
     auto *big_bertha = new mfc::ForthWord(input->base_string(), false);
 
     std::stack<mfc::iWordptr> to_add;
@@ -126,7 +126,7 @@ Wordptr StackGrapher::compute_effects_flattened(mfc::iWordptr input) {
 }
 
 
-Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word) {
+sWordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word) {
 
     //auto *new_word = new Word{.name = original_word->base_string()};
     std::vector<Instruction*> new_instructions;
@@ -148,7 +148,7 @@ Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word) {
 
         new_instructions.back()->data = symbolize_data(old_word->data);
     }
-    auto new_word = new Word(original_word->base_string(), Effects::neutral);
+    auto new_word = new sWord(original_word->base_string(), Effects::neutral);
     new_word->instructions = std::move(new_instructions);
 
     // cache this word for the future
@@ -157,7 +157,7 @@ Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word) {
     return new_word;
 }
 
-void propagate_stack(NodeList &stack, Instruction *instruction, Wordptr base,
+void propagate_stack(NodeList &stack, Instruction *instruction, sWordptr base,
                      RegisterGenerator &register_generator) {
     auto effects = instruction->linked_word->effects;
 
@@ -221,7 +221,7 @@ void propagate_stack(NodeList &stack, Instruction *instruction, Wordptr base,
         dln("   ", thing->forward_edge_register.to_string());
 }
 
-void StackGrapher::stack_graph_pass(Wordptr word) {
+void StackGrapher::stack_graph_pass(sWordptr word) {
     // the stack is a constantly updated list of
     // loose pop nodes that the next word might need
     auto &running_stack = *(new NodeList);
@@ -254,7 +254,7 @@ void StackGrapher::stack_graph_pass(Wordptr word) {
     word->my_graphs_outputs = running_stack;
 }
 
-void StackGrapher::retrieve_push_pop_effects(Wordptr word) {
+void StackGrapher::retrieve_push_pop_effects(sWordptr word) {
     // matching pairs
     for (int i = 0; i < word->my_graphs_outputs.size(); i++)
     {
@@ -289,7 +289,7 @@ void StackGrapher::retrieve_push_pop_effects(Wordptr word) {
  * Future note: What is going on?
  */
 
-void StackGrapher::branching_pass(Wordptr word) {
+void StackGrapher::branching_pass(sWordptr word) {
     dln();
     dln("Branching pass for [", word->name, "]");
 
@@ -356,7 +356,7 @@ void StackGrapher::branching_pass(Wordptr word) {
     word->block_pointing_at(word->instructions.begin());
 }
 
-Wordptr StackGrapher::show_word_info(Wordptr wordptr) {
+sWordptr StackGrapher::show_word_info(sWordptr wordptr) {
     println("============[", wordptr->name, "]===========");
     println("Basic block entry points:");
 

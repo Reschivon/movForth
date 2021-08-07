@@ -3,7 +3,7 @@
 
 using namespace sym;
 
-void sym::convert(sym::Wordptr wordptr){
+void sym::convert(sym::sWordptr wordptr){
 
 
 }

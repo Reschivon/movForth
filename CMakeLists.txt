@@ -34,7 +34,7 @@ add_executable(movForth
         sources/Interpretation/Interpreter.cpp
         headers/Interpretation/Stack.h
 
-        headers/Symbolic/iWord.cpp
+        sources/Symbolic/sWord.cpp
         sources/Symbolic/SymbolicPass.cpp
         sources/Symbolic/Translation.cpp
 
