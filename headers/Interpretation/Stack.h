@@ -23,14 +23,14 @@ namespace mfc {
         }
 
         int pop_number(){
-            if(stack.size() == 0) println("tried popping empty stack");
+            if(stack.empty()) println("tried popping empty stack");
 
-            if(stack.back().is_num()) { // int
-                auto ret = stack.back().as_num();
+            if(stack.back().type() == Data::number) { // int
+                auto ret = stack.back().to_type<Data::number_t>();
                 stack.pop_back();
                 return ret;
             }
-            if(stack.back().is_xt()) { // word ptr
+            if(stack.back().type() == Data::word) { // word ptr
                 println("tried popping cfa expecting int");
                 return 0;
             }
@@ -40,12 +40,12 @@ namespace mfc {
         Wordptr pop_word_pointer(){
             if(stack.size() == 0) println("tried popping empty stack");
 
-            if(stack.back().is_num()) { // int
+            if(stack.back().type() == Data::number) { // int
                 std::cout << "tried popping int expecting cfa" << std::endl;
                 return nullptr;
             }
-            if(stack.back().is_xt()) { // word ptr
-                auto ret = stack.back().as_xt();
+            if(stack.back().type() == Data::word) { // word ptr
+                auto ret = stack.back().to_type<Data::word_t>();
                 stack.pop_back();
                 return ret;
             }

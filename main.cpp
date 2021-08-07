@@ -1,7 +1,7 @@
 
 #include "headers/Interpretation/Interpreter.h"
 #include "headers/Symbolic/SymbolicPass.h"
-#include "headers/Generation/IRGenerator.h"
+//#include "headers/Generation/IRGenerator.h"
 
 int main() {
     //hello_word();

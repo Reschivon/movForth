@@ -18,21 +18,6 @@ std::string Word::base_string() {
     return name;
 }
 
-std::string Data::to_string(){
-    if(is_xt())
-        return as_xt()->to_string();
-    if(is_num())
-        return std::to_string(as_num());
-    return "undef";
-}
-
-Data Data::clone(){
-    if(is_xt())
-        return Data(as_xt()->clone());
-    if(is_num())
-        return Data(as_num());
-    return Data(nullptr);
-}
 
 ForthWord::ForthWord(std::string name, bool immediate) : Word(std::move(name), immediate, false){}
 void ForthWord::execute(Stack &stack, IP &ip) {
@@ -47,10 +32,10 @@ void ForthWord::execute(Stack &stack, IP &ip) {
 void ForthWord::add(Data data){
     if(!definition.empty() && // there exists a word
         definition.back()->stateful && // this word uses the data field
-        definition.back()->data.is_undef()){ // we didn't already set the data field
+        definition.back()->data.type() == Data::empty){ // we didn't already set the data field
         definition.back()->data = data;
-    }else if(data.is_xt()){
-        definition.push_back(data.as_xt());
+    }else if(data.type() == Data::word){
+        definition.push_back(data.to_type<Data::word_t>());
     }else{
         println("Adding a number to a definition is forbidden");
     }

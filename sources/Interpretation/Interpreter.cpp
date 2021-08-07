@@ -187,12 +187,12 @@ void Interpreter::init_words(){
     });
 
     wordGenerator.register_primitive("branch", [&](Stack &s, Data data, IP &ip) {
-        ip += data.as_num();
+        ip += data.to_type<Data::number_t>();
     }, true);
 
     wordGenerator.register_primitive("branchif", [&](Stack &s, Data data, IP &ip) {
         if (s.pop_number() == 0)
-            ip += data.as_num();
+            ip += data.to_type<Data::number_t>();
     }, true);
 
     wordGenerator.register_primitive("literal", [&](Stack &s, Data data, IP &ip) {

@@ -6,28 +6,12 @@
 #include <variant>
 #include <iostream>
 #include <string>
+#include "Data.h"
 
 namespace mfc{
     class Stack;
     class Word;
     typedef Word *Wordptr;
-
-    struct Data : std::variant<std::nullptr_t, int, Wordptr>{
-        using var_type = std::variant<std::nullptr_t, int, Wordptr>;
-
-        explicit Data(var_type data) : var_type(data) {}
-        Data() : var_type(nullptr) {}
-
-        bool is_num() { return index() == 1; }
-        bool is_xt() { return index() == 2; }
-        bool is_undef() { return index() == 0; }
-
-        int as_num() { return std::get<int>(*this); }
-        Wordptr as_xt() { return std::get<Wordptr>(*this); }
-
-        std::string to_string();
-        Data clone();
-    };
 
     class IP{
         const bool isActive;

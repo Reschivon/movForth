@@ -45,11 +45,11 @@ bool is_stateful(std::string name) {
 
 
 Data StackGrapher::symbolize_data(mfc::Data data) {
-    if (data.is_num())
-        return Data(data.as_num());
-    if (data.is_xt())
-        return Data(compute_effects(data.as_xt()));
-    if(data.is_undef())
+    if (data.type() == mfc::Data::number)
+        return Data(data.to_type<mfc::Data::number_t>());
+    if (data.type() == mfc::Data::word)
+        return Data(compute_effects(data.to_type<mfc::Data::word_t>()));
+    if(data.type() == mfc::Data::empty)
         return Data(nullptr);
     println("FUCK");
     return Data(nullptr);
