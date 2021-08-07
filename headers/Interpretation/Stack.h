@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <variant>
-#include "Word.h"
+#include "iWord.h"
 #include "../../headers/Print.h"
 
 namespace mfc {
@@ -15,8 +15,8 @@ namespace mfc {
         void push(int number) {
             stack.emplace_back(number);
         }
-        void push(Wordptr word_pointer) {
-            stack.emplace_back(word_pointer);
+        void push(iWordptr iWord_pointer) {
+            stack.emplace_back(iWord_pointer);
         }
         void push(Data thing){
             stack.push_back(thing);
@@ -30,22 +30,22 @@ namespace mfc {
                 stack.pop_back();
                 return ret;
             }
-            if(stack.back().type() == Data::word) { // word ptr
+            if(stack.back().type() == Data::iword) { // iWord ptr
                 println("tried popping cfa expecting int");
                 return 0;
             }
             return 0;
         }
 
-        Wordptr pop_word_pointer(){
+        iWordptr pop_iWord_pointer(){
             if(stack.size() == 0) println("tried popping empty stack");
 
             if(stack.back().type() == Data::number) { // int
                 std::cout << "tried popping int expecting cfa" << std::endl;
                 return nullptr;
             }
-            if(stack.back().type() == Data::word) { // word ptr
-                auto ret = stack.back().to_type<Data::word_t>();
+            if(stack.back().type() == Data::iword) { // iWord ptr
+                auto ret = stack.back().to_type<Data::iword_t>();
                 stack.pop_back();
                 return ret;
             }

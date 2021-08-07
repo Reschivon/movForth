@@ -1,14 +1,14 @@
 #include <utility>
 #include <iostream>
-#include "Word.h"
+#include "iWord.h"
 
-#ifndef MOVFORTH_INTER_WORDGEN_H
-#define MOVFORTH_INTER_WORDGEN_H
+#ifndef MOVFORTH_INTER_iWordGEN_H
+#define MOVFORTH_INTER_iWordGEN_H
 
 namespace mfc {
-    class WordGenerator {
+    class iWordGenerator {
     private:
-        std::unordered_map<std::string, std::function<Wordptr()>>
+        std::unordered_map<std::string, std::function<iWordptr()>>
                 generator_lookup;
 
     public:
@@ -22,7 +22,7 @@ namespace mfc {
             };
         }
 
-        Wordptr get(const std::string &name){
+        iWordptr get(const std::string &name){
             auto primitive = generator_lookup.find(name);
             if(primitive == generator_lookup.end())
                 return nullptr;

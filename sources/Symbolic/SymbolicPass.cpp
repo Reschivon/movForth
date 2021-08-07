@@ -4,7 +4,7 @@
 #include <stack>
 #include "../../headers/Symbolic/SymbolicPass.h"
 #include "../../headers/Print.h"
-#include "../../headers/Symbolic/Word.h"
+#include "../../headers/Symbolic/iWord.h"
 
 using namespace sym;
 
@@ -47,15 +47,15 @@ bool is_stateful(std::string name) {
 Data StackGrapher::symbolize_data(mfc::Data data) {
     if (data.type() == mfc::Data::number)
         return Data(data.to_type<mfc::Data::number_t>());
-    if (data.type() == mfc::Data::word)
-        return Data(compute_effects(data.to_type<mfc::Data::word_t>()));
+    if (data.type() == mfc::Data::iword)
+        return Data(compute_effects(data.to_type<mfc::Data::iword_t>()));
     if(data.type() == mfc::Data::empty)
         return Data(nullptr);
     println("FUCK");
     return Data(nullptr);
 }
 
-Wordptr StackGrapher::compute_effects(mfc::Wordptr original_word) {
+Wordptr StackGrapher::compute_effects(mfc::iWordptr original_word) {
     // check to see if we have passed over this word already
     // if so, return a pointer to it
     auto cached = visited_words.find(original_word);
@@ -93,10 +93,10 @@ Wordptr StackGrapher::compute_effects(mfc::Wordptr original_word) {
     return nullptr;
 }
 
-Wordptr StackGrapher::compute_effects_flattened(mfc::Wordptr input) {
+Wordptr StackGrapher::compute_effects_flattened(mfc::iWordptr input) {
     auto *big_bertha = new mfc::ForthWord(input->base_string(), false);
 
-    std::stack<mfc::Wordptr> to_add;
+    std::stack<mfc::iWordptr> to_add;
     to_add.push(input);
 
     while (!to_add.empty())
@@ -133,7 +133,7 @@ Wordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word) {
 
     for (int i = 0; i < original_word->get_definition().size(); i++)
     {
-        mfc::Wordptr old_word = original_word->get_definition()[i];
+        mfc::iWordptr old_word = original_word->get_definition()[i];
 
         // assume the current xt is a word
         // (all data cells should have been integrated in the previous loop)

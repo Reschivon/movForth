@@ -1,5 +1,5 @@
 
-#include "Word.h"
+#include "iWord.h"
 
 using namespace sym;
 

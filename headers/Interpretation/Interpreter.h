@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "Input.h"
-#include "Word.h"
+#include "iWord.h"
 #include "WordGenerator.h"
 #include "Stack.h"
 
@@ -11,17 +11,17 @@ namespace mfc {
 
     class Interpreter {
         file_input input;
-        std::vector<Wordptr> dictionary;
+        std::vector<iWordptr> dictionary;
         Stack stack;
         bool immediate = true;
-        WordGenerator wordGenerator;
+        iWordGenerator iWordGenerator;
 
         void init_words();
 
     public:
-        Wordptr find(const std::string &name);
+        iWordptr find(const std::string &name);
         Interpreter();
-        std::vector<Wordptr> get_dictionary();
+        std::vector<iWordptr> get_dictionary();
     };
 }
 

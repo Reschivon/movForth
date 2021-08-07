@@ -30,11 +30,11 @@ add_executable(movForth
         headers/Interpretation/WordGenerator.h
         headers/Interpretation/Input.h
         headers/Interpretation/Data.h
-        sources/Interpretation/Word.cpp
+        sources/Interpretation/iWord.cpp
         sources/Interpretation/Interpreter.cpp
         headers/Interpretation/Stack.h
 
-        headers/Symbolic/Word.cpp
+        headers/Symbolic/iWord.cpp
         sources/Symbolic/SymbolicPass.cpp
         sources/Symbolic/Translation.cpp
 
