@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.16)
 project(movForth)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -10,7 +10,7 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 message(STATUS "Include_directories ${LLVM_INCLUDE_DIRS}")
 
-set(llvm_libs "D:/llvm-bin/lib")
+#set(llvm_libs "D:/llvm-bin/lib")
 
 message(STATUS "Libs at ${llvm_libs}")
 

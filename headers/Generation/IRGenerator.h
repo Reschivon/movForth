@@ -40,13 +40,15 @@ int hello_word() {
     LLVMBuildRet(builder, LLVMConstInt(int_32_type, 0, false));
     // end
 
-    //LLVMDumpModule(module); // dump module to STDOUT
-    LLVMPrintModuleToFile(module, "hello.ll", nullptr);
+    LLVMDumpModule(module); // dump module to STDOUT
+    LLVMPrintModuleToFile(module, "../hello.ll", nullptr);
 
     // clean memory
     LLVMDisposeBuilder(builder);
     LLVMDisposeModule(module);
     LLVMContextDispose(context);
+
+    println("done generation");
 
     return 0;
 }
