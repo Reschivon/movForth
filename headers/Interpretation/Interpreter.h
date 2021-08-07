@@ -20,7 +20,7 @@ namespace mov {
 
     public:
         iWordptr find(const std::string &name);
-        Interpreter();
+        explicit Interpreter(std::string path);
         std::vector<iWordptr> get_dictionary();
     };
 }

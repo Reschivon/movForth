@@ -6,7 +6,7 @@
 int main() {
     //hello_word();
 
-    mov::Interpreter interpreter;
+    mov::Interpreter interpreter("../boot.fs");
     mov::StackGrapher stackGrapher;
 
     auto word_to_compile = interpreter.find("test");

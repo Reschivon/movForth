@@ -5,7 +5,7 @@
 
 using namespace mov;
 
-Interpreter::Interpreter() : input("../boot.fs"){
+Interpreter::Interpreter(std::string path) : input(path){
     init_words();
 
     std::string token;
