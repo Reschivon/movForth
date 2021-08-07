@@ -2,11 +2,11 @@
 #include <vector>
 #include <set>
 #include <stack>
-#include "../../headers/Symbolic/SymbolicPass.h"
+#include "../../headers/symbolic/symbolicPass.h"
 #include "../../headers/Print.h"
-#include "../../headers/Symbolic/sWord.h"
+#include "../../headers/symbolic/sWord.h"
 
-using namespace sym;
+using namespace mov;
 
 static const std::vector<std::pair<int, int>> swap_oi_pairs = {{1, 0}, {0, 1}};
 static const std::vector<std::pair<int, int>> rot_oi_pairs = {{2, 0}, {1, 2}, {0, 1}};
@@ -27,8 +27,8 @@ static const std::unordered_map<std::string, sWordptr> primitive_lookup = {
         {"'",         new sWord("'",         {.consume_token = true,})},
         {",",         new sWord(",",         {.num_popped = 1,  .compiled_slots = 1})},
         {"see",       new sWord("see",       Effects::neutral)},
-        {"[",         new sWord("[",         {.interpret_state = sym::Effects::TOINTERPRET})},
-        {"]",         new sWord("]",         {.interpret_state = sym::Effects::TOCOMPILE})},
+        {"[",         new sWord("[",         {.interpret_state = mov::Effects::TOINTERPRET})},
+        {"]",         new sWord("]",         {.interpret_state = mov::Effects::TOCOMPILE})},
         {"immediate", new sWord("immediate", Effects::neutral)}, // very rare this ends up in compiled code, consider warn on encounter
         {"@",         new sWord("@",         {.num_popped = 1, .num_pushed = 1})},
         {"!",         new sWord("!",         {.num_popped = 2,})},
@@ -44,18 +44,18 @@ bool is_stateful(std::string name) {
 }
 
 
-Data StackGrapher::symbolize_data(mfc::iData data) {
-    if (data.type() == mfc::iData::number)
-        return Data(data.to_type<mfc::iData::number_t>());
-    if (data.type() == mfc::iData::iword)
-        return Data(compute_effects(data.to_type<mfc::iData::iword_t>()));
-    if(data.type() == mfc::iData::empty)
-        return Data(nullptr);
+sData StackGrapher::symbolize_data(mov::iData data) {
+    if (data.type() == mov::iData::number)
+        return sData(data.to_type<mov::iData::number_t>());
+    if (data.type() == mov::iData::iword)
+        return sData(compute_effects(data.to_type<mov::iData::iword_t>()));
+    if(data.type() == mov::iData::empty)
+        return sData(nullptr);
     println("FUCK");
-    return Data(nullptr);
+    return sData(nullptr);
 }
 
-sWordptr StackGrapher::compute_effects(mfc::iWordptr original_word) {
+sWordptr StackGrapher::compute_effects(mov::iWordptr original_word) {
     // check to see if we have passed over this word already
     // if so, return a pointer to it
     auto cached = visited_words.find(original_word);
@@ -65,13 +65,13 @@ sWordptr StackGrapher::compute_effects(mfc::iWordptr original_word) {
         return cached->second;
     }
 
-    if (dynamic_cast<mfc::Primitive *>(original_word))
+    if (dynamic_cast<mov::Primitive *>(original_word))
     {
         // is a primitive: return the singleton of the primitive
         sWordptr word_singleton = primitive_lookup.at(original_word->base_string());
         return word_singleton;
 
-    } else if (auto forth_word = dynamic_cast<mfc::ForthWord *>(original_word))
+    } else if (auto forth_word = dynamic_cast<mov::ForthWord *>(original_word))
     {
         dln();
         dln("compute [", original_word->base_string(), "]");
@@ -93,10 +93,10 @@ sWordptr StackGrapher::compute_effects(mfc::iWordptr original_word) {
     return nullptr;
 }
 
-sWordptr StackGrapher::compute_effects_flattened(mfc::iWordptr input) {
-    auto *big_bertha = new mfc::ForthWord(input->base_string(), false);
+sWordptr StackGrapher::compute_effects_flattened(mov::iWordptr input) {
+    auto *big_bertha = new mov::ForthWord(input->base_string(), false);
 
-    std::stack<mfc::iWordptr> to_add;
+    std::stack<mov::iWordptr> to_add;
     to_add.push(input);
 
     while (!to_add.empty())
@@ -104,7 +104,7 @@ sWordptr StackGrapher::compute_effects_flattened(mfc::iWordptr input) {
         auto current = to_add.top();
         to_add.pop();
 
-        auto forth_word = dynamic_cast<mfc::ForthWord *>(current);
+        auto forth_word = dynamic_cast<mov::ForthWord *>(current);
         if (forth_word != nullptr)
         {
             auto def = forth_word->get_definition();
@@ -113,7 +113,7 @@ sWordptr StackGrapher::compute_effects_flattened(mfc::iWordptr input) {
 
         } else{
             // is primitive
-            big_bertha->add(mfc::iData(current));
+            big_bertha->add(mov::iData(current));
         }
     }
 
@@ -126,14 +126,14 @@ sWordptr StackGrapher::compute_effects_flattened(mfc::iWordptr input) {
 }
 
 
-sWordptr StackGrapher::conversion_pass(mfc::ForthWord *original_word) {
+sWordptr StackGrapher::conversion_pass(mov::ForthWord *original_word) {
 
     //auto *new_word = new Word{.name = original_word->base_string()};
     std::vector<Instruction*> new_instructions;
 
     for (int i = 0; i < original_word->get_definition().size(); i++)
     {
-        mfc::iWordptr old_word = original_word->get_definition()[i];
+        mov::iWordptr old_word = original_word->get_definition()[i];
 
         // assume the current xt is a word
         // (all data cells should have been integrated in the previous loop)

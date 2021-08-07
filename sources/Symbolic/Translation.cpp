@@ -1,9 +1,9 @@
 
-#include "../../headers/Symbolic/Translation.h"
+#include "../../headers/symbolic/Translation.h"
 
-using namespace sym;
+using namespace mov;
 
-void sym::convert(sym::sWordptr wordptr){
+void mov::convert(mov::sWordptr wordptr){
 
 
 }

@@ -1,7 +1,7 @@
 
-#include "../../headers/Symbolic/sWord.h"
+#include "../../headers/symbolic/sWord.h"
 
-using namespace sym;
+using namespace mov;
 
 Effects Effects::neutral{};
 

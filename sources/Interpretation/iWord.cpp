@@ -2,7 +2,7 @@
 #include "../../headers/Interpretation/iWord.h"
 #include "../../headers/Interpretation/Stack.h"
 
-using namespace mfc;
+using namespace mov;
 
 iWord::iWord(std::string name, bool immediate, bool stateful)
         : name(std::move(name)), immediate(immediate), stateful(stateful) {}

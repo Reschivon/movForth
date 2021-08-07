@@ -7,7 +7,7 @@
 #include "WordGenerator.h"
 #include "Stack.h"
 
-namespace mfc {
+namespace mov {
 
     class Interpreter {
         file_input input;

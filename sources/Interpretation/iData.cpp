@@ -3,7 +3,7 @@
 #include "../../headers/Interpretation/iData.h"
 #include "../../headers/Interpretation/iWord.h"
 
-using namespace mfc;
+using namespace mov;
 
 iData iData::clone(){
     if(type() == iword)

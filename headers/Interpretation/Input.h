@@ -7,7 +7,7 @@
 #include <fstream>
 #include "../Print.h"
 
-namespace mfc {
+namespace mov {
 
     class Input {
         virtual std::string next_token() = 0;

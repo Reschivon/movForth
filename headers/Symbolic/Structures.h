@@ -1,6 +1,6 @@
 
-#ifndef MOVFORTH_SYM_TYPES_H
-#define MOVFORTH_SYM_TYPES_H
+#ifndef MOVFORTH_mov_TYPES_H
+#define MOVFORTH_mov_TYPES_H
 
 #include <string>
 #include <variant>
@@ -17,7 +17,7 @@
  * to deal with references and shared_ptr
  */
 
-namespace sym {
+namespace mov {
 
     class sWord;
 

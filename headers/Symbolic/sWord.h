@@ -6,7 +6,7 @@
 #ifndef MOVFORTH_WORD_H
 #define MOVFORTH_WORD_H
 
-namespace sym{
+namespace mov{
 
     struct Effects{
         int num_popped = 0;
@@ -47,7 +47,7 @@ namespace sym{
         NodeList push_nodes;
 
         sWordptr linked_word;
-        Data data = Data(nullptr); // acquired from next in token list
+        sData data = sData(nullptr); // acquired from next in token list
 
         static bool is_jumpy(Instruction*);
 

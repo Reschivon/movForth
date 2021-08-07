@@ -1,13 +1,13 @@
 
 #include "headers/Interpretation/Interpreter.h"
-#include "headers/Symbolic/SymbolicPass.h"
+#include "headers/symbolic/symbolicPass.h"
 //#include "headers/Generation/IRGenerator.h"
 
 int main() {
     //hello_word();
 
-    mfc::Interpreter interpreter;
-    sym::StackGrapher stackGrapher;
+    mov::Interpreter interpreter;
+    mov::StackGrapher stackGrapher;
 
     auto word_to_compile = interpreter.find("test");
 

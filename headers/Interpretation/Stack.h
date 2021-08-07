@@ -6,7 +6,7 @@
 #include "iWord.h"
 #include "../../headers/Print.h"
 
-namespace mfc {
+namespace mov {
 
     class Stack {
         std::vector<iData> stack;
@@ -67,7 +67,7 @@ namespace mfc {
             return stack.size();
         }
 
-        void for_each(std::function<void(Data)> action){
+        void for_each(std::function<void(iData)> action){
             for(auto thing : stack)
                 action(thing);
         }

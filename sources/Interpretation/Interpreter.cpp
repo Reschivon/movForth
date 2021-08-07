@@ -3,7 +3,7 @@
 #include "../../headers/Interpretation/Interpreter.h"
 #include "../../headers/Print.h"
 
-using namespace mfc;
+using namespace mov;
 
 Interpreter::Interpreter() : input("../boot.fs"){
     init_words();

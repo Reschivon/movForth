@@ -8,7 +8,7 @@
 #include <string>
 #include "iData.h"
 
-namespace mfc{
+namespace mov{
     class Stack;
     class iWord;
     typedef iWord *iWordptr;

@@ -6,7 +6,7 @@
 #include <variant>
 #include <string>
 
-namespace mfc {
+namespace mov {
     class iWord;
     typedef iWord *iWordptr;
 
