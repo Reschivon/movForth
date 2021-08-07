@@ -1,19 +1,19 @@
 
 
-#include "../../headers/Interpretation/Data.h"
+#include "../../headers/Interpretation/iData.h"
 #include "../../headers/Interpretation/iWord.h"
 
 using namespace mfc;
 
-Data Data::clone(){
+iData iData::clone(){
     if(type() == iword)
-        return Data(to_type<iword_t>()->clone());
+        return iData(to_type<iword_t>()->clone());
     if(type() == number)
-        return Data(to_type<number_t>());
-    return Data(nullptr);
+        return iData(to_type<number_t>());
+    return iData(nullptr);
 }
 
-std::string Data::to_string(){
+std::string iData::to_string(){
     if(type() == iword)
         return to_type<iword_t>()->to_string();
     if(type() == number)

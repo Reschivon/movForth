@@ -23,7 +23,7 @@ namespace sym {
 
     typedef sWord *sWordptr;
 
-    class Data {
+    class sData {
         std::variant<std::nullptr_t, int, sWordptr> data{};
     public:
         bool is_num() {return data.index() == 1;}
@@ -36,7 +36,7 @@ namespace sym {
         int as_num() {return std::get<int>(data);}
         sWordptr as_xt() {return std::get<sWordptr>(data);}
 
-        explicit Data(std::variant<std::nullptr_t, int, sWordptr> data) : data(data) {}
+        explicit sData(std::variant<std::nullptr_t, int, sWordptr> data) : data(data) {}
     };
 
     struct Register{

@@ -29,7 +29,7 @@ add_executable(movForth
 
         headers/Interpretation/WordGenerator.h
         headers/Interpretation/Input.h
-        headers/Interpretation/Data.h
+        headers/Interpretation/iData.h
         sources/Interpretation/iWord.cpp
         sources/Interpretation/Interpreter.cpp
         headers/Interpretation/Stack.h
@@ -40,6 +40,6 @@ add_executable(movForth
 
 
         #headers/Generation/IRGenerator.h
-        headers/Symbolic/Instruction.h sources/Interpretation/Data.cpp)
+        headers/Symbolic/Instruction.h sources/Interpretation/iData.cpp)
 
 target_link_libraries(movForth ${llvm_libs})

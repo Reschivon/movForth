@@ -44,12 +44,12 @@ bool is_stateful(std::string name) {
 }
 
 
-Data StackGrapher::symbolize_data(mfc::Data data) {
-    if (data.type() == mfc::Data::number)
-        return Data(data.to_type<mfc::Data::number_t>());
-    if (data.type() == mfc::Data::iword)
-        return Data(compute_effects(data.to_type<mfc::Data::iword_t>()));
-    if(data.type() == mfc::Data::empty)
+Data StackGrapher::symbolize_data(mfc::iData data) {
+    if (data.type() == mfc::iData::number)
+        return Data(data.to_type<mfc::iData::number_t>());
+    if (data.type() == mfc::iData::iword)
+        return Data(compute_effects(data.to_type<mfc::iData::iword_t>()));
+    if(data.type() == mfc::iData::empty)
         return Data(nullptr);
     println("FUCK");
     return Data(nullptr);
@@ -113,7 +113,7 @@ sWordptr StackGrapher::compute_effects_flattened(mfc::iWordptr input) {
 
         } else{
             // is primitive
-            big_bertha->add(mfc::Data(current));
+            big_bertha->add(mfc::iData(current));
         }
     }
 

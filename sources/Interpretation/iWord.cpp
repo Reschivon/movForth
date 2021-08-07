@@ -29,13 +29,13 @@ void ForthWord::execute(Stack &stack, IP &ip) {
 
     }
 }
-void ForthWord::add(Data data){
+void ForthWord::add(iData data){
     if(!definition.empty() && // there exists a word
         definition.back()->stateful && // this word uses the data field
-        definition.back()->data.type() == Data::empty){ // we didn't already set the data field
+        definition.back()->data.type() == iData::empty){ // we didn't already set the data field
         definition.back()->data = data;
-    }else if(data.type() == Data::iword){
-        definition.push_back(data.to_type<Data::iword_t>());
+    }else if(data.type() == iData::iword){
+        definition.push_back(data.to_type<iData::iword_t>());
     }else{
         println("Adding a number to a definition is forbidden");
     }
@@ -50,7 +50,7 @@ int ForthWord::definition_size() {
     return definition.size();
 }
 
-void ForthWord::set(int index, Data value) {
+void ForthWord::set(int index, iData value) {
         definition[index]->data = value;
 }
 
@@ -59,7 +59,7 @@ iWordptr ForthWord::clone() {
 }
 
 
-Primitive::Primitive(std::string name, bool immediate, std::function<void(Stack&, Data data, IP&)> action, bool stateful)
+Primitive::Primitive(std::string name, bool immediate, std::function<void(Stack&, iData data, IP&)> action, bool stateful)
 : iWord(std::move(name), immediate, stateful), action(std::move(action)) {}
 
 void Primitive::execute(Stack &stack, IP &ip) {

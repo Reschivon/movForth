@@ -6,7 +6,7 @@
 #include <variant>
 #include <iostream>
 #include <string>
-#include "Data.h"
+#include "iData.h"
 
 namespace mfc{
     class Stack;
@@ -38,7 +38,7 @@ namespace mfc{
     public:
         bool immediate;
         const bool stateful;
-        Data data = Data(); // has value if stateful
+        iData data = iData(); // has value if stateful
 
         iWord(std::string name, bool immediate, bool stateful);
 
@@ -61,8 +61,8 @@ namespace mfc{
 
         void execute(Stack &stack, IP &ip) override;
         iWordptr clone() override;
-        void add(Data data);
-        void set(int index, Data value);
+        void add(iData data);
+        void set(int index, iData value);
         void definition_to_string();
         int definition_size();
         std::vector<iWordptr> get_definition() {
@@ -71,9 +71,9 @@ namespace mfc{
     };
 
     class Primitive : public iWord{
-        std::function<void(Stack&, Data data, IP&)> action;
+        std::function<void(Stack&, iData data, IP&)> action;
     public:
-        Primitive(std::string name, bool immediate, std::function<void(Stack&, Data data, IP&)> action, bool stateful);
+        Primitive(std::string name, bool immediate, std::function<void(Stack&, iData data, IP&)> action, bool stateful);
         void execute(Stack &stack, IP &ip) override;
         iWordptr clone() override;
     };

@@ -11,7 +11,7 @@ namespace sym {
     class StackGrapher{
         // cached results of already computed words
         std::unordered_map<mfc::iWordptr, sWordptr> visited_words;
-        Data symbolize_data(mfc::Data data);
+        Data symbolize_data(mfc::iData data);
         sWordptr conversion_pass(mfc::ForthWord *wordptr);
         void stack_graph_pass(sWordptr word);
         void branching_pass(sWordptr word);

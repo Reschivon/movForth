@@ -9,7 +9,7 @@
 namespace mfc {
 
     class Stack {
-        std::vector<Data> stack;
+        std::vector<iData> stack;
 
     public:
         void push(int number) {
@@ -18,19 +18,19 @@ namespace mfc {
         void push(iWordptr iWord_pointer) {
             stack.emplace_back(iWord_pointer);
         }
-        void push(Data thing){
+        void push(iData thing){
             stack.push_back(thing);
         }
 
         int pop_number(){
             if(stack.empty()) println("tried popping empty stack");
 
-            if(stack.back().type() == Data::number) { // int
-                auto ret = stack.back().to_type<Data::number_t>();
+            if(stack.back().type() == iData::number) { // int
+                auto ret = stack.back().to_type<iData::number_t>();
                 stack.pop_back();
                 return ret;
             }
-            if(stack.back().type() == Data::iword) { // iWord ptr
+            if(stack.back().type() == iData::iword) { // iWord ptr
                 println("tried popping cfa expecting int");
                 return 0;
             }
@@ -40,26 +40,26 @@ namespace mfc {
         iWordptr pop_iWord_pointer(){
             if(stack.size() == 0) println("tried popping empty stack");
 
-            if(stack.back().type() == Data::number) { // int
+            if(stack.back().type() == iData::number) { // int
                 std::cout << "tried popping int expecting cfa" << std::endl;
                 return nullptr;
             }
-            if(stack.back().type() == Data::iword) { // iWord ptr
-                auto ret = stack.back().to_type<Data::iword_t>();
+            if(stack.back().type() == iData::iword) { // iWord ptr
+                auto ret = stack.back().to_type<iData::iword_t>();
                 stack.pop_back();
                 return ret;
             }
             return nullptr;
         }
 
-        Data pop(){
+        iData pop(){
             if(stack.empty()) println("tried popping empty stack");
             auto ret = stack.back();
             stack.pop_back();
             return ret;
         }
 
-        Data top(){
+        iData top(){
             return stack.back();
         }
 
