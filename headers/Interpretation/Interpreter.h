@@ -21,7 +21,6 @@ namespace mov {
     public:
         iWordptr find(const std::string &name);
         explicit Interpreter(std::string path);
-        std::vector<iWordptr> get_dictionary();
     };
 }
 

@@ -8,10 +8,7 @@ iWord::iWord(std::string name, bool immediate, bool stateful)
         : name(std::move(name)), immediate(immediate), stateful(stateful) {}
 
 std::string iWord::to_string() {
-    if(stateful)
-        return name + "(" + data.to_string() + ")";
-    else
-        return name;
+    return name;
 }
 
 std::string iWord::base_string() {
@@ -21,29 +18,24 @@ std::string iWord::base_string() {
 
 ForthWord::ForthWord(std::string name, bool immediate) : iWord(std::move(name), immediate, false){}
 void ForthWord::execute(Stack &stack, IP &ip) {
-    for(IP it(definition.begin()); it < definition.end(); it+=1) {
+    for(IP it = definition.begin(); it < definition.end(); it++) {
 
-        //println("       [exec] ", ((*(it.me)).is_xt()?(*(it.me)).as_xt()->to_string():std::to_string((*(it.me)).as_num())), " ");
+        //println("       [exec] ", (it->is_word()?it->as_word()->to_string():std::to_string(it->as_number())), " ");
 
-        (*it.me)->execute(stack, it);
-
+        iData current_cell = *it;
+        if(current_cell.is_word())
+            current_cell.as_word()->execute(stack, it);
+        else
+            println("Too many numbers in definition, no LITERAL to consume them");
     }
 }
 void ForthWord::add(iData data){
-    if(!definition.empty() && // there exists a word
-        definition.back()->stateful && // this word uses the data field
-        definition.back()->data.is_empty()){ // we didn't already set the data field
-        definition.back()->data = data;
-    }else if(data.is_word()){
-        definition.push_back(data.as_word());
-    }else{
-        println("Adding a number to a definition is forbidden");
-    }
+    definition.push_back(data);
 }
 
 void ForthWord::definition_to_string() {
-    for(iWordptr thing : definition)
-        print(thing->to_string(), " ");
+    for(iData thing : definition)
+        print(thing.to_string(), " ");
 }
 
 int ForthWord::definition_size() {
@@ -51,7 +43,7 @@ int ForthWord::definition_size() {
 }
 
 void ForthWord::set(int index, iData value) {
-        definition[index]->data = value;
+    definition[index] = value;
 }
 
 iWordptr ForthWord::clone() {

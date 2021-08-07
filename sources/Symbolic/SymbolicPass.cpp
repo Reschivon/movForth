@@ -39,11 +39,6 @@ static const std::unordered_map<std::string, sWordptr> primitive_lookup = {
         {"create",    new sWord("create",    {.consume_token = true, .define_new_word = true})}
 };
 
-bool is_stateful(std::string name) {
-    return (name == "literal" || name == "branch" || name == "branchif");
-}
-
-
 sData StackGrapher::symbolize_data(mov::iData data) {
     if (data.is_number())
         return sData(data.as_number());
@@ -92,7 +87,7 @@ sWordptr StackGrapher::compute_effects(mov::iWordptr original_word) {
 
     return nullptr;
 }
-
+/*
 sWordptr StackGrapher::compute_effects_flattened(mov::iWordptr input) {
     auto *big_bertha = new mov::ForthWord(input->base_string(), false);
 
@@ -124,7 +119,7 @@ sWordptr StackGrapher::compute_effects_flattened(mov::iWordptr input) {
 
     return converted;
 }
-
+*/
 
 sWordptr StackGrapher::conversion_pass(mov::ForthWord *original_word) {
 
@@ -133,11 +128,14 @@ sWordptr StackGrapher::conversion_pass(mov::ForthWord *original_word) {
 
     for (int i = 0; i < original_word->get_definition().size(); i++)
     {
-        mov::iWordptr old_word = original_word->get_definition()[i];
+        iData old_word = original_word->get_definition()[i];
 
         // assume the current xt is a word
         // (all data cells should have been integrated in the previous loop)
-        auto *current_definee = compute_effects(old_word);
+        auto *current_definee = compute_effects(old_word.as_word());
+
+        if(old_word.as_word()->stateful)
+            new_instructions.back()->data = sData(original_word->get_definition()[++i].as_number());
 
         if(current_definee->name == "branch")
             new_instructions.push_back(new BranchInstruction(current_definee));
@@ -145,8 +143,6 @@ sWordptr StackGrapher::conversion_pass(mov::ForthWord *original_word) {
             new_instructions.push_back(new BranchIfInstruction(current_definee));
         else
             new_instructions.push_back(new Instruction(current_definee));
-
-        new_instructions.back()->data = symbolize_data(old_word->data);
     }
     auto new_word = new sWord(original_word->base_string(), Effects::neutral);
     new_word->instructions = std::move(new_instructions);

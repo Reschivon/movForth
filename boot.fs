@@ -7,14 +7,14 @@
 : negative -1 * ;
 
 : jump>
-    here
     literal branch ,
-            0      , ;
+    here
+    0 , ;
 
 : jumpif>
-    here
     literal branchif ,
-            0        , ;
+    here
+    0 , ;
 
 : >land
     dup
@@ -36,8 +36,9 @@
     jumpif> ;
 
 : else immediate
-    >land
-    jump> ;
+    jump>
+    swap
+    >land ;
 
 : then immediate
     >land ;

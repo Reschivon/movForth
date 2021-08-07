@@ -66,27 +66,27 @@ namespace mov{
         unsigned int id = 0;
     };
 
-    struct BasicBlockEntry {
+    struct BasicBlock {
         std::vector<Instruction*>::iterator target;
         std::vector<Instruction*>::iterator end;
-        unsigned int index; // like Register but I was lazy
+        unsigned int index = 0; // like Register but I was lazy
     };
 
     struct BranchInstruction : Instruction {
-        BasicBlockEntry *jump_to = nullptr;
+        BasicBlock *jump_to = nullptr;
         explicit BranchInstruction(sWordptr linked_word) : Instruction(linked_word){}
     };
     struct BranchIfInstruction : Instruction {
-        BasicBlockEntry *jump_to_close = nullptr;
-        BasicBlockEntry *jump_to_far = nullptr;
-        BranchIfInstruction(sWordptr linked_word) : Instruction(linked_word){}
+        BasicBlock *jump_to_close = nullptr;
+        BasicBlock *jump_to_far = nullptr;
+        explicit BranchIfInstruction(sWordptr linked_word) : Instruction(linked_word){}
     };
     struct ReturnInstruction : Instruction{
         ReturnInstruction();
     };
 
     struct cmp{
-        auto operator() (BasicBlockEntry* a, BasicBlockEntry* b) const{
+        auto operator() (BasicBlock* a, BasicBlock* b) const{
             return a->target < b->target;
         };
     };
@@ -106,10 +106,10 @@ namespace mov{
 
         void definition_to_string();
 
-        std::set<BasicBlockEntry*, cmp> basic_block_entries;
+        std::set<BasicBlock*, cmp> basic_block_entries;
 
-        BasicBlockEntry* block_pointing_at(std::vector<Instruction*>::iterator target){
-            auto *bbe = new BasicBlockEntry{.target = target};
+        BasicBlock* block_pointing_at(std::vector<Instruction*>::iterator target){
+            auto *bbe = new BasicBlock{.target = target};
             auto success = basic_block_entries.insert(bbe);
             if(success.second) // newly inserted bbe
                 (*success.first)->index = bbe_gen.get();

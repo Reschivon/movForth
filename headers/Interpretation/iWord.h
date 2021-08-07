@@ -13,25 +13,7 @@ namespace mov{
     class iWord;
     typedef iWord *iWordptr;
 
-    class IP{
-        const bool isActive;
-    public:
-        std::vector<iWordptr>::iterator me;
-
-        explicit IP(std::vector<iWordptr>::iterator in) : me(in), isActive(true) {}
-        IP() : isActive(false) {}
-
-        IP operator+=(int i) { //outside the class
-            if(!isActive) return *this;
-            me += i;
-            return *this;
-        }
-
-        bool operator<(const std::vector<iWordptr>::iterator& a) const{
-            return me < a;
-        }
-    };
-
+    typedef std::vector<iData>::iterator IP;
 
     class iWord{
         const std::string name;
@@ -55,7 +37,7 @@ namespace mov{
     }
 
     class ForthWord : public iWord {
-        std::vector<iWordptr> definition;
+        std::vector<iData> definition;
     public:
         ForthWord(std::string name, bool immediate);
 
@@ -65,7 +47,7 @@ namespace mov{
         void set(int index, iData value);
         void definition_to_string();
         int definition_size();
-        std::vector<iWordptr> get_definition() {
+        std::vector<iData> get_definition() {
             return definition;
         }
     };

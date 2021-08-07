@@ -1,11 +1,12 @@
 #include <algorithm>
 #include <iomanip>
+#include <utility>
 #include "../../headers/Interpretation/Interpreter.h"
 #include "../../headers/Print.h"
 
 using namespace mov;
 
-Interpreter::Interpreter(std::string path) : input(path){
+Interpreter::Interpreter(std::string path) : input(std::move(path)){
     init_words();
 
     std::string token;
@@ -180,23 +181,26 @@ void Interpreter::init_words(){
         iData val = stack.pop();
         auto last_word = try_cast<ForthWord>(dictionary.back());
         if (!last_word)
-           println("used ! for an address not in most recent word");
+           println("shit");
         else {
             last_word->set(address, val);
         }
     });
 
     iWordGenerator.register_primitive("branch", [&](Stack &s, iData data, IP &ip) {
-        ip += data.as_number();
+        ip += (ip+1)->as_number();
     }, true);
 
     iWordGenerator.register_primitive("branchif", [&](Stack &s, iData data, IP &ip) {
+        auto next_data = ip+1;
         if (s.pop_number() == 0)
-            ip += data.as_number();
+            ip += next_data->as_number();
+        else
+            ip++;
     }, true);
 
     iWordGenerator.register_primitive("literal", [&](Stack &s, iData data, IP &ip) {
-        s.push(data.clone());
+        s.push(*(++ip));
     }, true);
 
     // Use HERE for relative computations only
@@ -224,9 +228,5 @@ void Interpreter::init_words(){
     auto exit_word = new ForthWord(";", true);
     exit_word->add(iData(find("[")));
     dictionary.push_back(exit_word);
-}
-
-std::vector<iWordptr> Interpreter::get_dictionary() {
-    return std::move(dictionary);
 }
 

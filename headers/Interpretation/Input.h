@@ -66,4 +66,4 @@ namespace mov {
 }
 
 
-#endif //MOVFORTH_INPUT_H
+#endif //MOVFORTH_INTER_INPUT_H
