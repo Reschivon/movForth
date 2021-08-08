@@ -8,4 +8,4 @@ namespace mov{
     void convert(sWordptr wordptr);
 }
 
-#endif //MOVFORTH_TRANSLATION_H
+#endif

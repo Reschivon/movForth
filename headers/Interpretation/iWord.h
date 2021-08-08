@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string>
 #include "iData.h"
-#include "../Symbolic/PrimitiveEffects.h"
+#include "../PrimitiveEffects.h"
 
 namespace mov{
     class Stack;

@@ -4,7 +4,7 @@
 #define MOVFORTH_PRIMITIVEEFFECTS_H
 
 #include "PrimitiveEnums.h"
-#include "sWord.h"
+#include "Symbolic/sWord.h"
 
 namespace mov{
     static const std::vector<std::pair<int, int>> swap_oi_pairs = {{1, 0}, {0, 1}};
@@ -26,8 +26,8 @@ namespace mov{
             {primitive_words::TICK,          new sWord("'",         primitive_words::TICK,         {.consume_token = true,})},
             {primitive_words::COMMA,         new sWord(",",         primitive_words::COMMA,        {.num_popped = 1,  .compiled_slots = 1})},
             {primitive_words::SEE,           new sWord("see",       primitive_words::SEE,          Effects::neutral)},
-            {primitive_words::TOIMMEDIATE,   new sWord("[",         primitive_words::TOIMMEDIATE,  {.interpret_state = Effects::TOINTERPRET})},
-            {primitive_words::TOCOMPILE,     new sWord("]",         primitive_words::TOCOMPILE,    {.interpret_state = Effects::TOCOMPILE})},
+            {primitive_words::TOIMMEDIATE,   new sWord("[",         primitive_words::TOIMMEDIATE,  {.interpret_state = Effects::interpret_state::TOINTERPRET})},
+            {primitive_words::TOCOMPILE,     new sWord("]",         primitive_words::TOCOMPILE,    {.interpret_state = Effects::interpret_state::TOCOMPILE})},
             {primitive_words::IMMEDIATE,     new sWord("immediate", primitive_words::IMMEDIATE,    Effects::neutral)}, // very rare this ends up in compiled code, consider warn on encounter
             {primitive_words::FETCH,         new sWord("@",         primitive_words::FETCH,        {.num_popped = 1, .num_pushed = 1})},
             {primitive_words::STORE,         new sWord("!",         primitive_words::STORE,         {.num_popped = 2,})},

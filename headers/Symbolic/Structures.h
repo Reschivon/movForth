@@ -43,12 +43,12 @@ namespace mov {
         int ID = -1;
         enum registerType {UNDEF, NORMAL, PARAM} register_type = UNDEF;
 
-        Register operator++(int val){
+        Register operator++(int u){
             ID++;
             return *this;
         }
 
-        std::string to_string(){
+        [[nodiscard]] std::string to_string() const{
             switch (register_type)
             {
                 case NORMAL:

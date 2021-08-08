@@ -13,14 +13,12 @@ namespace mov {
         std::unordered_map<iWordptr, sWordptr> visited_words;
         sData symbolize_data(iData data);
         //sWordptr conversion_pass(ForthWord *wordptr);
-        sWordptr MakeBlockEntries(ForthWord *template_word);
+        sWordptr translate_to_basic_blocks(ForthWord *template_word);
         static void stack_graph_pass(sWordptr word);
-        void branching_pass(sWordptr word);
         static void retrieve_push_pop_effects(sWordptr word);
     public:
-        sWordptr compute_effects_flattened(iWordptr input);
         sWordptr compute_effects(iWordptr original_word);
-        sWordptr show_word_info(sWordptr wordptr);
+        static sWordptr show_word_info(sWordptr wordptr);
     };
 }
 

@@ -36,7 +36,7 @@ public:
     }
 };
 
-sWordptr StackGrapher::MakeBlockEntries(ForthWord *template_word){
+sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
     auto new_word = new sWord(template_word->base_string(), primitive_words::OTHER);
 
     println("make basic block entries for [" , template_word->to_string() , "]");

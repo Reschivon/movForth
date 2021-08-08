@@ -5,7 +5,7 @@
 #include <set>
 #include <utility>
 #include "Structures.h"
-#include "PrimitiveEnums.h"
+#include "../PrimitiveEnums.h"
 
 namespace mov{
 
@@ -17,7 +17,7 @@ namespace mov{
 
         unsigned int compiled_slots = 0; // TODO still unsure how to handle memory
 
-        enum interpret_state{NONE, TOCOMPILE, TOINTERPRET} interpret_state = NONE;
+        enum interpret_state{NONE, TOCOMPILE, TOINTERPRET} interpret_state = interpret_state::NONE;
 
         bool define_new_word = false;
 
@@ -31,7 +31,7 @@ namespace mov{
 
             compiled_slots += other.compiled_slots;
 
-            if(other.interpret_state != NONE)
+            if(other.interpret_state != interpret_state::NONE)
                 interpret_state = other.interpret_state;
 
             if(other.define_new_word) define_new_word = true;
@@ -53,14 +53,13 @@ namespace mov{
         explicit Instruction(sWordptr linked_word, sData data)
         : linked_word(linked_word), data(data){}
 
-        static bool is_jumpy(Instruction*);
         BranchInstruction* as_branch();
         BranchIfInstruction* as_branchif();
         ReturnInstruction* as_return();
 
         virtual std::string to_string();
 
-        bool branchy();
+        [[nodiscard]] bool branchy() const;
     };
 
     struct BBgen{
@@ -107,14 +106,10 @@ namespace mov{
         const std::string name;
         Effects effects;
 
-        explicit sWord(const std::string& name, primitive_words id)
-        : name(name), id(id) {}
+        explicit sWord(std::string name, primitive_words id);
 
-        explicit sWord(const std::string& name, primitive_words id, Effects effects)
-        : name(name), id(id), effects(effects) {}
+        explicit sWord(std::string name, primitive_words id, Effects effects);
 
-        // components for graph
-        //std::vector<Wordptr> definition;
         NodeList my_graphs_outputs;
         NodeList my_graphs_inputs;
 
@@ -131,8 +126,6 @@ namespace mov{
         }*/
 
         std::vector<Instruction*> instructions;
-
-        BBgen bbe_gen;
 
         bool branchy(){
             return

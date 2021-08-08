@@ -38,11 +38,9 @@ sWordptr StackGrapher::compute_effects(iWordptr original_word) {
         dln("compute [", original_word->base_string(), "]");
         indent();
 
-        //auto converted = conversion_pass(forth_word);
-        auto converted = MakeBlockEntries(forth_word);
+        auto converted = translate_to_basic_blocks(forth_word);
         stack_graph_pass(converted);
         retrieve_push_pop_effects(converted);
-        //branching_pass(converted);
 
         unindent();
         dln("finished compute [", original_word->base_string(), "]");
@@ -81,7 +79,7 @@ void propagate_stack(NodeList &stack, Instruction *instruction, sWordptr base,
     }
 
     // pop input nodes from stack
-    NodeList::move_top_elements(stack, instruction->pop_nodes, nodes_from_stack);
+    NodeList::move_top_elements(stack, instruction->pop_nodes, (int) nodes_from_stack);
 
     // make empty output nodes
     for (int i = 0; i < effects.num_pushed; i++)
@@ -148,7 +146,7 @@ void StackGrapher::stack_graph_pass(sWordptr word) {
     }
 
     // the pushed side effect is the same as remaining stack frames
-    word->effects.num_pushed = running_stack.size();
+    word->effects.num_pushed = (int) running_stack.size();
     word->my_graphs_outputs = running_stack;
 }
 
@@ -177,15 +175,15 @@ void StackGrapher::retrieve_push_pop_effects(sWordptr word) {
     dln("Finished effects for ", word->name, " pops: ",
         word->my_graphs_inputs.size(), " pushes: ",
         word->my_graphs_outputs.size());
-    word->effects.num_pushed = word->my_graphs_outputs.size();
-    word->effects.num_popped = word->my_graphs_inputs.size();
+    word->effects.num_pushed = (int) word->my_graphs_outputs.size();
+    word->effects.num_popped = (int) word->my_graphs_inputs.size();
 }
 
 sWordptr StackGrapher::show_word_info(sWordptr wordptr) {
     println("============[", wordptr->name, "]===========");
     println("Basic blocks:");
 
-    for(auto bbe : wordptr->basic_blocks){
+    for(const auto& bbe : wordptr->basic_blocks){
         println("bbe " + std::to_string(bbe.index) + ":");
         print("    ");
         for(auto instr : bbe.instructions)

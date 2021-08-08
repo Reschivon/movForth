@@ -24,4 +24,4 @@ namespace mov {
     };
 }
 
-#endif //MOVFORTH_INTERPRETER_H
+#endif
