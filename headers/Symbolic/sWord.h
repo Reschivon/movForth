@@ -43,6 +43,7 @@ namespace mov{
     struct BranchInstruction;
     struct BranchIfInstruction;
     struct ReturnInstruction;
+
     struct Instruction{
         NodeList pop_nodes;
         NodeList push_nodes;
@@ -57,7 +58,7 @@ namespace mov{
         BranchIfInstruction* as_branchif();
         ReturnInstruction* as_return();
 
-        virtual std::string to_string();
+        virtual std::string name();
 
         [[nodiscard]] bool branchy() const;
     };
@@ -81,7 +82,7 @@ namespace mov{
         explicit BranchInstruction(sWordptr linked_word, sData data, BasicBlock *jump_to)
         : Instruction(linked_word, data), jump_to(jump_to) {}
 
-        std::string to_string() override;
+        std::string name() override;
     };
     struct BranchIfInstruction : public Instruction {
         BasicBlock *jump_to_next;
@@ -89,11 +90,11 @@ namespace mov{
         explicit BranchIfInstruction(sWordptr linked_word, sData data, BasicBlock *jump_to_close, BasicBlock *jump_to_far)
         : Instruction(linked_word, data), jump_to_next(jump_to_close), jump_to_far(jump_to_far) {}
 
-        std::string to_string() override;
+        std::string name() override;
     };
     struct ReturnInstruction : public Instruction{
         ReturnInstruction();
-        std::string to_string() override {
+        std::string name() override {
             return "exit";
         }
     };

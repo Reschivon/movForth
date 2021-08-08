@@ -15,7 +15,7 @@ iData iData::clone(){
 
 std::string iData::to_string(){
     if(is_word())
-        return as_word()->to_string();
+        return as_word()->name();
     if(is_number())
         return std::to_string(as_number());
     return "undef";

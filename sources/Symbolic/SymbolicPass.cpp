@@ -34,7 +34,7 @@ sWordptr StackGrapher::compute_effects(iWordptr original_word) {
     if (auto forth_word = dynamic_cast<ForthWord *>(original_word))
     {
         dln();
-        dln("compute [", original_word->base_string(), "]");
+        dln("compute [", original_word->name(), "]");
         indent();
 
         auto converted = translate_to_basic_blocks(forth_word);
@@ -42,7 +42,7 @@ sWordptr StackGrapher::compute_effects(iWordptr original_word) {
         retrieve_push_pop_effects(converted);
 
         unindent();
-        dln("finished compute [", original_word->base_string(), "]");
+        dln("finished compute [", original_word->name(), "]");
 
         return converted;
     }
@@ -185,7 +185,7 @@ sWordptr StackGrapher::show_word_info(sWordptr wordptr) {
         println("bbe " + std::to_string(bbe.index) + ":");
         print("    ");
         for(auto instr : bbe.instructions)
-            print(" " , instr->to_string());
+            print(" " , instr->name());
         println();
     }
     println();

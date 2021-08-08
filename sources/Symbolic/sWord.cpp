@@ -11,7 +11,7 @@ void sWord::definition_to_string() {
     println("[", name, "]");
     println("input parameters: ", effects.num_popped, " output frames: ", effects.num_pushed);
     for(auto &thing : instructions)
-        print(thing->linked_word->name, " ");
+        print(thing->name(), " ");
     println();
 }
 
@@ -40,17 +40,17 @@ bool Instruction::branchy() const{
     linked_word->id == primitive_words::EXIT;
 }
 
-std::string Instruction::to_string(){
+std::string Instruction::name(){
     return linked_word->name;
 }
 
 ReturnInstruction::ReturnInstruction()
 : Instruction(new sWord("exit", primitive_words::EXIT), sData(nullptr)){}
 
-std::string BranchInstruction::to_string() {
-    return linked_word->name + "(" + std::to_string(jump_to->index) + ")";
+std::string BranchInstruction::name() {
+    return Instruction::name() + "(" + std::to_string(jump_to->index) + ")";
 }
 
-std::string BranchIfInstruction::to_string() {
-    return linked_word->name + "(" + std::to_string(jump_to_next->index) + ", " + std::to_string(jump_to_far->index) +")";
+std::string BranchIfInstruction::name() {
+    return Instruction::name() + "(" + std::to_string(jump_to_next->index) + ", " + std::to_string(jump_to_far->index) +")";
 }

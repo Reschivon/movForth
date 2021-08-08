@@ -5,17 +5,14 @@
 using namespace mov;
 
 iWord::iWord(std::string name, bool immediate, bool stateful)
-        : name(std::move(name)), immediate(immediate), stateful(stateful) {}
+        : _name(std::move(name)), immediate(immediate), stateful(stateful) {}
 
 iWord::iWord(std::string name, primitive_words id, bool immediate, bool stateful)
-        : name(std::move(name)), id(id), immediate(immediate), stateful(stateful) {}
+        : _name(std::move(name)), id(id), immediate(immediate), stateful(stateful) {}
 
-std::string iWord::to_string() {
-    return name;
-}
 
-std::string iWord::base_string() {
-    return name;
+std::string iWord::name() {
+    return _name;
 }
 
 
@@ -23,7 +20,7 @@ ForthWord::ForthWord(std::string name, bool immediate) : iWord(std::move(name), 
 void ForthWord::execute(Stack &stack, IP &ip) {
     for(IP it = definition.begin(); it < definition.end(); it++) {
 
-        //println("       [exec] ", (it->is_word()?it->as_word()->to_string():std::to_string(it->as_number())), " ");
+        //println("       [exec] ", (it->is_word()?it->as_word()->to_string():std::_name(it->as_number())), " ");
 
         iData current_cell = *it;
         if(current_cell.is_word())

@@ -54,9 +54,9 @@ public:
 };
 
 sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
-    auto new_word = new sWord(template_word->base_string(), primitive_words::OTHER);
+    auto new_word = new sWord(template_word->name(), primitive_words::OTHER);
 
-    println("make basic block entries for [" , template_word->to_string() , "]");
+    println("make basic block entries for [" , template_word->name() , "]");
 
     // cache this word for the future
     visited_words[template_word] = new_word;
@@ -81,29 +81,31 @@ sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
 
     auto curr_bb = bb_builder.get_bb_at_index(0);
     for(int i = 0; i < template_word->def().size(); i++){
-        if(template_word->def()[i].is_word()){
 
-            auto template_sub_def = template_word->def()[i].as_word();
-            auto new_sub_def = compute_effects(template_sub_def);
+        auto template_sub_def = template_word->def()[i].as_word();
+        auto new_sub_def = compute_effects(template_sub_def);
 
-            sData next_data = sData(nullptr);
-            if(template_sub_def->stateful){
-                next_data = symbolize_data(template_word->def()[i + 1]);
-            }
-
-            if(template_sub_def->id == primitive_words::BRANCH)
-                curr_bb->instructions.push_back(new BranchInstruction(
-                            new_sub_def, next_data,
-                            bb_builder.get_bb_for_branch_at(i).base()));
-
-            else if(template_sub_def->id == primitive_words::BRANCHIF)
-                curr_bb->instructions.push_back(new BranchIfInstruction(
-                        new_sub_def, next_data,
-                        bb_builder.get_bb_at_index(i+1+1).base(),
-                        bb_builder.get_bb_for_branch_at(i).base()));
-            else
-                curr_bb->instructions.push_back(new Instruction(new_sub_def, next_data));
+        sData next_data = sData(nullptr);
+        if(template_sub_def->stateful){
+            next_data = symbolize_data(template_word->def()[i + 1]);
         }
+
+        if(template_sub_def->id == primitive_words::BRANCH)
+            curr_bb->instructions.push_back(new BranchInstruction(
+                        new_sub_def, next_data,
+                        bb_builder.get_bb_for_branch_at(i).base()));
+
+        else if(template_sub_def->id == primitive_words::BRANCHIF)
+            curr_bb->instructions.push_back(new BranchIfInstruction(
+                    new_sub_def, next_data,
+                    bb_builder.get_bb_at_index(i+1+1).base(),
+                    bb_builder.get_bb_for_branch_at(i).base()));
+        else
+            curr_bb->instructions.push_back(new Instruction(new_sub_def, next_data));
+
+        // the next word will be consumed, so skip
+        if(template_word->def()[i].as_word()->stateful)
+            i++;
 
         if(bb_builder.is_index_bb(i + 1)){
             auto next_bb = bb_builder.get_bb_at_index(i + 1);
@@ -119,7 +121,7 @@ sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
     auto &last_bb = new_word->basic_blocks.back();
     auto &last_instr = last_bb.instructions.back();
 
-    if(last_bb.instructions.empty() || last_instr->linked_word->name != "exit")
+    if(last_bb.instructions.empty() || last_instr->name() != "exit")
         last_bb.instructions.push_back(new ReturnInstruction);
 
     return new_word;

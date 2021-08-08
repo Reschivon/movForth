@@ -17,7 +17,7 @@ namespace mov{
     typedef std::vector<iData>::iterator IP;
 
     class iWord{
-        const std::string name;
+        const std::string _name;
     public:
         primitive_words id = primitive_words::OTHER;
         bool immediate;
@@ -30,8 +30,7 @@ namespace mov{
         virtual void execute(Stack &stack, IP &ip) = 0;
         virtual iWordptr clone() = 0;
 
-        virtual std::string to_string();
-        virtual std::string base_string();
+        std::string name();
     };
 
     template <typename Cast>

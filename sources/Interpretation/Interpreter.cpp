@@ -45,13 +45,13 @@ Interpreter::Interpreter(std::string path) : input(std::move(path)){
             // it's a word
             if(iWordptr->immediate || immediate) {
                 auto dummy_ip = IP();
-                //dln("execute word ", Wordptr->base_string());
+                //dln("execute word ", Wordptr->_name());
                 iWordptr->execute(stack, dummy_ip);
             } else {
                 auto forth_word = try_cast<ForthWord>(dictionary.back());
 
                 if(forth_word){
-                    //dln("compile FW ", Wordptr->base_string());
+                    //dln("compile FW ", Wordptr->_name());
                     forth_word->add(iData(iWordptr));
                 }else
                     println("attempted to compile xts to a primitive word");
@@ -63,7 +63,7 @@ Interpreter::Interpreter(std::string path) : input(std::move(path)){
 
 iWordptr Interpreter::find(const std::string& name) {
     auto find_result = std::find_if(dictionary.begin(), dictionary.end(),
-                                    [name](iWordptr other){return other->base_string() == name;});
+                                    [name](iWordptr other){return other->name() == name;});
 
     if(find_result == dictionary.end())
         // try primitives
@@ -150,7 +150,7 @@ void Interpreter::init_words(){
 
         for (iWordptr word_pointer : dictionary) {
             std::cout << std::setfill(' ') << std::setw(15) <<
-                      word_pointer->to_string() + "  ";
+                      word_pointer->name() + "  ";
             print((word_pointer->immediate) ? "IMM  " : "     ");
 
             if (auto forth_word = try_cast<ForthWord>(word_pointer))
