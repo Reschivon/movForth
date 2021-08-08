@@ -14,9 +14,9 @@ namespace mov {
         sData symbolize_data(iData data);
         //sWordptr conversion_pass(ForthWord *wordptr);
         sWordptr MakeBlockEntries(ForthWord *template_word);
-        void stack_graph_pass(sWordptr word);
+        static void stack_graph_pass(sWordptr word);
         void branching_pass(sWordptr word);
-        void retrieve_push_pop_effects(sWordptr word);
+        static void retrieve_push_pop_effects(sWordptr word);
     public:
         sWordptr compute_effects_flattened(iWordptr input);
         sWordptr compute_effects(iWordptr original_word);
