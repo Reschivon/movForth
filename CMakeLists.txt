@@ -36,10 +36,9 @@ add_executable(movForth
 
         sources/symbolic/sWord.cpp
         sources/symbolic/symbolicPass.cpp
-        sources/symbolic/Translation.cpp
 
 
         #headers/Generation/IRGenerator.h
-        sources/Interpretation/iData.cpp sources/Symbolic/SymbolicPass_BlockEntries.cpp headers/PrimitiveEffects.h headers/PrimitiveEnums.h headers/Symbolic/Instruction.cpp headers/Symbolic/Instruction.h headers/Symbolic/Effects.h sources/Symbolic/SymbolicPass_StackGraph.cpp sources/Symbolic/SymbolicPass_RetrievePushPopEffects.cpp)
+        sources/Interpretation/iData.cpp sources/Symbolic/SymbolicPass_BlockEntries.cpp headers/PrimitiveEffects.h headers/PrimitiveEnums.h sources/Symbolic/Instruction.cpp headers/Symbolic/Instruction.h headers/Symbolic/Effects.h sources/Symbolic/SymbolicPass_StackGraph.cpp sources/Symbolic/SymbolicPass_RetrievePushPopEffects.cpp headers/Symbolic/BasicBlock.h sources/Symbolic/BasicBlock.cpp sources/Symbolic/SymbolicPass_BBCyclicPass.cpp)
 
 target_link_libraries(movForth ${llvm_libs})

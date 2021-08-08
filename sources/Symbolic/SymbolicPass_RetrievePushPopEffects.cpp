@@ -3,6 +3,7 @@
 using namespace mov;
 
 void StackGrapher::retrieve_push_pop_effects(sWordptr word) {
+    /*
     // matching pairs
     for (int i = 0; i < word->my_graphs_outputs.size(); i++)
     {
@@ -28,6 +29,8 @@ void StackGrapher::retrieve_push_pop_effects(sWordptr word) {
         word->my_graphs_outputs.size());
     word->effects.num_pushed = (int) word->my_graphs_outputs.size();
     word->effects.num_popped = (int) word->my_graphs_inputs.size();
+
+     */
 }
 
 

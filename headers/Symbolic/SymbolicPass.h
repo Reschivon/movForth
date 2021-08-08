@@ -14,7 +14,8 @@ namespace mov {
         sData symbolize_data(iData data);
         //sWordptr conversion_pass(ForthWord *wordptr);
         sWordptr translate_to_basic_blocks(ForthWord *template_word);
-        static void stack_graph_pass(sWordptr word);
+        static void stack_graph_pass(sWordptr wordptr);
+        static void bb_cyclic_pass(sWordptr wordptr);
         static void retrieve_push_pop_effects(sWordptr word);
     public:
         sWordptr compute_effects(iWordptr original_word);

@@ -3,7 +3,7 @@
 using namespace mov;
 
 
-void propagate_stack(NodeList &stack, Instruction *instruction, sWordptr base,
+void propagate_stack(NodeList &stack, Instruction *instruction, BasicBlock &base,
                      RegisterGenerator &register_generator) {
     auto effects = instruction->linked_word->effects;
 
@@ -24,7 +24,7 @@ void propagate_stack(NodeList &stack, Instruction *instruction, sWordptr base,
         instruction->pop_nodes.push_back(new Node{
             .target = input_node,
             .edge_register = input_register});
-        base->my_graphs_inputs.push_front(input_node);
+        base.my_graphs_inputs.push_front(input_node);
         dln("needs extra input ", input_register.to_string());
     }
 
@@ -67,25 +67,24 @@ void propagate_stack(NodeList &stack, Instruction *instruction, sWordptr base,
         dln("   ", thing->forward_edge_register.to_string());
 }
 
-void StackGrapher::stack_graph_pass(sWordptr word) {
+
+void stack_graph_pass_bb(BasicBlock &bb) {
     // the stack is a constantly updated list of
-    // loose pop nodes that the next word might need
+    // loose pop nodes that the next bb might need
     auto &running_stack = *(new NodeList);
     RegisterGenerator register_generator;
 
-    for (auto instruction : word->instructions)
+    for (auto instruction : bb.instructions)
     {
         auto definee = instruction->linked_word;
-        if(definee->name == "nop")
-            continue;
 
-        // update the word's total Effects
-        word->effects.acquire_side_effects(definee->effects);
+        // update the bb's total Effects
+        bb.effects.acquire_side_effects(definee->effects);
 
         // propagate the stack state
         dln();
         dln("[", definee->name, "]");
-        propagate_stack(running_stack, instruction, word, register_generator);
+        propagate_stack(running_stack, instruction, bb, register_generator);
 
         dln();
         dln("intermediate stack: ");
@@ -96,7 +95,16 @@ void StackGrapher::stack_graph_pass(sWordptr word) {
     }
 
     // the pushed side effect is the same as remaining stack frames
-    word->effects.num_pushed = (int) running_stack.size();
-    word->my_graphs_outputs = running_stack;
+    bb.effects.num_pushed = (int) running_stack.size();
+    bb.my_graphs_outputs = running_stack;
 }
 
+void StackGrapher::stack_graph_pass(sWordptr wordptr) {
+    for(auto &bb : wordptr->basic_blocks){
+        println();
+        println("Stack graph for [" , wordptr->name , ": " , bb.index , "]");
+        indent();
+        stack_graph_pass_bb(bb);
+        unindent();
+    }
+}

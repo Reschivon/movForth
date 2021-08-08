@@ -1,6 +1,6 @@
 
-#include "Instruction.h"
-#include "sWord.h"
+#include "../../headers/Symbolic/Instruction.h"
+#include "../../headers/Symbolic/sWord.h"
 
 using namespace mov;
 
@@ -29,6 +29,10 @@ std::string Instruction::name(){
 
 Instruction::Instruction(sWordptr linked_word, sData data)
         : linked_word(linked_word), data(data){}
+
+primitive_words Instruction::id() const {
+    return linked_word->id;
+}
 
 ReturnInstruction::ReturnInstruction()
 : Instruction(new sWord("exit", primitive_words::EXIT), sData(nullptr)){}
