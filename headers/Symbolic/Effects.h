@@ -1,5 +1,4 @@
 
-
 #ifndef MOVFORTH_EFFECTS_H
 #define MOVFORTH_EFFECTS_H
 

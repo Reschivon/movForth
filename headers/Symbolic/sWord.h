@@ -2,7 +2,6 @@
 #ifndef MOVFORTH_WORD_H
 #define MOVFORTH_WORD_H
 
-#include <set>
 #include <utility>
 #include "Structures.h"
 #include "../PrimitiveEnums.h"
@@ -44,14 +43,6 @@ namespace mov{
 
         std::vector<BasicBlock> basic_blocks;
 
-        /*BasicBlock* block_pointing_at(std::vector<Instruction*>::iterator target){
-            auto *bbe = new BasicBlock{.target = target};
-            auto success = basic_blocks.insert(bbe);
-            if(success.second) // newly inserted bbe
-                (*success.first)->index = bbe_gen.get();
-            return bbe;
-        }*/
-
         std::vector<Instruction*> instructions;
 
         bool branchy(){
@@ -63,6 +54,5 @@ namespace mov{
     };
 
 }
-
 
 #endif //MOVFORTH_WORD_H

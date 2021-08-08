@@ -63,6 +63,7 @@ sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
 
     BasicBlockBuilder bb_builder(new_word, (short) template_word->def().size());
 
+    // precompute BB and their entry points
     for(int i = 0; i < template_word->def().size(); i++){
         auto &template_sub_def = template_word->def().at(i);
         if(!template_sub_def.is_word())
@@ -79,6 +80,7 @@ sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
         }
     }
 
+    // fill BBs with instructions derived from template word
     auto curr_bb = bb_builder.get_bb_at_index(0);
     for(int i = 0; i < template_word->def().size(); i++){
 
@@ -107,6 +109,7 @@ sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
         if(template_word->def()[i].as_word()->stateful)
             i++;
 
+        // reached the end of a BB, go to next
         if(bb_builder.is_index_bb(i + 1)){
             auto next_bb = bb_builder.get_bb_at_index(i + 1);
 
@@ -117,7 +120,7 @@ sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
         }
     }
 
-    // ensure last instr of last bb is return
+    // ensure last instr of last BB is `return`
     auto &last_bb = new_word->basic_blocks.back();
     auto &last_instr = last_bb.instructions.back();
 
