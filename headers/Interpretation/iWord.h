@@ -39,20 +39,20 @@ namespace mov{
     }
 
     class ForthWord : public iWord {
-        std::vector<iData> definition;
-    public:
-        ForthWord(std::string name, bool immediate);
+            std::vector<iData> definition;
+        public:
+            ForthWord(std::string name, bool immediate);
 
-        void execute(Stack &stack, IP &ip) override;
-        iWordptr clone() override;
-        void add(iData data);
-        void set(int index, iData value);
-        void definition_to_string();
-        int definition_size();
-        std::vector<iData>& def() {
-            return definition;
-        }
-    };
+            void execute(Stack &stack, IP &ip) override;
+            iWordptr clone() override;
+            void add(iData data);
+            void set(int index, iData value);
+            void definition_to_string();
+            int definition_size();
+            std::vector<iData>& def() {
+                return definition;
+            }
+        };
 
     class Primitive : public iWord{
         std::function<void(Stack&, IP&)> action;

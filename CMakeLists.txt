@@ -40,6 +40,6 @@ add_executable(movForth
 
 
         #headers/Generation/IRGenerator.h
-        sources/Interpretation/iData.cpp sources/Symbolic/BlockEntriesPass.cpp headers/PrimitiveEffects.h headers/PrimitiveEnums.h)
+        sources/Interpretation/iData.cpp sources/Symbolic/BlockEntriesPass.cpp headers/PrimitiveEffects.h headers/PrimitiveEnums.h headers/Symbolic/Instruction.cpp headers/Symbolic/Instruction.h headers/Symbolic/Effects.h)
 
 target_link_libraries(movForth ${llvm_libs})

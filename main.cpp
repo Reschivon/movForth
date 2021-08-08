@@ -16,6 +16,5 @@ int main() {
     println();
     mov::StackGrapher::show_word_info(converted_word);
 
-
 }
 
