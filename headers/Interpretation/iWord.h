@@ -25,6 +25,7 @@ namespace mov{
         iData data = iData(); // has value if stateful
 
         iWord(std::string name, bool immediate, bool stateful);
+        iWord(std::string name, primitive_words id, bool immediate, bool stateful);
 
         virtual void execute(Stack &stack, IP &ip) = 0;
         virtual iWordptr clone() = 0;

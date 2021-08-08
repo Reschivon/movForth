@@ -136,9 +136,9 @@ namespace mov{
 
         bool branchy(){
             return
-            id == BRANCH ||
-            id == BRANCHIF ||
-            id == EXIT;
+            id == primitive_words::BRANCH ||
+            id == primitive_words::BRANCHIF ||
+            id == primitive_words::EXIT;
         }
     };
 

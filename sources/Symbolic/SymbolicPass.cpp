@@ -4,8 +4,6 @@
 #include <stack>
 #include "../../headers/Symbolic/SymbolicPass.h"
 #include "../../headers/Print.h"
-#include "../../headers/Symbolic/sWord.h"
-#include "../../headers/Symbolic/PrimitiveEffects.h"
 
 using namespace mov;
 
@@ -29,7 +27,8 @@ sWordptr StackGrapher::compute_effects(iWordptr original_word) {
 
     if (dynamic_cast<Primitive *>(original_word))
     {   // is a primitive: return the singleton of the primitive
-        sWordptr word_singleton = primitive_lookup.at(original_word->base_string());
+        println("find id " , original_word->id, " " , original_word->base_string());
+        sWordptr word_singleton = primitive_lookup.at(original_word->id);
         return word_singleton;
     }
 

@@ -7,6 +7,9 @@ using namespace mov;
 iWord::iWord(std::string name, bool immediate, bool stateful)
         : name(std::move(name)), immediate(immediate), stateful(stateful) {}
 
+iWord::iWord(std::string name, primitive_words id, bool immediate, bool stateful)
+        : name(std::move(name)), id(id), immediate(immediate), stateful(stateful) {}
+
 std::string iWord::to_string() {
     return name;
 }
@@ -52,7 +55,7 @@ iWordptr ForthWord::clone() {
 
 
 Primitive::Primitive(std::string name, primitive_words id, bool immediate, std::function<void(Stack&, IP&)> action, bool stateful)
-: iWord(std::move(name), immediate, stateful), action(std::move(action)) {}
+: iWord(std::move(name), id, immediate, stateful), action(std::move(action)) {}
 
 void Primitive::execute(Stack &stack, IP &ip) {
     action(stack, ip);

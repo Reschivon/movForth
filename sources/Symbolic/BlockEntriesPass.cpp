@@ -36,16 +36,8 @@ public:
     }
 };
 
-bool branchy(iData word){
-    if(!word.is_word())
-        return false;
-    return word.to_string() == "branch" ||
-           word.to_string() == "branchif" ||
-           word.to_string() == "exit";
-}
-
 sWordptr StackGrapher::MakeBlockEntries(ForthWord *template_word){
-    auto new_word = new sWord(template_word->base_string(), OTHER);
+    auto new_word = new sWord(template_word->base_string(), primitive_words::OTHER);
 
     println("make basic block entries for [" , template_word->to_string() , "]");
 
@@ -59,13 +51,13 @@ sWordptr StackGrapher::MakeBlockEntries(ForthWord *template_word){
         if(!template_sub_def.is_word())
             continue;
 
-        if(template_sub_def.as_word()->base_string() == "branch"){
+        if(template_sub_def.as_word()->id == primitive_words::BRANCH){
             int word_data = template_word->def()[i+1].as_number();
             int jump_dest_index = i + word_data + 1;
             basic_block_builder.make_bb_at_index(jump_dest_index);
         }
 
-        if(template_sub_def.as_word()->base_string() == "branchif"){
+        if(template_sub_def.as_word()->id == primitive_words::BRANCHIF){
             int word_data = template_word->def()[i+1].as_number();
             int jump_dest_index = i + word_data + 1;
             basic_block_builder.make_bb_at_index(jump_dest_index);
@@ -87,7 +79,7 @@ sWordptr StackGrapher::MakeBlockEntries(ForthWord *template_word){
                 next_data = symbolize_data(template_word->def()[i + 1]);
             }
 
-            if(template_sub_def->base_string() == "branch")
+            if(template_sub_def->id == primitive_words::BRANCH)
             {
                 int jump_to_index = i + next_data.as_num() + 1;
                 auto jump_to_bb = basic_block_builder.get_bb_at_index(jump_to_index);
@@ -95,7 +87,7 @@ sWordptr StackGrapher::MakeBlockEntries(ForthWord *template_word){
                 curr_bb->instructions.push_back(
                         new BranchInstruction(new_sub_def, next_data, jump_to_bb.base()));
 
-            }else if(template_sub_def->base_string() == "branchif")
+            }else if(template_sub_def->id == primitive_words::BRANCHIF)
             {
                 int jump_to_far_index = i + next_data.as_num() + 1;
                 int jump_to_next_index = i + 1 + 1;
@@ -117,13 +109,11 @@ sWordptr StackGrapher::MakeBlockEntries(ForthWord *template_word){
             auto last_instr = curr_bb->instructions.back();
 
             if(!last_instr->branchy())
-                curr_bb->instructions.push_back(new BranchInstruction(new sWord("branch", BRANCH), sData(nullptr), next_bb.base()));
+                curr_bb->instructions.push_back(new BranchInstruction(new sWord("branch", primitive_words::BRANCH), sData(nullptr), next_bb.base()));
 
             curr_bb = next_bb;
         }
     }
-
-    println("new word has " , new_word->basic_blocks.size() , " bbs");
 
     // ensure last instr of last bb is return
     auto &last_bb = new_word->basic_blocks.back();

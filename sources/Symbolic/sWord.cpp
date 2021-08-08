@@ -29,9 +29,9 @@ ReturnInstruction *Instruction::as_return() {
 
 bool Instruction::branchy(){
     return
-    linked_word->id == BRANCH ||
-    linked_word->id == BRANCHIF ||
-    linked_word->id == EXIT;
+    linked_word->id == primitive_words::BRANCH ||
+    linked_word->id == primitive_words::BRANCHIF ||
+    linked_word->id == primitive_words::EXIT;
 }
 
 std::string Instruction::to_string(){
@@ -39,7 +39,7 @@ std::string Instruction::to_string(){
 }
 
 ReturnInstruction::ReturnInstruction()
-    : Instruction(new sWord("exit", EXIT), sData(nullptr)){}
+: Instruction(new sWord("exit", primitive_words::EXIT), sData(nullptr)){}
 
 std::string BranchInstruction::to_string() {
     return linked_word->name + "(" + std::to_string(jump_to->index) + ")";
