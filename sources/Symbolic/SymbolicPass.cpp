@@ -27,7 +27,6 @@ sWordptr StackGrapher::compute_effects(iWordptr original_word) {
 
     if (dynamic_cast<Primitive *>(original_word))
     {   // is a primitive: return the singleton of the primitive
-        println("find id " , original_word->id, " " , original_word->base_string());
         sWordptr word_singleton = primitive_lookup.at(original_word->id);
         return word_singleton;
     }
@@ -171,7 +170,6 @@ void StackGrapher::retrieve_push_pop_effects(sWordptr word) {
     }
 
     // push pop effects
-    dln();
     dln("Finished effects for ", word->name, " pops: ",
         word->my_graphs_inputs.size(), " pushes: ",
         word->my_graphs_outputs.size());

@@ -5,12 +5,16 @@ using namespace mov;
 struct BasicBlockBuilder{
 private:
     short* bbe_lookup;
+    short* jump_lookup;
+
     sWordptr new_word;
     BBgen gen;
+
 public:
     using it_type = std::vector<BasicBlock>::iterator;
     BasicBlockBuilder(sWordptr new_word, short instructions)
-        : new_word(new_word) {
+        : new_word(new_word)
+    {
         const short bbe_lookup_size = instructions + 1;
         bbe_lookup = new short[bbe_lookup_size];
         std::fill_n(bbe_lookup, bbe_lookup_size, -1);
@@ -18,6 +22,10 @@ public:
         // ensure there is always entry block
         bbe_lookup[0] = 0;
         new_word->basic_blocks.emplace_back(gen);
+
+        const short jump_lookup_size = instructions;
+        jump_lookup = new short[jump_lookup_size];
+        std::fill_n(jump_lookup, jump_lookup_size, -1);
     }
 
     void make_bb_at_index(short index){
@@ -27,8 +35,17 @@ public:
         }
     }
 
+    void make_bb_for_jump(int from, int delta){
+        jump_lookup[from] = from + delta + 1;
+        make_bb_at_index(from + delta + 1);
+    }
+
     it_type get_bb_at_index(int index){
         return new_word->basic_blocks.begin() + bbe_lookup[index];
+    }
+
+    it_type get_bb_for_branch_at(int index){
+        return get_bb_at_index(jump_lookup[index]);
     }
 
     bool is_index_bb(int index){
@@ -44,7 +61,7 @@ sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
     // cache this word for the future
     visited_words[template_word] = new_word;
 
-    BasicBlockBuilder basic_block_builder(new_word, (short) template_word->def().size());
+    BasicBlockBuilder bb_builder(new_word, (short) template_word->def().size());
 
     for(int i = 0; i < template_word->def().size(); i++){
         auto &template_sub_def = template_word->def().at(i);
@@ -52,22 +69,17 @@ sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
             continue;
 
         if(template_sub_def.as_word()->id == primitive_words::BRANCH){
-            int word_data = template_word->def()[i+1].as_number();
-            int jump_dest_index = i + word_data + 1;
-            basic_block_builder.make_bb_at_index(jump_dest_index);
+            bb_builder.make_bb_for_jump(i, template_word->def()[i + 1].as_number());
         }
 
         if(template_sub_def.as_word()->id == primitive_words::BRANCHIF){
-            int word_data = template_word->def()[i+1].as_number();
-            int jump_dest_index = i + word_data + 1;
-            basic_block_builder.make_bb_at_index(jump_dest_index);
-
-            jump_dest_index = i + 1 + 1;
-            basic_block_builder.make_bb_at_index(jump_dest_index);
+            bb_builder.make_bb_for_jump(i, 1);
+            // must come after //TODO
+            bb_builder.make_bb_for_jump(i, template_word->def()[i + 1].as_number());
         }
     }
 
-    auto curr_bb = basic_block_builder.get_bb_at_index(0);
+    auto curr_bb = bb_builder.get_bb_at_index(0);
     for(int i = 0; i < template_word->def().size(); i++){
         if(template_word->def()[i].is_word()){
 
@@ -80,35 +92,23 @@ sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
             }
 
             if(template_sub_def->id == primitive_words::BRANCH)
-            {
-                int jump_to_index = i + next_data.as_num() + 1;
-                auto jump_to_bb = basic_block_builder.get_bb_at_index(jump_to_index);
+                curr_bb->instructions.push_back(new BranchInstruction(
+                            new_sub_def, next_data,
+                            bb_builder.get_bb_for_branch_at(i).base()));
 
-                curr_bb->instructions.push_back(
-                        new BranchInstruction(new_sub_def, next_data, jump_to_bb.base()));
-
-            }else if(template_sub_def->id == primitive_words::BRANCHIF)
-            {
-                int jump_to_far_index = i + next_data.as_num() + 1;
-                int jump_to_next_index = i + 1 + 1;
-
-                auto jump_to_far_bb = basic_block_builder.get_bb_at_index(jump_to_far_index);
-                auto jump_to_next_bb = basic_block_builder.get_bb_at_index(jump_to_next_index);
-
-                curr_bb->instructions.push_back(
-                        new BranchIfInstruction(new_sub_def, next_data, jump_to_next_bb.base(), jump_to_far_bb.base()));
-            }else
-            {
+            else if(template_sub_def->id == primitive_words::BRANCHIF)
+                curr_bb->instructions.push_back(new BranchIfInstruction(
+                        new_sub_def, next_data,
+                        bb_builder.get_bb_at_index(i+1+1).base(),
+                        bb_builder.get_bb_for_branch_at(i).base()));
+            else
                 curr_bb->instructions.push_back(new Instruction(new_sub_def, next_data));
-            }
         }
 
-        if(basic_block_builder.is_index_bb(i+1)){
-            auto next_bb = basic_block_builder.get_bb_at_index(i+1);
+        if(bb_builder.is_index_bb(i + 1)){
+            auto next_bb = bb_builder.get_bb_at_index(i + 1);
 
-            auto last_instr = curr_bb->instructions.back();
-
-            if(!last_instr->branchy())
+            if(!curr_bb->instructions.back()->branchy())
                 curr_bb->instructions.push_back(new BranchInstruction(new sWord("branch", primitive_words::BRANCH), sData(nullptr), next_bb.base()));
 
             curr_bb = next_bb;

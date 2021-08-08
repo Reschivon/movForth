@@ -21,7 +21,7 @@
     here - negative
     swap ! ;
 
-: land< immediate
+: land<
     here ;
 
 : <jump

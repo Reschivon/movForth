@@ -17,7 +17,7 @@ namespace mov{
 
         unsigned int compiled_slots = 0; // TODO still unsure how to handle memory
 
-        enum interpret_state{NONE, TOCOMPILE, TOINTERPRET} interpret_state = interpret_state::NONE;
+        enum interpret_state{NONE, TOCOMP, TOIMM} interpret_state = interpret_state::NONE;
 
         bool define_new_word = false;
 

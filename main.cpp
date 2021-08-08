@@ -13,11 +13,8 @@ int main() {
 
     auto converted_word = stackGrapher.compute_effects(word_to_compile);
 
-//    auto converted_word = stackGrapher.compute_effects_flattened(word_to_compile);
-
-    converted_word->definition_to_string();
-
-    stackGrapher.show_word_info(converted_word);
+    println();
+    mov::StackGrapher::show_word_info(converted_word);
 
 
 }
