@@ -49,7 +49,8 @@ namespace mov{
         sWordptr linked_word;
         sData data = sData(nullptr); // acquired from next in token list
 
-        explicit Instruction(sWordptr linked_word) : linked_word(linked_word) {}
+        explicit Instruction(sWordptr linked_word, sData data)
+            : linked_word(linked_word), data(data){}
 
         static bool is_jumpy(Instruction*);
         BranchInstruction* as_branch();
@@ -59,7 +60,7 @@ namespace mov{
         virtual std::string to_string();
     };
 
-    struct BBEgen{
+    struct BBgen{
         unsigned int get(){
             return id++;
         }
@@ -68,23 +69,23 @@ namespace mov{
     };
 
     struct BasicBlock {
-        explicit BasicBlock(BBEgen& gen) : index(gen.get()) {}
+        explicit BasicBlock(BBgen& gen) : index(gen.get()) {}
         std::vector<Instruction*> instructions;//TODO reference wrapper
         unsigned int index = 0; // like Register but I was lazy
     };
 
     struct BranchInstruction : public Instruction {
-        BasicBlock *jump_to = nullptr;
-        explicit BranchInstruction(sWordptr linked_word, BasicBlock *jump_to)
-            : Instruction(linked_word), jump_to(jump_to) {}
+        BasicBlock *jump_to;
+        explicit BranchInstruction(sWordptr linked_word, sData data, BasicBlock *jump_to)
+            : Instruction(linked_word, data), jump_to(jump_to) {}
 
         std::string to_string() override;
     };
     struct BranchIfInstruction : public Instruction {
-        BasicBlock *jump_to_next = nullptr;
-        BasicBlock *jump_to_far = nullptr;
-        explicit BranchIfInstruction(sWordptr linked_word, BasicBlock *jump_to_close, BasicBlock *jump_to_far)
-            : Instruction(linked_word), jump_to_next(jump_to_close), jump_to_far(jump_to_far) {}
+        BasicBlock *jump_to_next;
+        BasicBlock *jump_to_far;
+        explicit BranchIfInstruction(sWordptr linked_word, sData data, BasicBlock *jump_to_close, BasicBlock *jump_to_far)
+            : Instruction(linked_word, data), jump_to_next(jump_to_close), jump_to_far(jump_to_far) {}
 
         std::string to_string() override;
     };
@@ -100,8 +101,11 @@ namespace mov{
         const std::string name;
         Effects effects;
 
+        explicit sWord(const std::string& name)
+                : name(name) {}
+
         explicit sWord(const std::string& name, Effects effects)
-                : name(name), effects(effects) {}
+        : name(name), effects(effects) {}
 
         // components for graph
         //std::vector<Wordptr> definition;
@@ -122,7 +126,7 @@ namespace mov{
 
         std::vector<Instruction*> instructions;
 
-        BBEgen bbe_gen;
+        BBgen bbe_gen;
     };
 
 }

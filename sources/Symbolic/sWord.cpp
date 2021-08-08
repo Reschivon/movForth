@@ -32,7 +32,7 @@ ReturnInstruction *Instruction::as_return() {
 }
 
 
-ReturnInstruction::ReturnInstruction() : Instruction(new sWord("return", Effects::neutral)){}
+ReturnInstruction::ReturnInstruction() : Instruction(new sWord("return"), sData(nullptr)){}
 
 std::string Instruction::to_string(){
     return linked_word->name;

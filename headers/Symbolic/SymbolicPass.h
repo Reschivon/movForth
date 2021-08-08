@@ -3,7 +3,7 @@
 #ifndef MOVFORTH_mov_symbolicPASS_H
 #define MOVFORTH_mov_symbolicPASS_H
 
-#include "../symbolic/Structures.h"
+#include "../Symbolic/Structures.h"
 #include "../Interpretation/iWord.h"
 #include "sWord.h"
 
@@ -13,7 +13,7 @@ namespace mov {
         std::unordered_map<iWordptr, sWordptr> visited_words;
         sData symbolize_data(iData data);
         //sWordptr conversion_pass(ForthWord *wordptr);
-        sWordptr MakeBlockEntries(ForthWord *old_word);
+        sWordptr MakeBlockEntries(ForthWord *template_word);
         void stack_graph_pass(sWordptr word);
         void branching_pass(sWordptr word);
         void retrieve_push_pop_effects(sWordptr word);
