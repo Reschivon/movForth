@@ -47,7 +47,7 @@ namespace mov{
         void set(int index, iData value);
         void definition_to_string();
         int definition_size();
-        std::vector<iData> get_definition() {
+        std::vector<iData>& def() {
             return definition;
         }
     };

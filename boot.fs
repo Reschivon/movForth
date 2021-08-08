@@ -52,7 +52,7 @@
 : repeatif immediate
     <jumpif ;
 
-: test if 69 . 69 . else 420 . 420 . then ;
+: test if 69 . 69 . else 420 . then ;
 
 see
 

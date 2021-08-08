@@ -49,17 +49,18 @@ namespace mov{
         sWordptr linked_word;
         sData data = sData(nullptr); // acquired from next in token list
 
-        static bool is_jumpy(Instruction*);
+        explicit Instruction(sWordptr linked_word) : linked_word(linked_word) {}
 
+        static bool is_jumpy(Instruction*);
         BranchInstruction* as_branch();
         BranchIfInstruction* as_branchif();
         ReturnInstruction* as_return();
-        explicit Instruction(sWordptr linked_word) : linked_word(linked_word) {}
+
+        virtual std::string to_string();
     };
 
     struct BBEgen{
         unsigned int get(){
-            println("given ", id);
             return id++;
         }
     private:
@@ -67,28 +68,31 @@ namespace mov{
     };
 
     struct BasicBlock {
-        std::vector<Instruction*>::iterator target;
-        std::vector<Instruction*>::iterator end;
+        explicit BasicBlock(BBEgen& gen) : index(gen.get()) {}
+        std::vector<Instruction*> instructions;//TODO reference wrapper
         unsigned int index = 0; // like Register but I was lazy
     };
 
-    struct BranchInstruction : Instruction {
+    struct BranchInstruction : public Instruction {
         BasicBlock *jump_to = nullptr;
-        explicit BranchInstruction(sWordptr linked_word) : Instruction(linked_word){}
-    };
-    struct BranchIfInstruction : Instruction {
-        BasicBlock *jump_to_close = nullptr;
-        BasicBlock *jump_to_far = nullptr;
-        explicit BranchIfInstruction(sWordptr linked_word) : Instruction(linked_word){}
-    };
-    struct ReturnInstruction : Instruction{
-        ReturnInstruction();
-    };
+        explicit BranchInstruction(sWordptr linked_word, BasicBlock *jump_to)
+            : Instruction(linked_word), jump_to(jump_to) {}
 
-    struct cmp{
-        auto operator() (BasicBlock* a, BasicBlock* b) const{
-            return a->target < b->target;
-        };
+        std::string to_string() override;
+    };
+    struct BranchIfInstruction : public Instruction {
+        BasicBlock *jump_to_next = nullptr;
+        BasicBlock *jump_to_far = nullptr;
+        explicit BranchIfInstruction(sWordptr linked_word, BasicBlock *jump_to_close, BasicBlock *jump_to_far)
+            : Instruction(linked_word), jump_to_next(jump_to_close), jump_to_far(jump_to_far) {}
+
+        std::string to_string() override;
+    };
+    struct ReturnInstruction : public Instruction{
+        ReturnInstruction();
+        std::string to_string() override {
+            return "return";
+        }
     };
 
     class sWord {
@@ -106,15 +110,15 @@ namespace mov{
 
         void definition_to_string();
 
-        std::set<BasicBlock*, cmp> basic_block_entries;
+        std::vector<BasicBlock> basic_blocks;
 
-        BasicBlock* block_pointing_at(std::vector<Instruction*>::iterator target){
+        /*BasicBlock* block_pointing_at(std::vector<Instruction*>::iterator target){
             auto *bbe = new BasicBlock{.target = target};
-            auto success = basic_block_entries.insert(bbe);
+            auto success = basic_blocks.insert(bbe);
             if(success.second) // newly inserted bbe
                 (*success.first)->index = bbe_gen.get();
             return bbe;
-        }
+        }*/
 
         std::vector<Instruction*> instructions;
 
@@ -122,5 +126,6 @@ namespace mov{
     };
 
 }
+
 
 #endif //MOVFORTH_WORD_H

@@ -5,7 +5,7 @@
 #include "Structures.h"
 
 namespace mov{
-    void convert(mov::sWordptr wordptr);
+    void convert(sWordptr wordptr);
 }
 
 #endif //MOVFORTH_TRANSLATION_H

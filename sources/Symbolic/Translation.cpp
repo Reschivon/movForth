@@ -3,7 +3,7 @@
 
 using namespace mov;
 
-void mov::convert(mov::sWordptr wordptr){
+void convert(sWordptr wordptr){
 
 
 }

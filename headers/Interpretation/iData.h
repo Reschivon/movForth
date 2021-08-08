@@ -5,6 +5,7 @@
 
 #include <variant>
 #include <string>
+#include "../Print.h"
 
 namespace mov {
     class iWord;
@@ -27,10 +28,20 @@ namespace mov {
         }
 
         int as_number(){
-            return std::get<int>(*this);
+            try {
+                return std::get<int>(*this);
+            }catch (...){
+                println("tried extract variant of type " , index() , " as num");
+                return 0;
+            }
         }
         iWordptr as_word(){
-            return std::get<iWordptr>(*this);
+            try {
+                return std::get<iWordptr>(*this);
+            }catch (...){
+                println("tried extract variant of type " , index() , " as word");
+                return nullptr;
+            }
         }
 
         std::string to_string();

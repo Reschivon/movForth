@@ -1,5 +1,5 @@
 
-#include "../../headers/symbolic/sWord.h"
+#include "../../headers/Symbolic/sWord.h"
 
 using namespace mov;
 
@@ -12,6 +12,8 @@ void sWord::definition_to_string() {
         print(thing->linked_word->name, " ");
     println();
 }
+
+
 
 BranchInstruction *Instruction::as_branch() {
     return (BranchInstruction*)(this);
@@ -29,4 +31,17 @@ ReturnInstruction *Instruction::as_return() {
     return (ins->linked_word->name == "branch" || ins->linked_word->name == "branchif");
 }
 
+
 ReturnInstruction::ReturnInstruction() : Instruction(new sWord("return", Effects::neutral)){}
+
+std::string Instruction::to_string(){
+    return linked_word->name;
+}
+
+std::string BranchInstruction::to_string() {
+    return linked_word->name + "(" + std::to_string(jump_to->index) + ")";
+}
+
+std::string BranchIfInstruction::to_string() {
+    return linked_word->name + "(" + std::to_string(jump_to_next->index) + ", " + std::to_string(jump_to_far->index) +")";
+}

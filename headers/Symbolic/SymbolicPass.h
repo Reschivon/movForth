@@ -10,15 +10,16 @@
 namespace mov {
     class StackGrapher{
         // cached results of already computed words
-        std::unordered_map<mov::iWordptr, sWordptr> visited_words;
-        sData symbolize_data(mov::iData data);
-        sWordptr conversion_pass(mov::ForthWord *wordptr);
+        std::unordered_map<iWordptr, sWordptr> visited_words;
+        sData symbolize_data(iData data);
+        //sWordptr conversion_pass(ForthWord *wordptr);
+        sWordptr MakeBlockEntries(ForthWord *old_word);
         void stack_graph_pass(sWordptr word);
         void branching_pass(sWordptr word);
         void retrieve_push_pop_effects(sWordptr word);
     public:
-        sWordptr compute_effects_flattened(mov::iWordptr input);
-        sWordptr compute_effects(mov::iWordptr original_word);
+        sWordptr compute_effects_flattened(iWordptr input);
+        sWordptr compute_effects(iWordptr original_word);
         sWordptr show_word_info(sWordptr wordptr);
     };
 }

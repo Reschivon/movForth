@@ -27,8 +27,8 @@ static const std::unordered_map<std::string, sWordptr> primitive_lookup = {
         {"'",         new sWord("'",         {.consume_token = true,})},
         {",",         new sWord(",",         {.num_popped = 1,  .compiled_slots = 1})},
         {"see",       new sWord("see",       Effects::neutral)},
-        {"[",         new sWord("[",         {.interpret_state = mov::Effects::TOINTERPRET})},
-        {"]",         new sWord("]",         {.interpret_state = mov::Effects::TOCOMPILE})},
+        {"[",         new sWord("[",         {.interpret_state = Effects::TOINTERPRET})},
+        {"]",         new sWord("]",         {.interpret_state = Effects::TOCOMPILE})},
         {"immediate", new sWord("immediate", Effects::neutral)}, // very rare this ends up in compiled code, consider warn on encounter
         {"@",         new sWord("@",         {.num_popped = 1, .num_pushed = 1})},
         {"!",         new sWord("!",         {.num_popped = 2,})},
@@ -39,7 +39,7 @@ static const std::unordered_map<std::string, sWordptr> primitive_lookup = {
         {"create",    new sWord("create",    {.consume_token = true, .define_new_word = true})}
 };
 
-sData StackGrapher::symbolize_data(mov::iData data) {
+sData StackGrapher::symbolize_data(iData data) {
     if (data.is_number())
         return sData(data.as_number());
     if (data.is_word())
@@ -50,32 +50,30 @@ sData StackGrapher::symbolize_data(mov::iData data) {
     return sData(nullptr);
 }
 
-sWordptr StackGrapher::compute_effects(mov::iWordptr original_word) {
+sWordptr StackGrapher::compute_effects(iWordptr original_word) {
     // check to see if we have passed over this word already
     // if so, return a pointer to it
     auto cached = visited_words.find(original_word);
     if (cached != visited_words.end())
-    {
-        println(original_word->to_string(), " already analysed, skipping");
         return cached->second;
-    }
 
-    if (dynamic_cast<mov::Primitive *>(original_word))
-    {
-        // is a primitive: return the singleton of the primitive
+    if (dynamic_cast<Primitive *>(original_word))
+    {   // is a primitive: return the singleton of the primitive
         sWordptr word_singleton = primitive_lookup.at(original_word->base_string());
         return word_singleton;
+    }
 
-    } else if (auto forth_word = dynamic_cast<mov::ForthWord *>(original_word))
+    if (auto forth_word = dynamic_cast<ForthWord *>(original_word))
     {
         dln();
         dln("compute [", original_word->base_string(), "]");
         indent();
 
-        auto converted = conversion_pass(forth_word);
+        //auto converted = conversion_pass(forth_word);
+        auto converted = MakeBlockEntries(forth_word);
         stack_graph_pass(converted);
         retrieve_push_pop_effects(converted);
-        branching_pass(converted);
+        //branching_pass(converted);
 
         unindent();
         dln("finished compute [", original_word->base_string(), "]");
@@ -88,10 +86,10 @@ sWordptr StackGrapher::compute_effects(mov::iWordptr original_word) {
     return nullptr;
 }
 /*
-sWordptr StackGrapher::compute_effects_flattened(mov::iWordptr input) {
-    auto *big_bertha = new mov::ForthWord(input->base_string(), false);
+sWordptr StackGrapher::compute_effects_flattened(iWordptr input) {
+    auto *big_bertha = new ForthWord(input->base_string(), false);
 
-    std::stack<mov::iWordptr> to_add;
+    std::stack<iWordptr> to_add;
     to_add.push(input);
 
     while (!to_add.empty())
@@ -99,16 +97,16 @@ sWordptr StackGrapher::compute_effects_flattened(mov::iWordptr input) {
         auto current = to_add.top();
         to_add.pop();
 
-        auto forth_word = dynamic_cast<mov::ForthWord *>(current);
+        auto forth_word = dynamic_cast<ForthWord *>(current);
         if (forth_word != nullptr)
         {
-            auto def = forth_word->get_definition();
+            auto def = forth_word->def();
             for (auto dat = def.rbegin(); dat != def.rend(); dat++)
                 to_add.push(*dat);
 
         } else{
             // is primitive
-            big_bertha->add(mov::iData(current));
+            big_bertha->add(iData(current));
         }
     }
 
@@ -120,22 +118,22 @@ sWordptr StackGrapher::compute_effects_flattened(mov::iWordptr input) {
     return converted;
 }
 */
-
-sWordptr StackGrapher::conversion_pass(mov::ForthWord *original_word) {
+/*
+sWordptr StackGrapher::conversion_pass(ForthWord *original_word) {
 
     //auto *new_word = new Word{.name = original_word->base_string()};
     std::vector<Instruction*> new_instructions;
 
-    for (int i = 0; i < original_word->get_definition().size(); i++)
+    for (int i = 0; i < original_word->def().size(); i++)
     {
-        iData old_word = original_word->get_definition()[i];
+        iData old_word = original_word->def()[i];
 
         // assume the current xt is a word
         // (all data cells should have been integrated in the previous loop)
         auto *current_definee = compute_effects(old_word.as_word());
 
         if(old_word.as_word()->stateful)
-            new_instructions.back()->data = sData(original_word->get_definition()[++i].as_number());
+            new_instructions.back()->data = sData(original_word->def()[++i].as_number());
 
         if(current_definee->name == "branch")
             new_instructions.push_back(new BranchInstruction(current_definee));
@@ -152,6 +150,7 @@ sWordptr StackGrapher::conversion_pass(mov::ForthWord *original_word) {
 
     return new_word;
 }
+*/
 
 void propagate_stack(NodeList &stack, Instruction *instruction, sWordptr base,
                      RegisterGenerator &register_generator) {
@@ -284,7 +283,7 @@ void StackGrapher::retrieve_push_pop_effects(sWordptr word) {
  *
  * Future note: What is going on?
  */
-
+/*
 void StackGrapher::branching_pass(sWordptr word) {
     dln();
     dln("Branching pass for [", word->name, "]");
@@ -312,18 +311,18 @@ void StackGrapher::branching_pass(sWordptr word) {
 
             jump_rel = 1;
             jump_index = i + jump_rel + 1;
-            instruction->as_branchif()->jump_to_close = word->block_pointing_at(
+            instruction->as_branchif()->jump_to_next = word->block_pointing_at(
                     word->instructions.begin() + jump_index);
         }
     }
 
 
-    println("bb entries:", word->basic_block_entries.size());
-    for(auto basic_block_entries : word->basic_block_entries)
+    println("bb entries:", word->basic_blocks.size());
+    for(auto basic_block_entries : word->basic_blocks)
         println("   ", (*(basic_block_entries->target))->linked_word->name);
 
     // make sure the end of each basic block has a jump (if only just a 1 cell jump)
-    auto j = word->basic_block_entries.begin();
+    auto j = word->basic_blocks.begin();
     for(int i = 0; i < word->instructions.size()-1; i++){
         auto instruction = word->instructions.begin() + i;
         auto next_instruction = word->instructions.begin() + (i+1);
@@ -334,7 +333,7 @@ void StackGrapher::branching_pass(sWordptr word) {
         if(*next_instruction == *(*j)->target){
             println("   next is bbe");
             j++;
-            (*word->basic_block_entries.rbegin())->end = next_instruction;
+            (*word->basic_blocks.rbegin())->end = next_instruction;
 
             // BUT current instruction is not a branch
             if(!Instruction::is_jumpy(*instruction)){
@@ -350,38 +349,20 @@ void StackGrapher::branching_pass(sWordptr word) {
 
     // of course there is an implicit basic block: at the start of the definition
     word->block_pointing_at(word->instructions.begin());
-}
+}*/
 
 sWordptr StackGrapher::show_word_info(sWordptr wordptr) {
     println("============[", wordptr->name, "]===========");
-    println("Basic block entry points:");
+    println("Basic blocks:");
 
-    for(auto bbe : wordptr->basic_block_entries){
-        println("index ", bbe->index);
-        println("index ", (*bbe->target)->linked_word->name);
-
-        for(auto it = bbe->target; it != bbe->end; it++){
-            print((*it)->linked_word->name);
-        }
+    for(auto bbe : wordptr->basic_blocks){
+        println("bbe " + std::to_string(bbe.index) + ":");
+        print("    ");
+        for(auto instr : bbe.instructions)
+            print(" " , instr->to_string());
         println();
     }
     println();
-
-
-    for (auto instruction : wordptr->instructions)
-    {
-        println("[", instruction->linked_word->name, "]");
-        print("pops:  ");
-        for (auto node : instruction->pop_nodes)
-            print(" ", node->edge_register.to_string());
-        println();
-
-        print("pushes:");
-        for (auto node : instruction->push_nodes)
-            print(" ", node->forward_edge_register.to_string());
-        println();
-        println();
-    }
 
     return wordptr;
 }
