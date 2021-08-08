@@ -1,6 +1,7 @@
 #include <utility>
 #include <iostream>
 #include "iWord.h"
+#include "../Symbolic/PrimitiveEffects.h"
 
 #ifndef MOVFORTH_INTER_iWordGEN_H
 #define MOVFORTH_INTER_iWordGEN_H
@@ -12,13 +13,13 @@ namespace mov {
                 generator_lookup;
 
     public:
-        void register_primitive(std::string name, std::function<void(Stack &, iData data, IP &)> action, bool stateful = false) {
-            register_lambda_word(name, action, false,stateful );
+        void register_primitive(std::string name, primitive_words id, std::function<void(Stack &, IP &)> action, bool stateful = false) {
+            register_lambda_word(name, id, action, false, stateful);
         }
 
-        void register_lambda_word(std::string name, std::function<void(Stack&, iData data, IP&)> action, bool immediate, bool stateful = false){
+        void register_lambda_word(std::string name, primitive_words id, std::function<void(Stack&, IP&)> action, bool immediate, bool stateful = false){
             generator_lookup[name] = [=]{
-                return new Primitive(name, immediate, action, stateful);
+                return new Primitive(name, id, immediate, action, stateful);
             };
         }
 

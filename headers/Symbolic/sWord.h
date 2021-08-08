@@ -1,10 +1,11 @@
 
+#ifndef MOVFORTH_WORD_H
+#define MOVFORTH_WORD_H
+
 #include <set>
 #include <utility>
 #include "Structures.h"
-
-#ifndef MOVFORTH_WORD_H
-#define MOVFORTH_WORD_H
+#include "PrimitiveEnums.h"
 
 namespace mov{
 
@@ -50,7 +51,7 @@ namespace mov{
         sData data = sData(nullptr); // acquired from next in token list
 
         explicit Instruction(sWordptr linked_word, sData data)
-            : linked_word(linked_word), data(data){}
+        : linked_word(linked_word), data(data){}
 
         static bool is_jumpy(Instruction*);
         BranchInstruction* as_branch();
@@ -58,6 +59,8 @@ namespace mov{
         ReturnInstruction* as_return();
 
         virtual std::string to_string();
+
+        bool branchy();
     };
 
     struct BBgen{
@@ -77,7 +80,7 @@ namespace mov{
     struct BranchInstruction : public Instruction {
         BasicBlock *jump_to;
         explicit BranchInstruction(sWordptr linked_word, sData data, BasicBlock *jump_to)
-            : Instruction(linked_word, data), jump_to(jump_to) {}
+        : Instruction(linked_word, data), jump_to(jump_to) {}
 
         std::string to_string() override;
     };
@@ -85,27 +88,30 @@ namespace mov{
         BasicBlock *jump_to_next;
         BasicBlock *jump_to_far;
         explicit BranchIfInstruction(sWordptr linked_word, sData data, BasicBlock *jump_to_close, BasicBlock *jump_to_far)
-            : Instruction(linked_word, data), jump_to_next(jump_to_close), jump_to_far(jump_to_far) {}
+        : Instruction(linked_word, data), jump_to_next(jump_to_close), jump_to_far(jump_to_far) {}
 
         std::string to_string() override;
     };
     struct ReturnInstruction : public Instruction{
         ReturnInstruction();
         std::string to_string() override {
-            return "return";
+            return "exit";
         }
     };
 
+
+
     class sWord {
     public:
+        primitive_words id = primitive_words::OTHER;
         const std::string name;
         Effects effects;
 
-        explicit sWord(const std::string& name)
-                : name(name) {}
+        explicit sWord(const std::string& name, primitive_words id)
+        : name(name), id(id) {}
 
-        explicit sWord(const std::string& name, Effects effects)
-        : name(name), effects(effects) {}
+        explicit sWord(const std::string& name, primitive_words id, Effects effects)
+        : name(name), id(id), effects(effects) {}
 
         // components for graph
         //std::vector<Wordptr> definition;
@@ -127,6 +133,13 @@ namespace mov{
         std::vector<Instruction*> instructions;
 
         BBgen bbe_gen;
+
+        bool branchy(){
+            return
+            id == BRANCH ||
+            id == BRANCHIF ||
+            id == EXIT;
+        }
     };
 
 }

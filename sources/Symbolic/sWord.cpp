@@ -27,16 +27,19 @@ ReturnInstruction *Instruction::as_return() {
     return (ReturnInstruction*)(this);
 }
 
- bool Instruction::is_jumpy(Instruction* ins) {
-    return (ins->linked_word->name == "branch" || ins->linked_word->name == "branchif");
+bool Instruction::branchy(){
+    return
+    linked_word->id == BRANCH ||
+    linked_word->id == BRANCHIF ||
+    linked_word->id == EXIT;
 }
-
-
-ReturnInstruction::ReturnInstruction() : Instruction(new sWord("return"), sData(nullptr)){}
 
 std::string Instruction::to_string(){
     return linked_word->name;
 }
+
+ReturnInstruction::ReturnInstruction()
+    : Instruction(new sWord("exit", EXIT), sData(nullptr)){}
 
 std::string BranchInstruction::to_string() {
     return linked_word->name + "(" + std::to_string(jump_to->index) + ")";

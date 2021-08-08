@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include "iData.h"
+#include "../Symbolic/PrimitiveEffects.h"
 
 namespace mov{
     class Stack;
@@ -18,6 +19,7 @@ namespace mov{
     class iWord{
         const std::string name;
     public:
+        primitive_words id = primitive_words::OTHER;
         bool immediate;
         const bool stateful;
         iData data = iData(); // has value if stateful
@@ -53,9 +55,9 @@ namespace mov{
     };
 
     class Primitive : public iWord{
-        std::function<void(Stack&, iData data, IP&)> action;
+        std::function<void(Stack&, IP&)> action;
     public:
-        Primitive(std::string name, bool immediate, std::function<void(Stack&, iData data, IP&)> action, bool stateful);
+        Primitive(std::string name, primitive_words id, bool immediate, std::function<void(Stack&, IP&)> action, bool stateful);
         void execute(Stack &stack, IP &ip) override;
         iWordptr clone() override;
     };

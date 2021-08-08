@@ -41,21 +41,13 @@ bool branchy(iData word){
         return false;
     return word.to_string() == "branch" ||
            word.to_string() == "branchif" ||
-           word.to_string() == "return";
-}
-
-bool branchy(Instruction *instr){
-    if(!instr->linked_word)
-        return false;
-    return instr->linked_word->name == "branch" ||
-           instr->linked_word->name == "branchif" ||
-           instr->linked_word->name == "return";
+           word.to_string() == "exit";
 }
 
 sWordptr StackGrapher::MakeBlockEntries(ForthWord *template_word){
-    auto new_word = new sWord(template_word->base_string());
+    auto new_word = new sWord(template_word->base_string(), OTHER);
 
-    println("make block entries for [" , template_word->to_string() , "]");
+    println("make basic block entries for [" , template_word->to_string() , "]");
 
     // cache this word for the future
     visited_words[template_word] = new_word;
@@ -100,7 +92,6 @@ sWordptr StackGrapher::MakeBlockEntries(ForthWord *template_word){
                 int jump_to_index = i + next_data.as_num() + 1;
                 auto jump_to_bb = basic_block_builder.get_bb_at_index(jump_to_index);
 
-                println("new branch");
                 curr_bb->instructions.push_back(
                         new BranchInstruction(new_sub_def, next_data, jump_to_bb.base()));
 
@@ -112,12 +103,10 @@ sWordptr StackGrapher::MakeBlockEntries(ForthWord *template_word){
                 auto jump_to_far_bb = basic_block_builder.get_bb_at_index(jump_to_far_index);
                 auto jump_to_next_bb = basic_block_builder.get_bb_at_index(jump_to_next_index);
 
-                println("new branchif");
                 curr_bb->instructions.push_back(
                         new BranchIfInstruction(new_sub_def, next_data, jump_to_next_bb.base(), jump_to_far_bb.base()));
             }else
             {
-                println("new ins ", new_sub_def->name);
                 curr_bb->instructions.push_back(new Instruction(new_sub_def, next_data));
             }
         }
@@ -127,8 +116,8 @@ sWordptr StackGrapher::MakeBlockEntries(ForthWord *template_word){
 
             auto last_instr = curr_bb->instructions.back();
 
-            if(!branchy(last_instr))
-                curr_bb->instructions.push_back(new BranchInstruction(new sWord("branch"), sData(nullptr), next_bb.base()));
+            if(!last_instr->branchy())
+                curr_bb->instructions.push_back(new BranchInstruction(new sWord("branch", BRANCH), sData(nullptr), next_bb.base()));
 
             curr_bb = next_bb;
         }
@@ -140,7 +129,7 @@ sWordptr StackGrapher::MakeBlockEntries(ForthWord *template_word){
     auto &last_bb = new_word->basic_blocks.back();
     auto &last_instr = last_bb.instructions.back();
 
-    if(last_bb.instructions.empty() || last_instr->linked_word->name != "return")
+    if(last_bb.instructions.empty() || last_instr->linked_word->name != "exit")
         last_bb.instructions.push_back(new ReturnInstruction);
 
     return new_word;

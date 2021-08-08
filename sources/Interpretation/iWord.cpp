@@ -51,11 +51,11 @@ iWordptr ForthWord::clone() {
 }
 
 
-Primitive::Primitive(std::string name, bool immediate, std::function<void(Stack&, iData data, IP&)> action, bool stateful)
+Primitive::Primitive(std::string name, primitive_words id, bool immediate, std::function<void(Stack&, IP&)> action, bool stateful)
 : iWord(std::move(name), immediate, stateful), action(std::move(action)) {}
 
 void Primitive::execute(Stack &stack, IP &ip) {
-    action(stack, data, ip);
+    action(stack, ip);
 }
 
 iWordptr Primitive::clone() {
