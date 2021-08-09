@@ -4,7 +4,7 @@
 #ifndef MOVFORTH_PRINT_H
 #define MOVFORTH_PRINT_H
 
-extern int _indent;
+extern int indents;
 
 template <typename... Args>
 inline void print(Args&&... args)
@@ -14,7 +14,7 @@ inline void print(Args&&... args)
 
 template <typename... Args>
 inline void println(Args&&... args){
-    for(int i = 0; i < _indent; i++)
+    for(int i = 0; i < indents; i++)
         std::cout <<"\t";
     print(args...);
     std::cout << std::endl;
@@ -28,10 +28,10 @@ inline void dln(Args&&... args){
 }
 
 inline void indent(){
-    _indent++;
+    indents++;
 }
 inline void unindent(){
-    _indent--;
+    indents--;
 }
 
 #endif

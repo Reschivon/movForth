@@ -10,7 +10,7 @@ namespace mov {
     class iWordGenerator {
     private:
         std::unordered_map<std::string, std::function<iWordptr()>>
-                generator_lookup;
+                generator_lookup{};
 
     public:
         void register_primitive(const std::string& name, primitive_words id, std::function<void(Stack &, IP &)> action, bool stateful = false) {

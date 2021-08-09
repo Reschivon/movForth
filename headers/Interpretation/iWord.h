@@ -22,7 +22,6 @@ namespace mov{
         primitive_words id = primitive_words::OTHER;
         bool immediate;
         const bool stateful;
-        iData data = iData(); // has value if stateful
 
         iWord(std::string name, bool immediate, bool stateful);
         iWord(std::string name, primitive_words id, bool immediate, bool stateful);

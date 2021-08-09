@@ -6,10 +6,11 @@ struct Conflict{
     BasicBlock *from, *to;
     Conflict(BasicBlock *from, BasicBlock *to)
         : from(from), to(to) {}
-    std::string to_string() const{
+    [[nodiscard]] std::string to_string() const{
         return "conflict from bb#" +std::to_string(from->index) +
                 " to bb#" + std::to_string(to->index);
     }
+
 };
 
 

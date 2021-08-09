@@ -9,7 +9,7 @@
 namespace mov {
 
     class Stack {
-        std::vector<iData> stack;
+        std::vector<iData> stack{};
 
     public:
         void push(int number) {

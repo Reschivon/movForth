@@ -18,7 +18,7 @@ namespace mov{
         explicit sWord(std::string name, primitive_words id);
         explicit sWord(std::string name, primitive_words id, Effects effects);
 
-        std::vector<BasicBlock> basic_blocks;
+        std::vector<BasicBlock> basic_blocks{};
 
         Effects effects;
 

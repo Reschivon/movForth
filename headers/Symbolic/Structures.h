@@ -7,7 +7,6 @@
 #include <vector>
 #include <iostream>
 #include <functional>
-#include "../Util.h"
 #include "../Print.h"
 
 /*
@@ -31,7 +30,7 @@ namespace mov {
         bool is_empty() {return data.index() == 0;};
 
         std::string type(){
-            switch(data.index()) {case 1: return "number"; case 2: return "xt"; case 0: return "unknown";};
+        switch(data.index()) {case 1: return "number"; case 2: return "xt"; case 0: return "unknown"; default: return "";}
         }
         int as_num() {return std::get<int>(data);}
         sWordptr as_xt() {return std::get<sWordptr>(data);}
@@ -51,7 +50,7 @@ namespace mov {
         int ID = -1;
         enum registerType {UNDEF, NORMAL, PARAM} register_type = UNDEF;
 
-        Register operator++(int u){
+        Register operator++(int){
             ID++;
             return *this;
         }

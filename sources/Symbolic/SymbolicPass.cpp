@@ -1,5 +1,4 @@
 
-#include <vector>
 #include <set>
 #include <stack>
 #include "../../headers/Symbolic/SymbolicPass.h"

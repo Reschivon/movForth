@@ -2,4 +2,4 @@
 
 #include "../headers/Print.h"
 
-int _indent = 0;
+int indents = 0;

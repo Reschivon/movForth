@@ -10,7 +10,7 @@
 namespace mov {
     class StackGrapher{
         // cached results of already computed words
-        std::unordered_map<iWordptr, sWordptr> visited_words;
+        std::unordered_map<iWordptr, sWordptr> visited_words{};
         sData symbolize_data(iData data);
         //sWordptr conversion_pass(ForthWord *wordptr);
         sWordptr translate_to_basic_blocks(ForthWord *template_word);

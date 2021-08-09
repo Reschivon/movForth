@@ -45,7 +45,6 @@ namespace mov {
         }
 
         std::string to_string();
-        iData clone();
     };
 }
 #endif //MOVFORTH_IDATA_H

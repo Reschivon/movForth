@@ -36,7 +36,7 @@ namespace mov {
         std::ifstream file;
 
     public:
-        explicit file_input(std::string path) {
+        explicit file_input(const std::string& path) {
             file.open(path);
             if (!file.is_open())
                 println("Cannot open file");

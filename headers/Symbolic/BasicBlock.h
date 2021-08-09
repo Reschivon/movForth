@@ -20,7 +20,7 @@ namespace mov{
     struct BasicBlock {
         unsigned int index = 0; // like Register but I was lazy
 
-        std::vector<Instruction*> instructions;//TODO reference wrapper
+        std::vector<Instruction*> instructions{};//TODO reference wrapper
 
         NodeList my_graphs_outputs;
         NodeList my_graphs_inputs;

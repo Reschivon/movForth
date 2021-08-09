@@ -15,7 +15,7 @@ public:
     BasicBlockBuilder(sWordptr new_word, short instructions)
         : new_word(new_word)
     {
-        const short bbe_lookup_size = instructions + 1;
+        const short bbe_lookup_size = (short) instructions + 1;
         bbe_lookup = new short[bbe_lookup_size];
         std::fill_n(bbe_lookup, bbe_lookup_size, -1);
 
@@ -36,8 +36,8 @@ public:
     }
 
     void make_bb_for_jump(int from, int delta){
-        jump_lookup[from] = from + delta + 1;
-        make_bb_at_index(from + delta + 1);
+        jump_lookup[from] = (short) (from + delta + 1);
+        make_bb_at_index((short) (from + delta + 1));
     }
 
     it_type get_bb_at_index(int index){
