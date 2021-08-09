@@ -23,21 +23,41 @@ llvm_map_components_to_libnames(llvm_libs support core irreader)
 add_executable(movForth
         main.cpp
 
-        headers/Print.h
+        #headers/Print.h
         sources/Print.cpp
 
-        headers/Interpretation/WordGenerator.h
-        headers/Interpretation/Input.h
-        headers/Interpretation/iData.h
+        #headers/Interpretation/WordGenerator.h
+        #headers/Interpretation/Input.h
+        #headers/Interpretation/iData.h
+        #headers/Interpretation/Stack.h
+
         sources/Interpretation/iWord.cpp
         sources/Interpretation/Interpreter.cpp
-        headers/Interpretation/Stack.h
+
+
+        #headers/PrimitiveEffects.h
+        #headers/PrimitiveEnums.h
+
+        #headers/Symbolic/Effects.h
 
         sources/symbolic/sWord.cpp
-        sources/symbolic/symbolicPass.cpp
 
+        sources/Interpretation/iData.cpp
+
+        #headers/Symbolic/Instruction.h
+        sources/Symbolic/Instruction.cpp
+
+        #headers/Symbolic/BasicBlock.h
+        sources/Symbolic/BasicBlock.cpp
+
+        sources/symbolic/symbolicPass.cpp
+        sources/Symbolic/SymbolicPass_BlockEntries.cpp
+        sources/Symbolic/SymbolicPass_StackGraph.cpp
+        sources/Symbolic/SymbolicPass_RetrievePushPopEffects.cpp
+        sources/Symbolic/SymbolicPass_BBCyclicPass.cpp
 
         #headers/Generation/IRGenerator.h
-        sources/Interpretation/iData.cpp sources/Symbolic/SymbolicPass_BlockEntries.cpp headers/PrimitiveEffects.h headers/PrimitiveEnums.h sources/Symbolic/Instruction.cpp headers/Symbolic/Instruction.h headers/Symbolic/Effects.h sources/Symbolic/SymbolicPass_StackGraph.cpp sources/Symbolic/SymbolicPass_RetrievePushPopEffects.cpp headers/Symbolic/BasicBlock.h sources/Symbolic/BasicBlock.cpp sources/Symbolic/SymbolicPass_BBCyclicPass.cpp)
+
+        )
 
 target_link_libraries(movForth ${llvm_libs})

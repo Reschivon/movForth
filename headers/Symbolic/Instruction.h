@@ -3,7 +3,6 @@
 #define MOVFORTH_INSTRUCTION_H
 
 #include "Structures.h"
-#include "BasicBlock.h"
 #include "../PrimitiveEnums.h"
 
 namespace mov{
@@ -26,7 +25,7 @@ namespace mov{
         ReturnInstruction* as_return();
 
         virtual std::string name();
-        primitive_words id() const;
+        [[nodiscard]] primitive_words id() const;
 
         [[nodiscard]] bool branchy() const;
     };

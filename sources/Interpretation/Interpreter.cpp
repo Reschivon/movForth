@@ -6,7 +6,7 @@
 
 using namespace mov;
 
-Interpreter::Interpreter(std::string path) : input(std::move(path)){
+Interpreter::Interpreter(const std::string& path) : input(path){
     init_words();
 
     std::string token;
@@ -62,10 +62,10 @@ Interpreter::Interpreter(std::string path) : input(std::move(path)){
 }
 
 iWordptr Interpreter::find(const std::string& name) {
-    auto find_result = std::find_if(dictionary.begin(), dictionary.end(),
+    auto find_result = std::find_if(dictionary.rbegin(), dictionary.rend(),
                                     [name](iWordptr other){return other->name() == name;});
 
-    if(find_result == dictionary.end())
+    if(find_result == dictionary.rend())
         // try primitives
         return iWordGenerator.get(name);
 
@@ -210,7 +210,7 @@ void Interpreter::init_words(){
         if (!last_word)
             println("Define some words before calling HERE");
         else
-            s.push(last_word->definition_size());
+            s.push(last_word->def().size());
     });
 
     iWordGenerator.register_primitive("create", primitive_words::CREATE, [&](Stack &s, IP &i) {

@@ -1,6 +1,5 @@
 #include <utility>
 #include "../../headers/Interpretation/iWord.h"
-#include "../../headers/Interpretation/Stack.h"
 
 using namespace mov;
 
@@ -38,18 +37,9 @@ void ForthWord::definition_to_string() {
         print(thing.to_string(), " ");
 }
 
-int ForthWord::definition_size() {
-    return definition.size();
-}
-
 void ForthWord::set(int index, iData value) {
-    definition[index] = value;
+    definition.at(index) = value;
 }
-
-iWordptr ForthWord::clone() {
-    return new ForthWord(*this);
-}
-
 
 Primitive::Primitive(std::string name, primitive_words id, bool immediate, std::function<void(Stack&, IP&)> action, bool stateful)
 : iWord(std::move(name), id, immediate, stateful), action(std::move(action)) {}
@@ -58,6 +48,3 @@ void Primitive::execute(Stack &stack, IP &ip) {
     action(stack, ip);
 }
 
-iWordptr Primitive::clone() {
-    return new Primitive(*this);
-}

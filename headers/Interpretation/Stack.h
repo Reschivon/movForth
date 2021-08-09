@@ -8,6 +8,10 @@
 
 namespace mov {
 
+    /**
+     * Stack of the interpreter
+     * Holds Data objects as elements
+     */
     class Stack {
         std::vector<iData> stack{};
 
@@ -22,8 +26,12 @@ namespace mov {
             stack.push_back(thing);
         }
 
+        /**
+         * @return the top number, or 0 is top is not number
+         */
         int pop_number(){
-            if(stack.empty()) println("tried popping empty stack");
+            if(stack.empty())
+                println("tried popping empty stack");
 
             if(stack.back().is_number()) { // int
                 auto ret = stack.back().as_number();
@@ -37,6 +45,9 @@ namespace mov {
             return 0;
         }
 
+        /**
+        * @return the top word, or nullptr is top is not number
+        */
         iWordptr pop_iWord_pointer(){
             if(stack.size() == 0) println("tried popping empty stack");
 
@@ -52,8 +63,14 @@ namespace mov {
             return nullptr;
         }
 
+        /**
+        * @return the top Data, or an empty Data if stack is empty
+        */
         iData pop(){
-            if(stack.empty()) println("tried popping empty stack");
+            if(stack.empty()) {
+                println("tried popping empty stack");
+                return iData(nullptr);
+            }
             auto ret = stack.back();
             stack.pop_back();
             return ret;

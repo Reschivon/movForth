@@ -9,7 +9,14 @@
 
 namespace mov {
 
+    /**
+     * Interface for all types of Forth input
+     */
     class Input {
+        /**
+         * Next space or whitespace delimited token from inout source
+         * @return std::string of token
+         */
         virtual std::string next_token() = 0;
     };
 
@@ -30,12 +37,17 @@ namespace mov {
         }
     };
 
-
-
+    /**
+     * Helper class that returns tokens one by one from file
+     */
     class file_input : public Input {
         std::ifstream file;
 
     public:
+        /**
+         * Makes a file_input that immediately opens an ifstream to the provided file
+         * @param path path to file
+         */
         explicit file_input(const std::string& path) {
             file.open(path);
             if (!file.is_open())
@@ -53,7 +65,6 @@ namespace mov {
     class cin_input : public Input {
 
     public:
-
         std::string next_token() override {
             std::string ret;
             if(std::cin >> ret)
