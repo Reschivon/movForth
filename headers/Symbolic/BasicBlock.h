@@ -30,6 +30,10 @@ namespace mov{
         explicit BasicBlock(BBgen& gen);
 
         std::vector<BasicBlock*> nextBBs();
+        bool is_exit();
+
+        // cyclic pass use only (*sigh* there was no other way)
+        bool visited = false;
     };
 }
 #endif // MOVFORTH_BASICBLOCK_H

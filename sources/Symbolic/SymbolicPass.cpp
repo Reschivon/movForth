@@ -39,8 +39,8 @@ sWordptr StackGrapher::compute_effects(iWordptr original_word) {
 
         auto converted = translate_to_basic_blocks(forth_word);
         stack_graph_pass(converted);
-        bb_cyclic_pass(converted);
         retrieve_push_pop_effects(converted);
+        bb_cyclic_pass(converted);
 
         unindent();
         dln("finished compute [", original_word->name(), "]");

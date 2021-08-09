@@ -124,7 +124,7 @@ sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
     auto &last_bb = new_word->basic_blocks.back();
     auto &last_instr = last_bb.instructions.back();
 
-    if(last_bb.instructions.empty() || last_instr->name() != "exit")
+    if(last_bb.instructions.empty() || last_instr->name() != "is_exit")
         last_bb.instructions.push_back(new ReturnInstruction);
 
     return new_word;

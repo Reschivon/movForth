@@ -28,7 +28,7 @@ namespace mov {
     public:
         bool is_num() {return data.index() == 1;}
         bool is_xt() {return data.index() == 2;}
-        bool is_unknown() {return data.index() == 0;};
+        bool is_empty() {return data.index() == 0;};
 
         std::string type(){
             switch(data.index()) {case 1: return "number"; case 2: return "xt"; case 0: return "unknown";};
@@ -37,6 +37,14 @@ namespace mov {
         sWordptr as_xt() {return std::get<sWordptr>(data);}
 
         explicit sData(std::variant<std::nullptr_t, int, sWordptr> data) : data(data) {}
+
+        std::string to_string(){
+            if(is_xt())
+                return "xt";
+            if(is_num())
+                return std::to_string(as_num());
+            return "undef";
+        }
     };
 
     struct Register{

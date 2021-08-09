@@ -24,7 +24,8 @@ bool Instruction::branchy() const{
 }
 
 std::string Instruction::name(){
-    return linked_word->name;
+    return linked_word->name +
+    (data.is_empty()?"": "(" + data.to_string() + ")");
 }
 
 Instruction::Instruction(sWordptr linked_word, sData data)
@@ -34,28 +35,29 @@ primitive_words Instruction::id() const {
     return linked_word->id;
 }
 
-ReturnInstruction::ReturnInstruction()
-: Instruction(new sWord("exit", primitive_words::EXIT), sData(nullptr)){}
-
-std::string ReturnInstruction::name() {
-    return "exit";
-}
-
-std::string BranchInstruction::name() {
-    return Instruction::name() + "(to " + std::to_string(jump_to->index) + ")";
-}
-
 BranchInstruction::BranchInstruction(sWordptr linked_word, sData data,
                                      BasicBlock *jump_to)
         : Instruction(linked_word, data), jump_to(jump_to) {}
-
-std::string BranchIfInstruction::name() {
-    return Instruction::name() + "(true: " + std::to_string(jump_to_next->index) + ", false: " + std::to_string(jump_to_far->index) +")";
-}
 
 BranchIfInstruction::BranchIfInstruction(sWordptr linked_word, sData data,
                                          BasicBlock *jump_to_close,
                                          BasicBlock *jump_to_far)
         : Instruction(linked_word, data), jump_to_next(jump_to_close), jump_to_far(jump_to_far) {}
+
+ReturnInstruction::ReturnInstruction()
+        : Instruction(new sWord("exit", primitive_words::EXIT), sData(nullptr)){}
+
+
+std::string BranchInstruction::name() {
+    return linked_word->name + "(to " + std::to_string(jump_to->index) + ")";
+}
+
+std::string BranchIfInstruction::name() {
+    return linked_word->name + "(true: " + std::to_string(jump_to_next->index) + ", false: " + std::to_string(jump_to_far->index) +")";
+}
+
+std::string ReturnInstruction::name() {
+    return "exit";
+}
 
 

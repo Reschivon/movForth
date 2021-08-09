@@ -95,7 +95,6 @@ void stack_graph_pass_bb(BasicBlock &bb) {
     }
 
     // the pushed side effect is the same as remaining stack frames
-    bb.effects.num_pushed = (int) running_stack.size();
     bb.my_graphs_outputs = running_stack;
 }
 
@@ -106,5 +105,8 @@ void StackGrapher::stack_graph_pass(sWordptr wordptr) {
         indent();
         stack_graph_pass_bb(bb);
         unindent();
+        println("[" , wordptr->name , "]" ,
+                " push:" , bb.my_graphs_inputs.size() ,
+                " pop:" , bb.my_graphs_outputs.size());
     }
 }
