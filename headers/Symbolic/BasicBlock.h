@@ -36,8 +36,8 @@ namespace mov{
 
         // cyclic pass use only (*sigh* there was no other way)
         bool visited = false;
-        int enter_stack_size;
-        int enter_inputs;
+        int enter_stack_size = 0;
+        int enter_inputs = 0;
     };
 }
 #endif // MOVFORTH_BASICBLOCK_H

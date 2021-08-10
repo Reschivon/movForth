@@ -49,16 +49,16 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
     for(auto next : bb.nextBBs()){
         if(next.get().visited){
             if(exit_inputs != next.get().enter_inputs){
-                println("input size mismatch on edge from bb#" , bb.index , " to bb#" , next.get().index);
+                println("[FATAL] input size mismatch on edge from bb#" , bb.index , " to bb#" , next.get().index);
                 println("Past inputs: " , next.get().enter_inputs , " current: " , bb.enter_inputs);
-                continue;
             }
             if(transformed_stack.size() != next.get().enter_stack_size){
-                println("Control flow edge mismatch on edge from bb#" , bb.index , " to bb#" , next.get().index);
+                println("[FATAL] Control flow edge mismatch on edge from bb#" , bb.index , " to bb#" , next.get().index);
                 println("Past stack size: " , next.get().enter_stack_size , " current: " , transformed_stack.size());
-                continue;
             }
         }
+
+        println("LLLLLLLLLL " , exit_inputs);
 
         next.get().enter_inputs = exit_inputs;
         next.get().enter_stack_size = (int) transformed_stack.size();
@@ -86,6 +86,7 @@ void StackGrapher::stack_graph_for_word(sWordptr wordptr) {
 
     // last BB guaranteed to be return
     auto &lastBB = wordptr->basic_blocks.back();
+    println("FFFFFFFFFFFFF ", lastBB.enter_inputs);
     wordptr->effects.num_popped = lastBB.enter_inputs;
     wordptr->effects.num_pushed = lastBB.enter_stack_size;
 

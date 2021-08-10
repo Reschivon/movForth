@@ -53,8 +53,11 @@ sWordptr StackGrapher::static_analysis(iWordptr original_word) {
 sWordptr StackGrapher::show_word_info(sWordptr wordptr) {
     println("============[", wordptr->name, "]===========");
 
-    println("per-instruction graph:");
 
+    println("push:" , wordptr->effects.num_pushed,
+            " pop:" , wordptr->effects.num_popped);
+
+    println("per-instruction graph:");
     for(const auto& bbe : wordptr->basic_blocks){
         println("bbe " + std::to_string(bbe.index) + ":");
         print("    ");
