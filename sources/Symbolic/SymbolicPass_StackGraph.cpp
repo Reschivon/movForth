@@ -2,7 +2,9 @@
 
 using namespace mov;
 
-void propagate_stack(NodeList &stack, Instruction *instruction, BasicBlock &base,
+void propagate_stack(NodeList &stack,
+                     Instruction *instruction,
+                     BasicBlock &base,
                      RegisterGen &register_gen) {
 
     auto effects = instruction->linked_word->effects;
@@ -35,10 +37,10 @@ void propagate_stack(NodeList &stack, Instruction *instruction, BasicBlock &base
 
     // link output nodes to stack
     for (auto push_node : instruction->push_nodes)
-        Node::link_bidirection(push_node,
-                               stack.new_back(),
-                               push_node->target? push_node->edge_register : 
-                                                  register_gen.get());
+        if(push_node->target)
+            Node::link_bidirection(push_node, stack.new_back(), push_node->edge_register);
+        else
+            Node::link_bidirection(push_node, stack.new_back(), register_gen.get());
 
     print("pops:");
     for (auto node : instruction->pop_nodes)
@@ -54,6 +56,7 @@ void propagate_stack(NodeList &stack, Instruction *instruction, BasicBlock &base
 NodeList StackGrapher::stack_graph_pass_bb(BasicBlock &bb, 
                                            NodeList &running_stack, 
                                            RegisterGen register_gen) {
+
     for (auto instruction : bb.instructions)
     {
         auto definee = instruction->linked_word;

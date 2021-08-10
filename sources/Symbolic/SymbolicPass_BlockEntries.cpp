@@ -85,7 +85,7 @@ sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
     for(int i = 0; i < template_word->def().size(); i++){
 
         auto template_sub_def = template_word->def()[i].as_word();
-        auto new_sub_def = compute_effects(template_sub_def);
+        auto new_sub_def = static_analysis(template_sub_def);
 
         sData next_data = sData(nullptr);
         if(template_sub_def->stateful){

@@ -10,21 +10,21 @@ sData StackGrapher::symbolize_data(iData data) {
     if (data.is_number())
         return sData(data.as_number());
     if (data.is_word())
-        return sData(compute_effects(data.as_word()));
+        return sData(static_analysis(data.as_word()));
     if(data.is_empty())
         return sData(nullptr);
     println("FUCK");
     return sData(nullptr);
 }
 
-sWordptr StackGrapher::compute_effects(iWordptr original_word) {
+sWordptr StackGrapher::static_analysis(iWordptr original_word) {
     // check to see if we have passed over this word already
     // if so, return a pointer to it
     auto cached = visited_words.find(original_word);
     if (cached != visited_words.end())
         return cached->second;
 
-    if (dynamic_cast<Primitive *>(original_word))
+    if (dynamic_cast<Primitive*>(original_word))
     {   // is a primitive: return the singleton of the primitive
         sWordptr word_singleton = primitive_lookup.at(original_word->id);
         return word_singleton;

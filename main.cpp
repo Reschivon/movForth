@@ -25,7 +25,7 @@ int main() {
     //    basic block edges)
     // 2. Data Flow Analysis (graph of stack data as it gets
     //    mutated by words)
-    auto converted_word = stackGrapher.compute_effects(word_to_compile);
+    auto converted_word = stackGrapher.static_analysis(word_to_compile);
 
     // Show the fruits of labor from static analysis
     // This function is still incomplete

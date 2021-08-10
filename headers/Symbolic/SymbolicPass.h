@@ -20,7 +20,7 @@ namespace mov {
         static NodeList stack_graph_pass_bb(BasicBlock &bb, NodeList &running_stack,
                                  RegisterGen register_gen);
     public:
-        sWordptr compute_effects(iWordptr original_word);
+        sWordptr static_analysis(iWordptr original_word);
 
         static sWordptr show_word_info(sWordptr wordptr);
     };

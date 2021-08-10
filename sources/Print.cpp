@@ -2,4 +2,4 @@
 
 #include "../headers/Print.h"
 
-int indents = 0;
+std::string indents = "";
