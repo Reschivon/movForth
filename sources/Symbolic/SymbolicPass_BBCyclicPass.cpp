@@ -13,7 +13,7 @@ struct Conflict{
 
 };
 
-void explore_graph_dfs(NodeList stack, BasicBlock &bb, sWordptr base){
+void explore_graph_dfs(NodeList stack, BasicBlock &bb){
     if(bb.visited){
         if(stack.size() != bb.enter_stack_size){
             println("Control flow edge inconsistency on edge entering bb#" , bb.index);
@@ -47,12 +47,12 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb, sWordptr base){
     for(auto next : bb.nextBBs()){
         if(next.get().visited){
             if(exit_inputs != next.get().enter_inputs){
-                println("input size inconsistency on edge from bb#" , bb.index , " to bb#" , next.get().index);
+                println("input size mismatch on edge from bb#" , bb.index , " to bb#" , next.get().index);
                 println("Past inputs: " , next.get().enter_inputs , " current: " , bb.enter_inputs);
                 continue;
             }
             if(transformed_stack.size() != next.get().enter_stack_size){
-                println("Control flow edge inconsistency on edge from bb#" , bb.index , " to bb#" , next.get().index);
+                println("Control flow edge mismatch on edge from bb#" , bb.index , " to bb#" , next.get().index);
                 println("Past stack size: " , next.get().enter_stack_size , " current: " , transformed_stack.size());
                 continue;
             }
@@ -60,7 +60,7 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb, sWordptr base){
 
         next.get().enter_inputs = exit_inputs;
         next.get().enter_stack_size = transformed_stack.size();
-        explore_graph_dfs(transformed_stack, next, base);
+        explore_graph_dfs(transformed_stack, next);
     }
 
     bb.visited = true;
@@ -71,7 +71,22 @@ void StackGrapher::bb_cyclic_pass(sWordptr wordptr) {
     println("BB cyclic pass");
 
     NodeList stack;
-    explore_graph_dfs(stack, wordptr->basic_blocks.front(), wordptr);
+    explore_graph_dfs(stack, wordptr->basic_blocks.front());
+
+    // propagate Effects through a single control path
+    auto &curr_bb = wordptr->basic_blocks.front();
+    Effects net_effects;
+    while (!curr_bb.is_exit()){
+        net_effects.acquire_side_effects(curr_bb.effects);
+        curr_bb = curr_bb.nextBBs().front();
+    }
+    wordptr->effects = net_effects;
+
+    // last BB guaranteed to be return
+    auto &lastBB = wordptr->basic_blocks.back();
+    wordptr->effects.num_popped = lastBB.enter_inputs;
+    wordptr->effects.num_pushed = lastBB.enter_stack_size;
+
 }
 
 

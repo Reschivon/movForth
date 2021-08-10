@@ -27,5 +27,5 @@ std::vector<BasicBlock::bb_ref> BasicBlock::nextBBs() {
 }
 
 bool BasicBlock::is_exit() {
-    return instructions.size() == 1 && instructions.back()->id() == primitive_words::EXIT;
+    return instructions.size() > 0 && instructions.back()->id() == primitive_words::EXIT;
 }
