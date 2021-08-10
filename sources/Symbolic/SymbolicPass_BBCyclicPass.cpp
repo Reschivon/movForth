@@ -21,21 +21,23 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
         }
         return;
     }else{
-        bb.enter_stack_size = stack.size();
+        bb.enter_stack_size = (int) stack.size();
     }
 
-    RegisterGen register_gen(bb.index);
+    RegisterGen register_gen((int) bb.index);
 
     println();
     println("[bb#: " , bb.index , "] BEGIN stack graph");
     indent();
 
-    NodeList transformed_stack = StackGrapher::stack_graph_pass_bb(stack, bb, register_gen);
+    NodeList transformed_stack = StackGrapher::stack_graph_for_bb(stack, bb,
+                                                                  register_gen);
+    StackGrapher::compute_matching_pairs(bb);
 
     unindent();
     println("[bb#: " , bb.index , "] END stack graph");
-    println("push:" , bb.my_graphs_outputs.size(),
-            " pop:" , bb.my_graphs_inputs.size());
+    println("push:" , bb.effects.num_pushed,
+            " pop:" , bb.effects.num_popped);
 
     print("next: ");
     for(auto next : bb.nextBBs())
@@ -59,14 +61,14 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
         }
 
         next.get().enter_inputs = exit_inputs;
-        next.get().enter_stack_size = transformed_stack.size();
+        next.get().enter_stack_size = (int) transformed_stack.size();
         explore_graph_dfs(transformed_stack, next);
     }
 
     bb.visited = true;
 }
 
-void StackGrapher::bb_cyclic_pass(sWordptr wordptr) {
+void StackGrapher::stack_graph_for_word(sWordptr wordptr) {
     println();
     println("BB cyclic pass");
 

@@ -2,7 +2,11 @@
 
 using namespace mov;
 
-void retrieve_push_pop_effects_bb(BasicBlock &bb) {
+void StackGrapher::compute_matching_pairs(BasicBlock &bb) {
+
+    bb.effects.num_popped = (int) bb.my_graphs_inputs.size();
+    bb.effects.num_pushed = (int) bb.my_graphs_outputs.size();
+
     // matching pairs
     for (int i = 0; i < bb.my_graphs_outputs.size(); i++)
     {
@@ -21,18 +25,6 @@ void retrieve_push_pop_effects_bb(BasicBlock &bb) {
             next = next->target;
         }
     }
-
-    // print push pop effects
-//    dln("Finished effects for bb#", bb.index ,
-//        " pops: "  , bb.my_graphs_inputs.size(),
-//        " pushes: ", bb.my_graphs_outputs.size());
-    bb.effects.num_pushed = (int) bb.my_graphs_outputs.size();
-    bb.effects.num_popped = (int) bb.my_graphs_inputs.size();
-}
-
-void StackGrapher::retrieve_push_pop_effects(sWordptr wordptr) {
-    for(auto &bb : wordptr->basic_blocks)
-        retrieve_push_pop_effects_bb(bb);
 }
 
 

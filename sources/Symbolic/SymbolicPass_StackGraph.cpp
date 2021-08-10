@@ -53,8 +53,8 @@ void propagate_stack(NodeList &stack,
     println();
 }
 
-NodeList StackGrapher::stack_graph_pass_bb(NodeList &running_stack, BasicBlock &bb,
-                                  RegisterGen register_gen) {
+NodeList StackGrapher::stack_graph_for_bb(NodeList &running_stack, BasicBlock &bb,
+                                          RegisterGen register_gen) {
 
     for (auto instruction : bb.instructions)
     {
