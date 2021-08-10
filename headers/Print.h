@@ -29,9 +29,14 @@ inline void dln(Args&&... args){
 
 inline void indent(){
     indents++;
+    for(int i = 0; i < indents; i++)
+        std::cout <<"\t";
 }
 inline void unindent(){
     indents--;
+    std::cout << std::endl;
+    for(int i = 0; i < indents; i++)
+        std::cout <<"\t";
 }
 
 #endif

@@ -7,21 +7,21 @@ void propagate_stack(NodeList &stack,
                      BasicBlock &base,
                      RegisterGen &register_gen) {
 
-    auto effects = instruction->linked_word->effects;
+    const auto effects = instruction->linked_word->effects;
 
     // if the stack does not have at least (effects.num_popped) items for us,
     // then we will create input nodes until there are enough items
     unsigned int nodes_from_stack = std::min(effects.num_popped, (int) stack.size());
     unsigned int nodes_from_input = std::max(effects.num_popped - (int)stack.size(), 0);
 
+    // pop input nodes from stack to current instruction
+    NodeList::move_top_elements(stack, instruction->pop_nodes,
+                                (int) nodes_from_stack);
+
     while (nodes_from_input --> 0)
         Node::link(base.my_graphs_inputs.new_front(),
                    instruction->pop_nodes.new_back(),
                    register_gen.get_input());
-
-    // pop input nodes from stack to current instruction
-    NodeList::move_top_elements(stack, instruction->pop_nodes,
-                                (int) nodes_from_stack);
 
     // make empty output nodes
     for (int i = 0; i < effects.num_pushed; i++)
@@ -53,9 +53,8 @@ void propagate_stack(NodeList &stack,
     println();
 }
 
-NodeList StackGrapher::stack_graph_pass_bb(BasicBlock &bb, 
-                                           NodeList &running_stack, 
-                                           RegisterGen register_gen) {
+NodeList StackGrapher::stack_graph_pass_bb(NodeList &running_stack, BasicBlock &bb,
+                                  RegisterGen register_gen) {
 
     for (auto instruction : bb.instructions)
     {
@@ -72,25 +71,7 @@ NodeList StackGrapher::stack_graph_pass_bb(BasicBlock &bb,
         dln();
         dln("[stack:]");
         for (auto thing : running_stack)
-            dln("\t", thing->edge_register.to_string());
+            dln( thing->edge_register.to_string());
     }
-
-    bb.my_graphs_outputs = running_stack;
-    
     return running_stack;
-}
-
-void StackGrapher::stack_graph_pass(sWordptr wordptr) {
-    for(auto &bb : wordptr->basic_blocks){
-        println();
-        println("[bb#: " , bb.index , "] BEGIN stack graph");
-        indent();
-
-        stack_graph_pass_bb(bb, *(new NodeList), RegisterGen());
-
-        unindent();
-        println("[bb#: " , bb.index , "] END stack graph");
-        println("pop:" , bb.my_graphs_outputs.size(),
-                  " push:" , bb.my_graphs_inputs.size());
-    }
 }

@@ -18,12 +18,11 @@ namespace mov{
     struct Instruction;
 
     struct BasicBlock{
+        typedef std::reference_wrapper<BasicBlock> bb_ref;
+
         unsigned int index = 0; // like Register but I was lazy
 
         std::vector<Instruction*> instructions{}; //TODO reference wrapper
-
-        NodeList pop_nodes{};
-        NodeList push_nodes{};
 
         NodeList my_graphs_outputs{};
         NodeList my_graphs_inputs{};
@@ -32,11 +31,12 @@ namespace mov{
 
         explicit BasicBlock(BBgen& gen);
 
-        std::vector<BasicBlock*> nextBBs();
+        std::vector<bb_ref> nextBBs();
         bool is_exit();
 
         // cyclic pass use only (*sigh* there was no other way)
         bool visited = false;
+        int enter_stack_size;
     };
 }
 #endif // MOVFORTH_BASICBLOCK_H

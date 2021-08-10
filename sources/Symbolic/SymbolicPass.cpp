@@ -37,7 +37,7 @@ sWordptr StackGrapher::static_analysis(iWordptr original_word) {
         indent();
 
         auto converted = translate_to_basic_blocks(forth_word);
-        stack_graph_pass(converted);
+        //stack_graph_pass(converted);
         retrieve_push_pop_effects(converted);
         bb_cyclic_pass(converted);
 
@@ -54,7 +54,8 @@ sWordptr StackGrapher::static_analysis(iWordptr original_word) {
 
 sWordptr StackGrapher::show_word_info(sWordptr wordptr) {
     println("============[", wordptr->name, "]===========");
-    println("Basic blocks:");
+
+    println("per-instruction graph:");
 
     for(const auto& bbe : wordptr->basic_blocks){
         println("bbe " + std::to_string(bbe.index) + ":");

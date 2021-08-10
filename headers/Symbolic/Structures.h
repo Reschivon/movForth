@@ -48,6 +48,7 @@ namespace mov {
 
     struct Register{
         int ID = -1;
+        int groupID = -1;
         enum registerType {UNDEF, NORMAL, PARAM} register_type = UNDEF;
 
         Register operator++(int){
@@ -59,13 +60,13 @@ namespace mov {
             switch (register_type)
             {
                 case NORMAL:
-                    return "(register "+ std::to_string(ID) + ")";
+                    return "(register " + std::to_string(groupID) + ":" + std::to_string(ID) + ")";
                 case PARAM:
-                    return "(input "+ std::to_string(ID) + ")";
+                    return "(input " + std::to_string(groupID) + ":" + std::to_string(ID) + ")";
                 case UNDEF:
-                    return "(undefined "+ std::to_string(ID) + ")";
+                    return "(undefined " + std::to_string(groupID) + ":" + std::to_string(ID) + ")";
                 default:
-                    return "(fucked "+ std::to_string(ID) + ")";
+                    return "(fucked " + std::to_string(groupID) + ":" + std::to_string(ID) + ")";
             }
         }
     };
@@ -82,9 +83,11 @@ namespace mov {
             return ret;
         }
 
+        explicit RegisterGen(int groupID) : groupID(groupID) {}
     private:
-        Register current_id = {0, Register::NORMAL};
-        Register current_param_id = {0, Register::PARAM};
+        const int groupID;
+        Register current_id =       {0, groupID, Register::NORMAL};
+        Register current_param_id = {0, groupID, Register::PARAM};
     };
 
     struct Node{

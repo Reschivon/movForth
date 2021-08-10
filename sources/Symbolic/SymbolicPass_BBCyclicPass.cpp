@@ -13,34 +13,47 @@ struct Conflict{
 
 };
 
-/*void explore_graph_dfs(BasicBlock *bb, std::vector<Conflict> &conflicts, sWordptr wordptr){
-    if(bb->visited)
+void explore_graph_dfs(NodeList stack, BasicBlock &bb, sWordptr base){
+    if(bb.visited){
+        if(stack.size() != bb.enter_stack_size){
+            println("Control flow edge inconsistency on edge entering bb#" , bb.index);
+            println("Past stack size: " , bb.enter_stack_size , " current: " , stack.size());
+        }
         return;
-    for(auto *next : bb->nextBBs()){
-        if(next->is_exit())
-            wordptr->effects.num_pushed =
-            conflicts.emplace_back(bb, next);
-        explore_graph_dfs(next, conflicts, wordptr);
+    }else{
+        bb.enter_stack_size = stack.size();
     }
-    bb->visited = true;
-}*/
+
+    RegisterGen register_gen(bb.index);
+
+    println();
+    println("[bb#: " , bb.index , "] BEGIN stack graph");
+    indent();
+
+    NodeList transformed_stack = StackGrapher::stack_graph_pass_bb(stack, bb, register_gen);
+
+    unindent();
+    println("[bb#: " , bb.index , "] END stack graph");
+    println("push:" , bb.my_graphs_outputs.size(),
+            " pop:" , bb.my_graphs_inputs.size());
+
+    print("next: ");
+    for(auto next : bb.nextBBs())
+        print(next.get().index);
+    println();
+
+    for(auto next : bb.nextBBs())
+        explore_graph_dfs(transformed_stack, next, base);
+
+    bb.visited = true;
+}
 
 void StackGrapher::bb_cyclic_pass(sWordptr wordptr) {
     println();
     println("BB cyclic pass");
 
-    std::vector<Conflict> conflicts;
-    //explore_graph_dfs(&wordptr->basic_blocks.front(), conflicts);
-
-    if(conflicts.empty()){
-        println("   found no conflicts");
-    }else{
-        println("   found conflicts:");
-        for(auto conflict : conflicts)
-            println("    " , conflict.to_string());
-    }
-
-
+    NodeList stack;
+    explore_graph_dfs(stack, wordptr->basic_blocks.front(), wordptr);
 }
 
 

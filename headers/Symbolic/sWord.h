@@ -20,6 +20,9 @@ namespace mov{
 
         std::vector<BasicBlock> basic_blocks{};
 
+        NodeList my_graphs_outputs{};
+        NodeList my_graphs_inputs{};
+
         Effects effects;
 
         bool branchy();
