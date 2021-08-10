@@ -51,10 +51,10 @@ add_executable(movForth
         sources/Symbolic/BasicBlock.cpp
 
         sources/symbolic/symbolicPass.cpp
-        sources/Symbolic/SymbolicPass_BlockEntries.cpp
-        sources/Symbolic/SymbolicPass_StackGraph.cpp
-        sources/Symbolic/SymbolicPass_RetrievePushPopEffects.cpp
-        sources/Symbolic/SymbolicPass_BBCyclicPass.cpp
+        sources/Symbolic/SymbolicPass_TranslateToBasicBlocks.cpp
+        sources/Symbolic/SymbolicPass_WordStackGraph.cpp
+        sources/Symbolic/SymbolicPass_ComputeMatchingPairs.cpp
+        sources/Symbolic/SymbolicPass_BBStackGraph.cpp
 
         #headers/Generation/IRGenerator.h
 

@@ -37,7 +37,7 @@ sWordptr StackGrapher::static_analysis(iWordptr original_word) {
         indent();
 
         auto converted = translate_to_basic_blocks(forth_word);
-        stack_graph_for_word(converted);
+        word_stack_graph(converted);
 
         unindent();
         dln("finished compute [", original_word->name(), "]");
