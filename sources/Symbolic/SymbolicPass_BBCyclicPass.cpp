@@ -42,8 +42,26 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb, sWordptr base){
         print(next.get().index);
     println();
 
-    for(auto next : bb.nextBBs())
+    int exit_inputs = bb.enter_inputs + bb.effects.num_popped;
+
+    for(auto next : bb.nextBBs()){
+        if(next.get().visited){
+            if(exit_inputs != next.get().enter_inputs){
+                println("input size inconsistency on edge from bb#" , bb.index , " to bb#" , next.get().index);
+                println("Past inputs: " , next.get().enter_inputs , " current: " , bb.enter_inputs);
+                continue;
+            }
+            if(transformed_stack.size() != next.get().enter_stack_size){
+                println("Control flow edge inconsistency on edge from bb#" , bb.index , " to bb#" , next.get().index);
+                println("Past stack size: " , next.get().enter_stack_size , " current: " , transformed_stack.size());
+                continue;
+            }
+        }
+
+        next.get().enter_inputs = exit_inputs;
+        next.get().enter_stack_size = transformed_stack.size();
         explore_graph_dfs(transformed_stack, next, base);
+    }
 
     bb.visited = true;
 }
