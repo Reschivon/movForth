@@ -1,41 +1,24 @@
 
 #include <iostream>
-#include <regex>
 
 #ifndef MOVFORTH_PRINT_H
 #define MOVFORTH_PRINT_H
 
-extern std::string indents;
+extern int indents;
 
-template <typename Arg>
-inline void print_impl(Arg arg){
-    std::cout << arg;
-}
-template <typename Arg>
-inline void print_impl(std::string arg){
-    std::cout << std::regex_replace(arg, std::regex("\n"), indents);
-}
-
-
-template <class ...Args>
-void print(Args... args)
+template <typename... Args>
+inline void print(Args&&... args)
 {
-    ((print_impl(args)), ...);
+    ((std::cout << std::forward<Args>(args)), ...);
 }
 
 template <typename... Args>
 inline void println(Args&&... args){
-    print(args..., "\n");
+    print(args...);
+    std::cout << std::endl;
+    for(int i = 0; i < indents; i++)
+        std::cout <<"\t";
 }
-
-template <typename... Args>
-inline void d(Args&&... args){
-    if(true) // Debug toggle - not the best, but works for now
-    {
-        print(args...);
-    }
-}
-
 template <typename... Args>
 inline void dln(Args&&... args){
     if(true) // Debug toggle - not the best, but works for now
@@ -45,10 +28,10 @@ inline void dln(Args&&... args){
 }
 
 inline void indent(){
-    indents += "\t";
+    indents++;
 }
 inline void unindent(){
-    indents.pop_back();
+    indents--;
 }
 
 #endif
