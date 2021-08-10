@@ -13,30 +13,24 @@ struct Conflict{
 
 };
 
-
-void dfs(BasicBlock *bb, std::vector<Conflict> &conflicts){
+/*void explore_graph_dfs(BasicBlock *bb, std::vector<Conflict> &conflicts, sWordptr wordptr){
     if(bb->visited)
         return;
     for(auto *next : bb->nextBBs()){
-        // The `exit` BB is a special case
-        // Since it is more of an indication of definition end
-        // than an actual instruction, it can take as many items
-        // off the stack as needed
         if(next->is_exit())
-            next->effects.num_popped = bb->effects.num_pushed;
-        else if(bb->effects.num_pushed != next->effects.num_popped)
+            wordptr->effects.num_pushed =
             conflicts.emplace_back(bb, next);
-        dfs(next, conflicts);
+        explore_graph_dfs(next, conflicts, wordptr);
     }
     bb->visited = true;
-}
+}*/
 
 void StackGrapher::bb_cyclic_pass(sWordptr wordptr) {
     println();
     println("BB cyclic pass");
 
     std::vector<Conflict> conflicts;
-    dfs(&wordptr->basic_blocks.front(), conflicts);
+    //explore_graph_dfs(&wordptr->basic_blocks.front(), conflicts);
 
     if(conflicts.empty()){
         println("   found no conflicts");
@@ -45,6 +39,8 @@ void StackGrapher::bb_cyclic_pass(sWordptr wordptr) {
         for(auto conflict : conflicts)
             println("    " , conflict.to_string());
     }
+
+
 }
 
 

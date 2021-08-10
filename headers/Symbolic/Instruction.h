@@ -11,12 +11,12 @@ namespace mov{
     struct BranchIfInstruction;
     struct ReturnInstruction;
 
-    struct Instruction {
-        NodeList pop_nodes;
-        NodeList push_nodes;
-
+    struct Instruction{
         sWordptr linked_word;
         sData data = sData(nullptr); // acquired from next in token list
+
+        NodeList pop_nodes{};
+        NodeList push_nodes{};
 
         explicit Instruction(sWordptr linked_word, sData data);
 

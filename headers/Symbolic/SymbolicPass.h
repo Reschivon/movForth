@@ -17,8 +17,11 @@ namespace mov {
         static void stack_graph_pass(sWordptr wordptr);
         static void bb_cyclic_pass(sWordptr wordptr);
         static void retrieve_push_pop_effects(sWordptr word);
+        static NodeList stack_graph_pass_bb(BasicBlock &bb, NodeList &running_stack,
+                                 RegisterGen register_gen);
     public:
         sWordptr compute_effects(iWordptr original_word);
+
         static sWordptr show_word_info(sWordptr wordptr);
     };
 }

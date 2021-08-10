@@ -29,7 +29,7 @@ std::string Instruction::name(){
 }
 
 Instruction::Instruction(sWordptr linked_word, sData data)
-        : linked_word(linked_word), data(data){}
+        : linked_word(linked_word), data(data) {}
 
 primitive_words Instruction::id() const {
     return linked_word->id;

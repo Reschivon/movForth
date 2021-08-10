@@ -10,7 +10,7 @@
 
 namespace mov{
 
-    class sWord {
+    class sWord{
     public:
         primitive_words id = primitive_words::OTHER;
         const std::string name;

@@ -2,78 +2,58 @@
 
 using namespace mov;
 
-
 void propagate_stack(NodeList &stack, Instruction *instruction, BasicBlock &base,
-                     RegisterGenerator &register_generator) {
+                     RegisterGen &register_gen) {
+
     auto effects = instruction->linked_word->effects;
 
-    dln("pops: ", effects.num_popped, " pushes: ", effects.num_pushed);
+    // if the stack does not have at least (effects.num_popped) items for us,
+    // then we will create input nodes until there are enough items
+    unsigned int nodes_from_stack = std::min(effects.num_popped, (int) stack.size());
+    unsigned int nodes_from_input = std::max(effects.num_popped - (int)stack.size(), 0);
 
-    // add necessary input nodes
-    unsigned int nodes_from_input = 0;
-    unsigned int nodes_from_stack = effects.num_popped;
-    if (effects.num_popped > stack.size())
-    {
-        nodes_from_input = effects.num_popped - stack.size();
-        nodes_from_stack = stack.size();
-    }
-    while (nodes_from_input-- > 0)
-    {
-        Register input_register = register_generator.get_param();
-        auto input_node = new Node;
-        instruction->pop_nodes.push_back(new Node{
-            .target = input_node,
-            .edge_register = input_register});
-        base.my_graphs_inputs.push_front(input_node);
-        dln("needs extra input ", input_register.to_string());
-    }
+    while (nodes_from_input --> 0)
+        Node::link(base.my_graphs_inputs.new_front(),
+                   instruction->pop_nodes.new_back(),
+                   register_gen.get_input());
 
-    // pop input nodes from stack
-    NodeList::move_top_elements(stack, instruction->pop_nodes, (int) nodes_from_stack);
+    // pop input nodes from stack to current instruction
+    NodeList::move_top_elements(stack, instruction->pop_nodes,
+                                (int) nodes_from_stack);
 
     // make empty output nodes
     for (int i = 0; i < effects.num_pushed; i++)
-        instruction->push_nodes.push_back(new Node);
+        instruction->push_nodes.new_back();
 
-    // cross internally
+    // link output and input nodes that represent the same data
     for (auto out_in_pair : effects.out_in_pairs)
     {
-        // dln("cross internal o", out_in_pair.second, " with ",out_in_pair.first);
-
         auto pop_node = instruction->pop_nodes[out_in_pair.second];
         auto push_node = instruction->push_nodes[out_in_pair.first];
-
         Node::link(pop_node, push_node, pop_node->edge_register);
     }
 
-    // push output nodes to stack
+    // link output nodes to stack
     for (auto push_node : instruction->push_nodes)
-    {
-        Register aRegister;
-        if (push_node->target != nullptr) // it was linked in the [cross internally] step
-            aRegister = push_node->edge_register;
-        else
-            aRegister = register_generator.get();
+        Node::link_bidirection(push_node,
+                               stack.new_back(),
+                               push_node->target? push_node->edge_register : 
+                                                  register_gen.get());
 
-        stack.push_back(new Node);
-        Node::link_bidirection(push_node, stack.back(), aRegister);
-    }
-
-    println("pop from ids:");
+    print("pops:");
     for (auto node : instruction->pop_nodes)
-        println("   ", node->edge_register.to_string());
-    dln("push to ids");
+        print(" ", node->edge_register.to_string());
+    println();
+
+    print("pushes:");
     for (auto thing : instruction->push_nodes)
-        dln("   ", thing->forward_edge_register.to_string());
+        print(" ", thing->forward_edge_register.to_string());
+    println();
 }
 
-
-void stack_graph_pass_bb(BasicBlock &bb) {
-    // the stack is a constantly updated list of
-    // loose pop nodes that the next bb might need
-    auto &running_stack = *(new NodeList);
-    RegisterGenerator register_generator;
-
+NodeList StackGrapher::stack_graph_pass_bb(BasicBlock &bb, 
+                                           NodeList &running_stack, 
+                                           RegisterGen register_gen) {
     for (auto instruction : bb.instructions)
     {
         auto definee = instruction->linked_word;
@@ -84,29 +64,30 @@ void stack_graph_pass_bb(BasicBlock &bb) {
         // propagate the stack state
         dln();
         dln("[", definee->name, "]");
-        propagate_stack(running_stack, instruction, bb, register_generator);
+        propagate_stack(running_stack, instruction, bb, register_gen);
 
         dln();
-        dln("intermediate stack: ");
+        dln("[stack:]");
         for (auto thing : running_stack)
-        {
             dln("\t", thing->edge_register.to_string());
-        }
     }
 
-    // the pushed side effect is the same as remaining stack frames
     bb.my_graphs_outputs = running_stack;
+    
+    return running_stack;
 }
 
 void StackGrapher::stack_graph_pass(sWordptr wordptr) {
     for(auto &bb : wordptr->basic_blocks){
         println();
-        println("Stack graph for [" , wordptr->name , ": " , bb.index , "]");
+        println("[bb#: " , bb.index , "] BEGIN stack graph");
         indent();
-        stack_graph_pass_bb(bb);
+
+        stack_graph_pass_bb(bb, *(new NodeList), RegisterGen());
+
         unindent();
-        println("[" , wordptr->name , "]" ,
-                " push:" , bb.my_graphs_inputs.size() ,
-                " pop:" , bb.my_graphs_outputs.size());
+        println("[bb#: " , bb.index , "] END stack graph");
+        println("pop:" , bb.my_graphs_outputs.size(),
+                  " push:" , bb.my_graphs_inputs.size());
     }
 }

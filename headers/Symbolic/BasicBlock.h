@@ -17,13 +17,16 @@ namespace mov{
 
     struct Instruction;
 
-    struct BasicBlock {
+    struct BasicBlock{
         unsigned int index = 0; // like Register but I was lazy
 
         std::vector<Instruction*> instructions{}; //TODO reference wrapper
 
-        NodeList my_graphs_outputs;
-        NodeList my_graphs_inputs;
+        NodeList pop_nodes{};
+        NodeList push_nodes{};
+
+        NodeList my_graphs_outputs{};
+        NodeList my_graphs_inputs{};
 
         Effects effects;
 

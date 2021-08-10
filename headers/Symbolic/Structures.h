@@ -70,13 +70,13 @@ namespace mov {
         }
     };
 
-    struct RegisterGenerator{
+    struct RegisterGen{
         Register get(){
             auto ret = current_id;
             current_id++;
             return ret;
         }
-        Register get_param(){
+        Register get_input(){
             auto ret = current_param_id;
             current_param_id++;
             return ret;
@@ -112,9 +112,17 @@ namespace mov {
             return back();
         }
 
+        Node* new_front(){
+            return push_front(new Node);
+        }
+
         Node* push_front(Node *push){ // bad perf, but keeping it simple
             std::vector<Node*>::insert(begin(), push);
             return back();
+        }
+
+        Node* new_back(){
+            return push_back(new Node);
         }
 
         unsigned int size(){

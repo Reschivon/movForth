@@ -14,10 +14,10 @@ inline void print(Args&&... args)
 
 template <typename... Args>
 inline void println(Args&&... args){
-    for(int i = 0; i < indents; i++)
-        std::cout <<"\t";
     print(args...);
     std::cout << std::endl;
+    for(int i = 0; i < indents; i++)
+        std::cout <<"\t";
 }
 template <typename... Args>
 inline void dln(Args&&... args){
@@ -29,9 +29,14 @@ inline void dln(Args&&... args){
 
 inline void indent(){
     indents++;
+    for(int i = 0; i < indents; i++)
+        std::cout <<"\t";
 }
 inline void unindent(){
     indents--;
+    std::cout << std::endl;
+    for(int i = 0; i < indents; i++)
+        std::cout <<"\t";
 }
 
 #endif
