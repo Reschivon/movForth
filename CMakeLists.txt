@@ -23,31 +23,16 @@ llvm_map_components_to_libnames(llvm_libs support core irreader)
 add_executable(movForth
         main.cpp
 
-        #headers/Print.h
         sources/Print.cpp
 
-        #headers/Interpretation/WordGenerator.h
-        #headers/Interpretation/Input.h
-        #headers/Interpretation/iData.h
-        #headers/Interpretation/Stack.h
-
         sources/Interpretation/iWord.cpp
+        sources/Interpretation/iData.cpp
         sources/Interpretation/Interpreter.cpp
-
-
-        #headers/PrimitiveEffects.h
-        #headers/PrimitiveEnums.h
-
-        #headers/Symbolic/Effects.h
 
         sources/symbolic/sWord.cpp
 
-        sources/Interpretation/iData.cpp
-
-        #headers/Symbolic/Instruction.h
         sources/Symbolic/Instruction.cpp
 
-        #headers/Symbolic/BasicBlock.h
         sources/Symbolic/BasicBlock.cpp
 
         sources/symbolic/symbolicPass.cpp
@@ -58,6 +43,6 @@ add_executable(movForth
 
         #headers/Generation/IRGenerator.h
 
-        )
+        headers/Interpretation/iData.h sources/Interpretation/iData.cpp)
 
 target_link_libraries(movForth ${llvm_libs})

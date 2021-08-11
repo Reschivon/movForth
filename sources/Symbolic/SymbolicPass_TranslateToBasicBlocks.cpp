@@ -1,5 +1,7 @@
 
 #include "../../headers/Symbolic/SymbolicPass.h"
+#include "../../headers/Interpretation/iData.h"
+
 using namespace mov;
 
 struct BasicBlockBuilder{

@@ -5,93 +5,28 @@
 
 #include <variant>
 #include <string>
-#include "../Print.h"
-/*
+#include "../../headers/Interpretation/iWord.h"
 
-namespace mov {
-    class iWord;
-    typedef iWord *iWordptr;
+namespace mov{
 
-    */
-/**
-     * @brief Holds all types of data found within a word's definition (words and numbers)
-     *//*
+    struct DictData : std::variant<int, iWord*, ForthWord*, Primitive*, std::nullptr_t>{
+        using dict_data_var_type = std::variant<int, iWord*, ForthWord*, Primitive*, std::nullptr_t>;
+        [[nodiscard]] bool is_number()      const{ return index() == 0;}
+        [[nodiscard]] bool is_word()        const{ return index() == 1 || index() == 2 || index() == 3;}
+        [[nodiscard]] bool is_forth_word()  const{ return index() == 2;}
+        [[nodiscard]] bool is_primitive()   const{ return index() == 3;}
+        [[nodiscard]] bool is_empty()       const{ return index() == 4;}
 
-    struct iData : std::variant<std::nullptr_t, int, iWordptr>{
-        using var_type = std::variant<std::nullptr_t, int, iWordptr>;
+        int as_number();
+        iWord* as_word();
+        ForthWord* as_forth_word();
+        Primitive* as_primitive();
 
-        */
-/**
-         * Makes a data object from a parameter of specific type
-         * @param data can be an iWordptr, an int, or a nullptr signifying emptiness
-         *//*
-
-        explicit iData(var_type data) : var_type(data) {}
-        iData() : var_type(nullptr) {}
-
-        */
-/**
-         * @return Whether the Data object is holding a number
-         *//*
-
-        bool is_number(){
-            return index() == 1;
-        }
-
-        */
-/**
-         * @return Whether the Data object is holding a word pointer
-         *//*
-
-        bool is_word(){
-            return index() == 2;
-        }
-
-        */
-/**
-         * @return Whether the Data object is empty
-         *//*
-
-        bool is_empty(){
-            return index() == 0;
-        }
-
-        */
-/**
-         * @return underlying int, or 0 if this Data does not hold number
-         *//*
-
-        int as_number(){
-            try {
-                return std::get<int>(*this);
-            }catch (...){
-                println("tried extract variant of type " , index() , " as num");
-                return 0;
-            }
-        }
-        */
-/**
-         * @return underlying iWordptr, or nullptr if this Data does not hold word
-         *//*
-
-        iWordptr as_word(){
-            try {
-                return std::get<iWordptr>(*this);
-            }catch (...){
-                println("tried extract variant of type " , index() , " as word");
-                return nullptr;
-            }
-        }
-
-        */
-/**
-         * @return string form of this Data, regardless of underlying type
-         *//*
+        explicit DictData(dict_data_var_type data);
+        DictData();
 
         std::string to_string();
     };
 }
- */
 
 #endif //MOVFORTH_IDATA_H
-

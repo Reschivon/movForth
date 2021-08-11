@@ -3,6 +3,7 @@
 #include <stack>
 #include "../../headers/Symbolic/SymbolicPass.h"
 #include "../../headers/Print.h"
+#include "../../headers/Interpretation/iData.h"
 
 using namespace mov;
 

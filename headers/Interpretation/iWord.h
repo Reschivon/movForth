@@ -6,7 +6,6 @@
 #include <variant>
 #include <iostream>
 #include <string>
-#include "iData.h"
 #include "../PrimitiveEffects.h"
 
 namespace mov{
@@ -92,24 +91,6 @@ namespace mov{
         void execute(IP &ip) override;
     };
 
-    struct DictData : std::variant<int, iWord*, ForthWord*, Primitive*, std::nullptr_t>{
-        using dict_data_var_type = std::variant<int, iWord*, ForthWord*, Primitive*, std::nullptr_t>;
-        [[nodiscard]] bool is_number()      const{ return index() == 0;}
-        [[nodiscard]] bool is_word()        const{ return index() == 1 || index() == 2 || index() == 3;}
-        [[nodiscard]] bool is_forth_word()  const{ return index() == 2;}
-        [[nodiscard]] bool is_primitive()   const{ return index() == 3;}
-        [[nodiscard]] bool is_empty()       const{ return index() == 4;}
-
-        int as_number();
-        iWord* as_word();
-        ForthWord* as_forth_word();
-        Primitive* as_primitive();
-
-        explicit DictData(dict_data_var_type data);
-        DictData();
-
-        std::string to_string();
-    };
 }
 
 #endif
