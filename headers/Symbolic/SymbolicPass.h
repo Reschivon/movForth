@@ -12,7 +12,7 @@ namespace mov {
         // cached results of already computed words
         std::unordered_map<iWordptr, sWordptr> visited_words{};
 
-        sData symbolize_data(DictData data);
+        sData symbolize_data(iData data);
         sWordptr translate_to_basic_blocks(ForthWord *template_word);
         static void word_stack_graph(sWordptr wordptr);
     public:

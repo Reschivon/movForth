@@ -25,8 +25,8 @@ Interpreter::Interpreter(const std::string& path) : input(path){
                 else {
                     if(dictionary.back().is_forth_word()){
                         //dln("compile number ", num);
-                        dictionary.back().as_forth_word()->add(DictData(find("literal")));
-                        dictionary.back().as_forth_word()->add(DictData(num));
+                        dictionary.back().as_forth_word()->add(iData(find("literal")));
+                        dictionary.back().as_forth_word()->add(iData(num));
                     }else{
                         println("attempted to compile LITERAL to a primitive word");
                     }
@@ -47,7 +47,7 @@ Interpreter::Interpreter(const std::string& path) : input(path){
             } else {
                 if(dictionary.back().is_forth_word()){
                     //dln("compile FW ", Wordptr->_name());
-                    dictionary.back().as_forth_word()->add(DictData(iWordptr));
+                    dictionary.back().as_forth_word()->add(iData(iWordptr));
                 }else
                     println("attempted to compile xts to a primitive word");
             }
@@ -60,7 +60,7 @@ iWordptr Interpreter::find(const std::string& name) {
     auto find_result = std::find_if(
             dictionary.rbegin(),
             dictionary.rend(),
-            [name](DictData other){return other.is_forth_word() && other.as_forth_word()->name() == name;});
+            [name](iData other){return other.is_forth_word() && other.as_forth_word()->name() == name;});
 
     if(find_result == dictionary.rend())
         // try primitives
@@ -121,7 +121,7 @@ void Interpreter::init_words(){
     });
 
     iWordGenerator.register_primitive(".S", primitive_words::SHOW, [&](IP &i) {
-        stack.for_each([](DictData thing) {
+        stack.for_each([](iData thing) {
             print(thing.to_string(), " ");
         });
         println("<-top");
@@ -148,7 +148,7 @@ void Interpreter::init_words(){
     iWordGenerator.register_primitive("see", primitive_words::SEE, [&](IP &i) {
         println("\n\tSo you want to see?");
 
-        for (DictData dict_data : dictionary) {
+        for (iData dict_data : dictionary) {
             if(!dict_data.is_forth_word()) continue;
             iWordptr word_pointer = dict_data.as_word();
 
@@ -186,11 +186,11 @@ void Interpreter::init_words(){
     iWordGenerator.register_primitive("!", primitive_words::STORE, [&](IP &i) {
         if(immediate){
             int address = stack.pop_number();
-            DictData val = stack.pop();
+            iData val = stack.pop();
             dictionary.at(address) = val;
         }else{
             int address = stack.pop_number();
-            DictData val = stack.pop();
+            iData val = stack.pop();
 
             if (!dictionary.back().is_forth_word())
                 println("shit");
@@ -241,12 +241,12 @@ void Interpreter::init_words(){
 
 
     auto colon_word = new ForthWord(":", false);
-    colon_word->add(DictData(find("create")));
-    colon_word->add(DictData(find("]")));
+    colon_word->add(iData(find("create")));
+    colon_word->add(iData(find("]")));
     dictionary.emplace_back(colon_word);
 
     auto exit_word = new ForthWord(";", true);
-    exit_word->add(DictData(find("[")));
+    exit_word->add(iData(find("[")));
     dictionary.emplace_back(exit_word);
 }
 

@@ -7,7 +7,7 @@
 
 using namespace mov;
 
-sData StackGrapher::symbolize_data(DictData data) {
+sData StackGrapher::symbolize_data(iData data) {
     if (data.is_number())
         return sData(data.as_number());
     if (data.is_word())

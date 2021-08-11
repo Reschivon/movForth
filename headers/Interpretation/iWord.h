@@ -11,14 +11,14 @@
 namespace mov{
     class Stack;
     class iWord;
-    class DictData;
+    class iData;
 
     typedef iWord *iWordptr;
 
     /**
      * Iterator over a word's definition
      */
-    typedef std::vector<DictData>::iterator IP;
+    typedef std::vector<iData>::iterator IP;
 
     /**
      * A word in the interpreter's dictionary
@@ -51,7 +51,7 @@ namespace mov{
      * Defined word, holds a definition
      */
     class ForthWord : public iWord {
-        std::vector<DictData> definition;
+        std::vector<iData> definition;
 
     public:
         ForthWord(std::string name, bool immediate);
@@ -61,12 +61,12 @@ namespace mov{
         /**
          * Append definition
          */
-        void add(DictData data);
+        void add(iData data);
         /**
          * Set index of definition to value
          * @throws std::__out_of_range if invalid index
          */
-        void set(int index, DictData value);
+        void set(int index, iData value);
         /**
          * For debuggin only. Does what you think
          */
@@ -74,7 +74,7 @@ namespace mov{
         /**
          * @return reference to definition
          */
-        std::vector<DictData>& def() {
+        std::vector<iData>& def() {
             return definition;
         }
     };

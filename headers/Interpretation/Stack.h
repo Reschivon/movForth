@@ -14,7 +14,7 @@ namespace mov {
      * Holds Data objects as elements
      */
     class Stack {
-        std::vector<DictData> stack{};
+        std::vector<iData> stack{};
 
     public:
         void push(int number) {
@@ -23,7 +23,7 @@ namespace mov {
         void push(iWordptr iWord_pointer) {
             stack.emplace_back(iWord_pointer);
         }
-        void push(DictData thing){
+        void push(iData thing){
             stack.push_back(thing);
         }
 
@@ -67,17 +67,17 @@ namespace mov {
         /**
         * @return the top Data, or an empty Data if stack is empty
         */
-        DictData pop(){
+        iData pop(){
             if(stack.empty()) {
                 println("tried popping empty stack");
-                return DictData(nullptr);
+                return iData(nullptr);
             }
             auto ret = stack.back();
             stack.pop_back();
             return ret;
         }
 
-        DictData top(){
+        iData top(){
             return stack.back();
         }
 
@@ -85,7 +85,7 @@ namespace mov {
             return stack.size();
         }
 
-        void for_each(std::function<void(DictData)> action){
+        void for_each(std::function<void(iData)> action){
             for(auto thing : stack)
                 action(thing);
         }

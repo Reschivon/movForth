@@ -9,7 +9,7 @@
 
 namespace mov{
 
-    struct DictData : std::variant<int, iWord*, ForthWord*, Primitive*, std::nullptr_t>{
+    struct iData : std::variant<int, iWord*, ForthWord*, Primitive*, std::nullptr_t>{
         using dict_data_var_type = std::variant<int, iWord*, ForthWord*, Primitive*, std::nullptr_t>;
         [[nodiscard]] bool is_number()      const{ return index() == 0;}
         [[nodiscard]] bool is_word()        const{ return index() == 1 || index() == 2 || index() == 3;}
@@ -22,8 +22,8 @@ namespace mov{
         ForthWord* as_forth_word();
         Primitive* as_primitive();
 
-        explicit DictData(dict_data_var_type data);
-        DictData();
+        explicit iData(dict_data_var_type data);
+        iData();
 
         std::string to_string();
     };

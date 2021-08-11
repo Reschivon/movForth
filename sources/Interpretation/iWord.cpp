@@ -22,14 +22,14 @@ void ForthWord::execute(IP &ip) {
 
         //println("       [exec] ", (it->is_word()?it->as_word()->to_string():std::_name(it->as_number())), " ");
 
-        DictData current_cell = *it;
+        iData current_cell = *it;
         if(current_cell.is_word())
             current_cell.as_word()->execute(it);
         else
             println("Too many numbers in definition, no LITERAL to consume them");
     }
 }
-void ForthWord::add(DictData data){
+void ForthWord::add(iData data){
     definition.push_back(data);
 }
 
@@ -38,7 +38,7 @@ void ForthWord::definition_to_string() {
         print(thing.to_string(), " ");
 }
 
-void ForthWord::set(int index, DictData value) {
+void ForthWord::set(int index, iData value) {
     definition.at(index) = value;
 }
 
