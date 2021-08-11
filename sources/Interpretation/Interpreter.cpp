@@ -25,8 +25,8 @@ Interpreter::Interpreter(const std::string& path) : input(path){
                 else {
                     if(dictionary.back().is_forth_word()){
                         //dln("compile number ", num);
-                        dictionary.back().as_forth_word()->add(iData(find("literal")));
-                        dictionary.back().as_forth_word()->add(iData(num));
+                        dictionary.back().as_forth_word()->add(DictData(find("literal")));
+                        dictionary.back().as_forth_word()->add(DictData(num));
                     }else{
                         println("attempted to compile LITERAL to a primitive word");
                     }
@@ -47,7 +47,7 @@ Interpreter::Interpreter(const std::string& path) : input(path){
             } else {
                 if(dictionary.back().is_forth_word()){
                     //dln("compile FW ", Wordptr->_name());
-                    dictionary.back().as_forth_word()->add(iData(iWordptr));
+                    dictionary.back().as_forth_word()->add(DictData(iWordptr));
                 }else
                     println("attempted to compile xts to a primitive word");
             }
@@ -121,7 +121,7 @@ void Interpreter::init_words(){
     });
 
     iWordGenerator.register_primitive(".S", primitive_words::SHOW, [&](IP &i) {
-        stack.for_each([](iData thing) {
+        stack.for_each([](DictData thing) {
             print(thing.to_string(), " ");
         });
         println("<-top");
@@ -137,7 +137,7 @@ void Interpreter::init_words(){
     iWordGenerator.register_primitive(",", primitive_words::COMMA, [&](IP &i) {
         if(immediate)
             if(stack.top().is_number())
-                 dictionary.emplace_back(iNumber(stack.top().as_number()));
+                 dictionary.emplace_back(stack.top().as_number());
             else println("COMMA pops a number from stack, but only XT was available");
         else
             if (dictionary.back().is_forth_word())
@@ -184,12 +184,19 @@ void Interpreter::init_words(){
     });
 
     iWordGenerator.register_primitive("!", primitive_words::STORE, [&](IP &i) {
-        int address = stack.pop_number();
-        iData val = stack.pop();
-        if (!dictionary.back().is_forth_word())
-           println("shit");
-        else {
-            dictionary.back().as_forth_word()->set(address, val);
+        if(immediate){
+            int address = stack.pop_number();
+            DictData val = stack.pop();
+            dictionary.at(address) = val;
+        }else{
+            int address = stack.pop_number();
+            DictData val = stack.pop();
+
+            if (!dictionary.back().is_forth_word())
+                println("shit");
+            else {
+                dictionary.back().as_forth_word()->set(address, val);
+            }
         }
     });
 
@@ -215,7 +222,7 @@ void Interpreter::init_words(){
         if(immediate){
             // words being execud, no point in compiling branches since nothing
             // is in state of half-compilation. Prime time for ALLOTing
-            dictionary.emplace_back(iNumber(0));
+            dictionary.emplace_back(0);
         }else{
             // words being compiled, very bad time for ALLOT right now
             // therefore we can assume user wants to mark positions for BRANCH
@@ -234,12 +241,12 @@ void Interpreter::init_words(){
 
 
     auto colon_word = new ForthWord(":", false);
-    colon_word->add(iData(find("create")));
-    colon_word->add(iData(find("]")));
+    colon_word->add(DictData(find("create")));
+    colon_word->add(DictData(find("]")));
     dictionary.emplace_back(colon_word);
 
     auto exit_word = new ForthWord(";", true);
-    exit_word->add(iData(find("[")));
+    exit_word->add(DictData(find("[")));
     dictionary.emplace_back(exit_word);
 }
 

@@ -3,11 +3,13 @@
 
 using namespace mov;
 
-iNumber DictData::as_number()      { return std::get<iNumber>(*this);}
+int DictData::as_number()      { return std::get<int>(*this);}
 iWord* DictData::as_word()
 {
     if(is_forth_word())
         return std::get<ForthWord*>(*this);
+    if(is_primitive())
+        return std::get<Primitive*>(*this);
     return std::get<iWord*>(*this); // assume word if not FW
 }
 ForthWord* DictData::as_forth_word()  { return std::get<ForthWord*>(*this);}
@@ -15,7 +17,15 @@ Primitive* DictData::as_primitive()   { return std::get<Primitive*>(*this);}
 
 DictData::DictData(DictData::dict_data_var_type data) : dict_data_var_type(data) {}
 
-iNumber::iNumber(int value) : value(value) {}
+std::string DictData::to_string() {
+    if(is_word())
+        return as_word()->name();
+    if(is_number())
+        return std::to_string(as_number());
+    return "undef";
+}
+
+DictData::DictData() : DictData::dict_data_var_type(nullptr) {}
 
 iWord::iWord(std::string name, bool immediate, bool stateful)
         : _name(std::move(name)), immediate(immediate), stateful(stateful) {}
@@ -36,23 +46,23 @@ void ForthWord::execute(IP &ip) {
 
         //println("       [exec] ", (it->is_word()?it->as_word()->to_string():std::_name(it->as_number())), " ");
 
-        iData current_cell = *it;
+        DictData current_cell = *it;
         if(current_cell.is_word())
             current_cell.as_word()->execute(it);
         else
             println("Too many numbers in definition, no LITERAL to consume them");
     }
 }
-void ForthWord::add(iData data){
+void ForthWord::add(DictData data){
     definition.push_back(data);
 }
 
 void ForthWord::definition_to_string() {
-    for(iData thing : definition)
+    for(auto thing : definition)
         print(thing.to_string(), " ");
 }
 
-void ForthWord::set(int index, iData value) {
+void ForthWord::set(int index, DictData value) {
     definition.at(index) = value;
 }
 
