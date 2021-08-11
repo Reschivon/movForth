@@ -181,8 +181,13 @@ void Interpreter::init_words(){
 
 
     iWordGenerator.register_primitive("allot", primitive_words::ALLOT, [&](IP &ip) {
-        for(int i = 0; i < stack.pop_number(); i++)
-            dictionary.emplace_back(0);
+        int num_to_allot = stack.pop_number();
+        if(num_to_allot < 0)
+            while(num_to_allot --> 0 || dictionary.back().is_number())
+                dictionary.pop_back();
+        else
+            while(num_to_allot --> 0)
+                dictionary.emplace_back(0);
     });
 
     iWordGenerator.register_primitive("@", primitive_words::FETCH, [&](IP &ip) {

@@ -13,7 +13,7 @@ namespace mov{
 
     // primitives (static instances)
     static const std::unordered_map<primitive_words, sWordptr> primitive_lookup = {
-            {primitive_words::ADD,         new sWord("+",           primitive_words::ADD,          {.num_popped = 2, .num_pushed = 1})},
+            {primitive_words::ADD,           new sWord("+",           primitive_words::ADD,          {.num_popped = 2, .num_pushed = 1})},
             {primitive_words::SUBTRACT,      new sWord("-",         primitive_words::SUBTRACT,     {.num_popped = 2, .num_pushed = 1})},
             {primitive_words::MULTIPLY,      new sWord("*",         primitive_words::MULTIPLY,     {.num_popped = 2, .num_pushed = 1})},
             {primitive_words::DIVIDE,        new sWord("/",         primitive_words::DIVIDE,       {.num_popped = 2, .num_pushed = 1})},
@@ -29,8 +29,9 @@ namespace mov{
             {primitive_words::TOIMMEDIATE,   new sWord("[",         primitive_words::TOIMMEDIATE,  {.interpret_state = Effects::interpret_state::TOIMM})},
             {primitive_words::TOCOMPILE,     new sWord("]",         primitive_words::TOCOMPILE,    {.interpret_state = Effects::interpret_state::TOCOMP})},
             {primitive_words::IMMEDIATE,     new sWord("immediate", primitive_words::IMMEDIATE,    Effects::neutral)}, // very rare this ends up in compiled code, consider warn on encounter
+            {primitive_words::ALLOT,         new sWord("allot",     primitive_words::ALLOT,        {.num_popped = 1})},
             {primitive_words::FETCH,         new sWord("@",         primitive_words::FETCH,        {.num_popped = 1, .num_pushed = 1})},
-            {primitive_words::STORE,         new sWord("!",         primitive_words::STORE,         {.num_popped = 2,})},
+            {primitive_words::STORE,         new sWord("!",         primitive_words::STORE,        {.num_popped = 2,})},
             {primitive_words::BRANCH,        new sWord("branch",    primitive_words::BRANCH,       Effects::neutral)},
             {primitive_words::BRANCHIF,      new sWord("branchif",  primitive_words::BRANCHIF,     {.num_popped = 1})},
             {primitive_words::LITERAL,       new sWord("literal",   primitive_words::LITERAL,      {.num_pushed = 1})},
