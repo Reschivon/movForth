@@ -41,21 +41,10 @@ namespace mov{
         iWord(std::string name, bool immediate, bool stateful);
         iWord(std::string name, primitive_words id, bool immediate, bool stateful);
 
-        virtual void execute(Stack &stack, IP &ip) = 0;
+        virtual void execute(IP &ip) = 0;
 
         std::string name();
     };
-
-    /**
-     * Cast a iWordptr to one of its derived types
-     * @tparam Cast desired type, *non-pointer*
-     * @param word_pointer
-     * @return word_pointer casted, or nullptr if unsuccessful
-     */
-    template <typename Cast>
-    static Cast* try_cast(iWordptr word_pointer){
-        return dynamic_cast<Cast*>(word_pointer);
-    }
 
     /**
      * Defined word, holds a definition
@@ -66,7 +55,7 @@ namespace mov{
     public:
         ForthWord(std::string name, bool immediate);
 
-        void execute(Stack &stack, IP &ip) override;
+        void execute(IP &ip) override;
 
         /**
          * Append definition
@@ -94,11 +83,31 @@ namespace mov{
      * Get singletons from primitive_lookup
      */
     class Primitive : public iWord{
-        std::function<void(Stack&, IP&)> action;
-        Primitive(std::string name, primitive_words id, bool immediate, std::function<void(Stack&, IP&)> action, bool stateful);
+        std::function<void(IP&)> action;
+        Primitive(std::string name, primitive_words id, bool immediate, std::function<void(IP&)> action, bool stateful);
         friend class iWordGenerator;
     public:
-        void execute(Stack &stack, IP &ip) override;
+        void execute(IP &ip) override;
+    };
+
+    struct iNumber{
+        int value;
+        explicit iNumber(int value);
+    };
+
+    struct DictData : std::variant<iNumber, iWord*, ForthWord*, Primitive*>{
+        using dict_data_var_type = std::variant<iNumber, iWord*, ForthWord*, Primitive*>;
+        [[nodiscard]] bool is_number()      const{ return index() == 0;}
+        [[nodiscard]] bool is_word()        const{ return index() == 1 || index() == 2;}
+        [[nodiscard]] bool is_forth_word()  const{ return index() == 2;}
+        [[nodiscard]] bool is_primitive()   const{ return index() == 3;}
+
+        iNumber as_number();
+        iWord* as_word();
+        ForthWord* as_forth_word();
+        Primitive* as_primitive();
+
+        explicit DictData(dict_data_var_type data);
     };
 }
 

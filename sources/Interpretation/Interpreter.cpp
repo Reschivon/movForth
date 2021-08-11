@@ -23,13 +23,10 @@ Interpreter::Interpreter(const std::string& path) : input(path){
                 if(immediate)
                     stack.push(num);
                 else {
-                    auto forth_word =
-                            try_cast<ForthWord>(dictionary.back());
-
-                    if(forth_word){
+                    if(dictionary.back().is_forth_word()){
                         //dln("compile number ", num);
-                        forth_word->add(iData(find("literal")));
-                        forth_word->add(iData(num));
+                        dictionary.back().as_forth_word()->add(iData(find("literal")));
+                        dictionary.back().as_forth_word()->add(iData(num));
                     }else{
                         println("attempted to compile LITERAL to a primitive word");
                     }
@@ -46,13 +43,11 @@ Interpreter::Interpreter(const std::string& path) : input(path){
             if(iWordptr->immediate || immediate) {
                 auto dummy_ip = IP();
                 //dln("execute word ", Wordptr->_name());
-                iWordptr->execute(stack, dummy_ip);
+                iWordptr->execute(dummy_ip);
             } else {
-                auto forth_word = try_cast<ForthWord>(dictionary.back());
-
-                if(forth_word){
+                if(dictionary.back().is_forth_word()){
                     //dln("compile FW ", Wordptr->_name());
-                    forth_word->add(iData(iWordptr));
+                    dictionary.back().as_forth_word()->add(iData(iWordptr));
                 }else
                     println("attempted to compile xts to a primitive word");
             }
@@ -62,171 +57,189 @@ Interpreter::Interpreter(const std::string& path) : input(path){
 }
 
 iWordptr Interpreter::find(const std::string& name) {
-    auto find_result = std::find_if(dictionary.rbegin(), dictionary.rend(),
-                                    [name](iWordptr other){return other->name() == name;});
+    auto find_result = std::find_if(
+            dictionary.rbegin(),
+            dictionary.rend(),
+            [name](DictData other){return other.is_forth_word() && other.as_forth_word()->name() == name;});
 
     if(find_result == dictionary.rend())
         // try primitives
         return iWordGenerator.get(name);
 
-    return *find_result;
+    return find_result->as_forth_word();
 }
 
 
 void Interpreter::init_words(){
 
-    iWordGenerator.register_primitive("+", primitive_words::ADD, [](Stack &s, IP &i) {
-        s.push(s.pop_number() + s.pop_number());
+    iWordGenerator.register_primitive("+", primitive_words::ADD, [&](IP &i) {
+        stack.push(stack.pop_number() + stack.pop_number());
     });
 
-    iWordGenerator.register_primitive("-", primitive_words::SUBTRACT, [](Stack &s, IP &i) {
-        auto one = s.pop_number();
-        auto two = s.pop_number();
-        s.push(two - one);
-
-    });
-
-    iWordGenerator.register_primitive("*", primitive_words::MULTIPLY, [](Stack &s, IP &i) {
-        s.push(s.pop_number() * s.pop_number());
+    iWordGenerator.register_primitive("-", primitive_words::SUBTRACT, [&](IP &i) {
+        auto one = stack.pop_number();
+        auto two = stack.pop_number();
+        stack.push(two - one);
 
     });
 
-    iWordGenerator.register_primitive("/", primitive_words::DIVIDE, [](Stack &s, IP &i) {
-        s.push(s.pop_number() / s.pop_number());
+    iWordGenerator.register_primitive("*", primitive_words::MULTIPLY, [&](IP &i) {
+        stack.push(stack.pop_number() * stack.pop_number());
+
     });
 
-    iWordGenerator.register_primitive("swap", primitive_words::SWAP, [](Stack &s, IP &i) {
-        auto top = s.pop_number(), second = s.pop_number();
-        s.push(top);
-        s.push(second);
+    iWordGenerator.register_primitive("/", primitive_words::DIVIDE, [&](IP &i) {
+        stack.push(stack.pop_number() / stack.pop_number());
     });
 
-    iWordGenerator.register_primitive("rot", primitive_words::ROT, [](Stack &s, IP &i) {
-        auto top = s.pop_number();
-        auto second = s.pop_number();
-        auto third = s.pop_number();
-
-        s.push(second);// third
-        s.push(top);   // second
-        s.push(third); // top
+    iWordGenerator.register_primitive("swap", primitive_words::SWAP, [&](IP &i) {
+        auto top = stack.pop_number(), second = stack.pop_number();
+        stack.push(top);
+        stack.push(second);
     });
 
-    iWordGenerator.register_primitive("dup", primitive_words::DUP, [](Stack &s, IP &i) {
-        s.push(s.top());
+    iWordGenerator.register_primitive("rot", primitive_words::ROT, [&](IP &i) {
+        auto top = stack.pop_number();
+        auto second = stack.pop_number();
+        auto third = stack.pop_number();
+
+        stack.push(second);// third
+        stack.push(top);   // second
+        stack.push(third); // top
     });
 
-    iWordGenerator.register_primitive("drop", primitive_words::DROP, [](Stack &s, IP &i) {
-        s.pop_number();
+    iWordGenerator.register_primitive("dup", primitive_words::DUP, [&](IP &i) {
+        stack.push(stack.top());
     });
 
-    iWordGenerator.register_primitive(".", primitive_words::EMIT, [](Stack &s, IP &i) {
-        println(s.pop_number());
+    iWordGenerator.register_primitive("drop", primitive_words::DROP, [&](IP &i) {
+        stack.pop_number();
     });
 
-    iWordGenerator.register_primitive(".S", primitive_words::SHOW, [](Stack &s, IP &i) {
-        s.for_each([](iData thing) {
+    iWordGenerator.register_primitive(".", primitive_words::EMIT, [&](IP &i) {
+        println(stack.pop_number());
+    });
+
+    iWordGenerator.register_primitive(".S", primitive_words::SHOW, [&](IP &i) {
+        stack.for_each([](iData thing) {
             print(thing.to_string(), " ");
         });
         println("<-top");
     });
 
-    iWordGenerator.register_primitive("'", primitive_words::TICK, [&](Stack &s, IP &i) {
+    iWordGenerator.register_primitive("'", primitive_words::TICK, [&](IP &i) {
         std::string next_token = input.next_token();
         auto cfa = find(next_token);
         if (cfa != nullptr)
-            s.push(cfa);
+            stack.push(cfa);
     });
 
-    iWordGenerator.register_primitive(",", primitive_words::COMMA, [&](Stack &s, IP &i) {
-        if (auto last_word = try_cast<ForthWord>(dictionary.back())) {
-            last_word->add(s.pop());
-        } else {
-            println("attempted to compile to a primitive");
-        }
+    iWordGenerator.register_primitive(",", primitive_words::COMMA, [&](IP &i) {
+        if(immediate)
+            if(stack.top().is_number())
+                 dictionary.emplace_back(iNumber(stack.top().as_number()));
+            else println("COMMA pops a number from stack, but only XT was available");
+        else
+            if (dictionary.back().is_forth_word())
+                 dictionary.back().as_forth_word()->add(stack.pop());
+            else println("attempted to compile to a primitive");
     });
 
-    iWordGenerator.register_primitive("see", primitive_words::SEE, [&](Stack &s, IP &i) {
+    iWordGenerator.register_primitive("see", primitive_words::SEE, [&](IP &i) {
         println("\n\tSo you want to see?");
 
-        for (iWordptr word_pointer : dictionary) {
+        for (DictData dict_data : dictionary) {
+            if(!dict_data.is_forth_word()) continue;
+            iWordptr word_pointer = dict_data.as_word();
+
             std::cout << std::setfill(' ') << std::setw(15) <<
                       word_pointer->name() + "  ";
             print((word_pointer->immediate) ? "IMM  " : "     ");
 
-            if (auto forth_word = try_cast<ForthWord>(word_pointer))
-                forth_word->definition_to_string();
+            if (dict_data.is_forth_word())
+                dict_data.as_forth_word()->definition_to_string();
             println();
         }
         println();
     });
 
-    iWordGenerator.register_lambda_word("[", primitive_words::TOIMMEDIATE, [&](Stack &s, IP &i) {
+    iWordGenerator.register_lambda_word("[", primitive_words::TOIMMEDIATE, [&](IP &i) {
         immediate = true;
     }, true);
 
-    iWordGenerator.register_primitive("]", primitive_words::TOCOMPILE, [&](Stack &s, IP &i) {
+    iWordGenerator.register_primitive("]", primitive_words::TOCOMPILE, [&](IP &i) {
         immediate = false;
     });
 
-    iWordGenerator.register_lambda_word("immediate", primitive_words::IMMEDIATE, [&](Stack &s, IP &i) {
-        dictionary.back()->immediate = true;
+    iWordGenerator.register_lambda_word("immediate", primitive_words::IMMEDIATE, [&](IP &i) {
+        if(!dictionary.back().is_forth_word()){
+            println("tried to set immediate on number data");
+            return;
+        }
+        dictionary.back().as_forth_word()->immediate = true;
     }, true);
 
-    iWordGenerator.register_primitive("@", primitive_words::FETCH, [&](Stack &s, IP &i) {
-        dictionary.back()->immediate = true;
+    iWordGenerator.register_primitive("@", primitive_words::FETCH, [&](IP &i) {
+        //TODO  nothing ... yet
     });
 
-    iWordGenerator.register_primitive("!", primitive_words::STORE, [&](Stack &s, IP &i) {
+    iWordGenerator.register_primitive("!", primitive_words::STORE, [&](IP &i) {
         int address = stack.pop_number();
         iData val = stack.pop();
-        auto last_word = try_cast<ForthWord>(dictionary.back());
-        if (!last_word)
+        if (!dictionary.back().is_forth_word())
            println("shit");
         else {
-            last_word->set(address, val);
+            dictionary.back().as_forth_word()->set(address, val);
         }
     });
 
-    iWordGenerator.register_primitive("branch", primitive_words::BRANCH, [&](Stack &s, IP &ip) {
+    iWordGenerator.register_primitive("branch", primitive_words::BRANCH, [&](IP &ip) {
         ip += (ip+1)->as_number();
     }, true);
 
-    iWordGenerator.register_primitive("branchif", primitive_words::BRANCHIF, [&](Stack &s, IP &ip) {
+    iWordGenerator.register_primitive("branchif", primitive_words::BRANCHIF, [&](IP &ip) {
         auto next_data = ip+1;
-        if (s.pop_number() == 0)
+        if (stack.pop_number() == 0)
             ip += next_data->as_number();
         else
             ip++;
     }, true);
 
-    iWordGenerator.register_primitive("literal", primitive_words::LITERAL, [&](Stack &s, IP &ip) {
-        s.push(*(++ip));
+    iWordGenerator.register_primitive("literal", primitive_words::LITERAL, [&](IP &ip) {
+        stack.push(*(++ip));
     }, true);
 
     // Use HERE for relative computations only
     // Does not represent specific address
-    iWordGenerator.register_primitive("here", primitive_words::HERE, [&](Stack &s, IP &i) {
-        auto last_word = try_cast<ForthWord>(dictionary.back());
-        if (!last_word)
-            println("Define some words before calling HERE");
-        else
-            s.push(last_word->def().size());
+    iWordGenerator.register_primitive("here", primitive_words::HERE, [&](IP &i) {
+        if(immediate){
+            // words being execud, no point in compiling branches since nothing
+            // is in state of half-compilation. Prime time for ALLOTing
+            dictionary.emplace_back(iNumber(0));
+        }else{
+            // words being compiled, very bad time for ALLOT right now
+            // therefore we can assume user wants to mark positions for BRANCH
+            if (!dictionary.back().is_forth_word())
+                println("Define some words before calling HERE");
+            else
+                stack.push((int) dictionary.back().as_forth_word()->def().size());
+        }
     });
 
-    iWordGenerator.register_primitive("create", primitive_words::CREATE, [&](Stack &s, IP &i) {
+    iWordGenerator.register_primitive("create", primitive_words::CREATE, [&](IP &i) {
         std::string next_token = input.next_token();
         //dln("    consume ", next_token);
-        dictionary.push_back(new ForthWord(next_token, false));
+        dictionary.emplace_back(new ForthWord(next_token, false));
     });
 
 
     auto colon_word = new ForthWord(":", false);
     colon_word->add(iData(find("create")));
     colon_word->add(iData(find("]")));
-    dictionary.push_back(colon_word);
+    dictionary.emplace_back(colon_word);
 
     auto exit_word = new ForthWord(";", true);
     exit_word->add(iData(find("[")));
-    dictionary.push_back(exit_word);
+    dictionary.emplace_back(exit_word);
 }
 

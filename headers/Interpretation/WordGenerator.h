@@ -12,11 +12,11 @@ namespace mov {
                 generator_lookup{};
 
         friend class Interpreter;
-        void register_primitive(const std::string& name, primitive_words id, std::function<void(Stack &, IP &)> action, bool stateful = false) {
+        void register_primitive(const std::string& name, primitive_words id, std::function<void(IP &)> action, bool stateful = false) {
             register_lambda_word(name, id, std::move(action), false, stateful);
         }
 
-        void register_lambda_word(const std::string& name, primitive_words id, std::function<void(Stack&, IP&)> action, bool immediate, bool stateful = false){
+        void register_lambda_word(const std::string& name, primitive_words id, std::function<void(IP&)> action, bool immediate, bool stateful = false){
             generator_lookup[name] = [=]{
                 return new Primitive(name, id, immediate, action, stateful);
             };

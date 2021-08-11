@@ -13,7 +13,7 @@ namespace mov {
      */
     class Interpreter {
         file_input input;
-        std::vector<iWordptr> dictionary;
+        std::vector<DictData> dictionary;
         Stack stack;
         bool immediate = true;
         iWordGenerator iWordGenerator;

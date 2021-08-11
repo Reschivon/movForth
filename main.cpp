@@ -31,6 +31,5 @@ int main() {
     // This function is still incomplete
     println();
     mov::StackGrapher::show_word_info(converted_word);
-
 }
 

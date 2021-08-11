@@ -57,7 +57,7 @@ sWordptr StackGrapher::show_word_info(sWordptr wordptr) {
     println("push:" , wordptr->effects.num_pushed,
             " pop:" , wordptr->effects.num_popped);
 
-    println("per-instruction graph:");
+    println();
     for(const auto& bbe : wordptr->basic_blocks){
         println("bbe " + std::to_string(bbe.index) + ":");
         print("    ");
