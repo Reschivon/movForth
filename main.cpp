@@ -20,9 +20,9 @@ int main() {
     mov::StackGrapher stackGrapher;
 
     // Do static analysis on "test".
-    // 1. Control Analysis (compute a definition's into basic
-    //    blocks and look for stack size inconsistencies between
-    //    basic block edges)
+    // 1. Control Analysis (compute the basic blocks of
+    //    a definition and look for stack size inconsistencies
+    //    between basic block edges)
     // 2. Data Flow Analysis (graph of stack data as it gets
     //    mutated by words)
     auto converted_word = stackGrapher.static_analysis(word_to_compile);

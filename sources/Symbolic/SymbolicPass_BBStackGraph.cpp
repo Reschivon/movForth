@@ -14,15 +14,8 @@ struct Conflict{
 };
 
 void explore_graph_dfs(NodeList stack, BasicBlock &bb){
-    if(bb.visited){
-        if(stack.size() != bb.enter_stack_size){
-            println("Control flow edge inconsistency on edge entering bb#" , bb.index);
-            println("Past stack size: " , bb.enter_stack_size , " current: " , stack.size());
-        }
-        return;
-    }else{
-        bb.enter_stack_size = (int) stack.size();
-    }
+    if(bb.visited) return;
+             else  bb.enter_stack_size = (int) stack.size();
 
     RegisterGen register_gen((int) bb.index);
 
