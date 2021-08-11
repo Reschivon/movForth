@@ -21,15 +21,16 @@ namespace mov{
         TOIMMEDIATE =13,
         TOCOMPILE   =14,
         IMMEDIATE   =15,
-        FETCH       =16,
-        STORE       =17,
-        BRANCH      =18,
-        BRANCHIF    =19,
-        LITERAL     =20,
-        HERE        =21,
-        CREATE      =22,
-        EXIT        =23,
-        OTHER       =24
+        ALLOT       =16,
+        FETCH       =17,
+        STORE       =18,
+        BRANCH      =19,
+        BRANCHIF    =20,
+        LITERAL     =21,
+        HERE        =22,
+        CREATE      =23,
+        EXIT        =24,
+        OTHER       =25
     };
 }
 #endif //MOVFORTH_PRIMITIVEENUMS_H

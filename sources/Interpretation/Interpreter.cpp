@@ -72,33 +72,33 @@ iWordptr Interpreter::find(const std::string& name) {
 
 void Interpreter::init_words(){
 
-    iWordGenerator.register_primitive("+", primitive_words::ADD, [&](IP &i) {
+    iWordGenerator.register_primitive("+", primitive_words::ADD, [&](IP &ip) {
         stack.push(stack.pop_number() + stack.pop_number());
     });
 
-    iWordGenerator.register_primitive("-", primitive_words::SUBTRACT, [&](IP &i) {
+    iWordGenerator.register_primitive("-", primitive_words::SUBTRACT, [&](IP &ip) {
         auto one = stack.pop_number();
         auto two = stack.pop_number();
         stack.push(two - one);
 
     });
 
-    iWordGenerator.register_primitive("*", primitive_words::MULTIPLY, [&](IP &i) {
+    iWordGenerator.register_primitive("*", primitive_words::MULTIPLY, [&](IP &ip) {
         stack.push(stack.pop_number() * stack.pop_number());
 
     });
 
-    iWordGenerator.register_primitive("/", primitive_words::DIVIDE, [&](IP &i) {
+    iWordGenerator.register_primitive("/", primitive_words::DIVIDE, [&](IP &ip) {
         stack.push(stack.pop_number() / stack.pop_number());
     });
 
-    iWordGenerator.register_primitive("swap", primitive_words::SWAP, [&](IP &i) {
+    iWordGenerator.register_primitive("swap", primitive_words::SWAP, [&](IP &ip) {
         auto top = stack.pop_number(), second = stack.pop_number();
         stack.push(top);
         stack.push(second);
     });
 
-    iWordGenerator.register_primitive("rot", primitive_words::ROT, [&](IP &i) {
+    iWordGenerator.register_primitive("rot", primitive_words::ROT, [&](IP &ip) {
         auto top = stack.pop_number();
         auto second = stack.pop_number();
         auto third = stack.pop_number();
@@ -108,33 +108,33 @@ void Interpreter::init_words(){
         stack.push(third); // top
     });
 
-    iWordGenerator.register_primitive("dup", primitive_words::DUP, [&](IP &i) {
+    iWordGenerator.register_primitive("dup", primitive_words::DUP, [&](IP &ip) {
         stack.push(stack.top());
     });
 
-    iWordGenerator.register_primitive("drop", primitive_words::DROP, [&](IP &i) {
+    iWordGenerator.register_primitive("drop", primitive_words::DROP, [&](IP &ip) {
         stack.pop_number();
     });
 
-    iWordGenerator.register_primitive(".", primitive_words::EMIT, [&](IP &i) {
+    iWordGenerator.register_primitive(".", primitive_words::EMIT, [&](IP &ip) {
         println(stack.pop_number());
     });
 
-    iWordGenerator.register_primitive(".S", primitive_words::SHOW, [&](IP &i) {
+    iWordGenerator.register_primitive(".S", primitive_words::SHOW, [&](IP &ip) {
         stack.for_each([](iData thing) {
             print(thing.to_string(), " ");
         });
         println("<-top");
     });
 
-    iWordGenerator.register_primitive("'", primitive_words::TICK, [&](IP &i) {
+    iWordGenerator.register_primitive("'", primitive_words::TICK, [&](IP &ip) {
         std::string next_token = input.next_token();
         auto cfa = find(next_token);
         if (cfa != nullptr)
             stack.push(cfa);
     });
 
-    iWordGenerator.register_primitive(",", primitive_words::COMMA, [&](IP &i) {
+    iWordGenerator.register_primitive(",", primitive_words::COMMA, [&](IP &ip) {
         if(immediate)
             if(stack.top().is_number())
                  dictionary.emplace_back(stack.top().as_number());
@@ -145,7 +145,7 @@ void Interpreter::init_words(){
             else println("attempted to compile to a primitive");
     });
 
-    iWordGenerator.register_primitive("see", primitive_words::SEE, [&](IP &i) {
+    iWordGenerator.register_primitive("see", primitive_words::SEE, [&](IP &ip) {
         println("\n\tSo you want to see?");
 
         for (iData dict_data : dictionary) {
@@ -163,15 +163,15 @@ void Interpreter::init_words(){
         println();
     });
 
-    iWordGenerator.register_lambda_word("[", primitive_words::TOIMMEDIATE, [&](IP &i) {
+    iWordGenerator.register_lambda_word("[", primitive_words::TOIMMEDIATE, [&](IP &ip) {
         immediate = true;
     }, true);
 
-    iWordGenerator.register_primitive("]", primitive_words::TOCOMPILE, [&](IP &i) {
+    iWordGenerator.register_primitive("]", primitive_words::TOCOMPILE, [&](IP &ip) {
         immediate = false;
     });
 
-    iWordGenerator.register_lambda_word("immediate", primitive_words::IMMEDIATE, [&](IP &i) {
+    iWordGenerator.register_lambda_word("immediate", primitive_words::IMMEDIATE, [&](IP &ip) {
         if(!dictionary.back().is_forth_word()){
             println("tried to set immediate on number data");
             return;
@@ -179,11 +179,17 @@ void Interpreter::init_words(){
         dictionary.back().as_forth_word()->immediate = true;
     }, true);
 
-    iWordGenerator.register_primitive("@", primitive_words::FETCH, [&](IP &i) {
-        //TODO  nothing ... yet
+
+    iWordGenerator.register_primitive("allot", primitive_words::ALLOT, [&](IP &ip) {
+        for(int i = 0; i < stack.pop_number(); i++)
+            dictionary.emplace_back(0);
     });
 
-    iWordGenerator.register_primitive("!", primitive_words::STORE, [&](IP &i) {
+    iWordGenerator.register_primitive("@", primitive_words::FETCH, [&](IP &ip) {
+        stack.push(dictionary.at(stack.pop_number()));
+    });
+
+    iWordGenerator.register_primitive("!", primitive_words::STORE, [&](IP &ip) {
         if(immediate){
             int address = stack.pop_number();
             iData val = stack.pop();
@@ -218,7 +224,7 @@ void Interpreter::init_words(){
 
     // Use HERE for relative computations only
     // Does not represent specific address
-    iWordGenerator.register_primitive("here", primitive_words::HERE, [&](IP &i) {
+    iWordGenerator.register_primitive("here", primitive_words::HERE, [&](IP &ip) {
         if(immediate){
             // words being execud, no point in compiling branches since nothing
             // is in state of half-compilation. Prime time for ALLOTing
@@ -233,7 +239,7 @@ void Interpreter::init_words(){
         }
     });
 
-    iWordGenerator.register_primitive("create", primitive_words::CREATE, [&](IP &i) {
+    iWordGenerator.register_primitive("create", primitive_words::CREATE, [&](IP &ip) {
         std::string next_token = input.next_token();
         //dln("    consume ", next_token);
         dictionary.emplace_back(new ForthWord(next_token, false));
