@@ -18,7 +18,7 @@ ForthWord::ForthWord(std::string name, bool immediate)
     : iWord(std::move(name), immediate, false) {}
 
 void ForthWord::execute(IP &ip) {
-    for(IP it = definition.begin(); it < definition.end(); it++) {
+    for(auto it = definition.begin(); it < definition.end(); it++) {
 
         //println("       [exec] ", (it->is_word()?it->as_word()->to_string():std::_name(it->as_number())), " ");
 
