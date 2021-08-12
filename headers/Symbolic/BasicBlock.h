@@ -12,7 +12,7 @@ namespace mov{
             return id++;
         }
     private:
-        unsigned int id = 0;
+        unsigned int id = 1;
     };
 
     struct Instruction;

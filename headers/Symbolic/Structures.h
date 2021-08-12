@@ -47,12 +47,12 @@ namespace mov {
     };
 
     struct Register{
-        int ID = -1;
-        int groupID = -1;
-        enum registerType {UNDEF, NORMAL, PARAM} register_type = UNDEF;
+        int index = -1;
+        int bb_index = -1;
+        enum registerType {UNDEF, NORMAL, INPUT, BBINPUT} register_type = UNDEF;
 
         Register operator++(int){
-            ID++;
+            index++;
             return *this;
         }
 
@@ -60,9 +60,11 @@ namespace mov {
             switch (register_type)
             {
                 case NORMAL:
-                    return "(register " + std::to_string(groupID) + "-" + std::to_string(ID) + ")";
-                case PARAM:
-                    return "(input " + std::to_string(groupID) + "-" + std::to_string(ID) + ")";
+                    return "(register " + std::to_string(bb_index) + "-" + std::to_string(index) + ")";
+                case INPUT:
+                    return "(input    " + std::to_string(bb_index) + "-" + std::to_string(index) + ")";
+                case BBINPUT:
+                    return "(BBinput  " + std::to_string(bb_index) + "-" + std::to_string(index) + ")";
                 case UNDEF:
                     return "(undefined)";
                 default:
@@ -73,21 +75,28 @@ namespace mov {
 
     struct RegisterGen{
         Register get(){
-            auto ret = current_id;
-            current_id++;
+            auto ret = current;
+            current++;
             return ret;
         }
         Register get_input(){
-            auto ret = current_param_id;
-            current_param_id++;
+            auto ret = current_param;
+            current_param++;
+            return ret;
+        }
+
+        Register get_bb_input(){
+            auto ret = current_bb_input;
+            current_bb_input++;
             return ret;
         }
 
         explicit RegisterGen(int groupID) : groupID(groupID) {}
     private:
         const int groupID;
-        Register current_id =       {0, groupID, Register::NORMAL};
-        Register current_param_id = {0, groupID, Register::PARAM};
+        Register current =       {1, groupID, Register::NORMAL};
+        Register current_param = {1, groupID, Register::INPUT};
+        Register current_bb_input = {1, groupID, Register::BBINPUT};
     };
 
     struct Node{
@@ -107,7 +116,7 @@ namespace mov {
             back->forward_edge_register = id;
         }
 
-        static void redefine_edge_behind(Node *node, Register id){
+        static void redefine_preceding_edge(Node *node, Register id){
             node->edge_register = id;
             node->target->forward_edge_register = id;
         }

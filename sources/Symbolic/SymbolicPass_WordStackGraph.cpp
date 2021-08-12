@@ -15,7 +15,7 @@ struct Conflict{
 
 void explore_graph_dfs(NodeList stack, BasicBlock &bb){
     if(bb.visited) return;
-             else  bb.enter_stack_size = (int) stack.size();
+    else           bb.enter_stack_size = (int) stack.size();
 
     RegisterGen register_gen((int) bb.index);
 
@@ -23,9 +23,13 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
     println("[bb#: " , bb.index , "] BEGIN stack graph");
     indent();
 
+    for(Node *thing : stack)
+        Node::redefine_preceding_edge(thing, register_gen.get_bb_input());
+
+    // transformed stack == stack, but I want to make
+    // it clear that stack has been modified
     NodeList transformed_stack = StackGrapher::basic_block_stack_graph(stack,
-                                                                       bb,
-                                                                       register_gen);
+                                                                       bb,register_gen);
     StackGrapher::compute_matching_pairs(bb);
 
     unindent();
@@ -64,9 +68,11 @@ void StackGrapher::word_stack_graph(sWordptr wordptr) {
     println();
     println("Generate stack graph for all BBs of " , wordptr->name);
 
+    // build stack graph
     NodeList stack;
     explore_graph_dfs(stack, wordptr->basic_blocks.front());
 
+    // compute total effects of word
     // propagate Effects through a single control path
     auto &curr_bb = wordptr->basic_blocks.front();
     Effects net_effects;

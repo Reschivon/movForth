@@ -17,9 +17,9 @@ void StackGrapher::compute_matching_pairs(BasicBlock &bb) {
         {
             if (next->target == nullptr)
                 break;
-            if (next->edge_register.register_type == Register::PARAM)
+            if (next->edge_register.register_type == Register::INPUT)
             {
-                bb.effects.out_in_pairs.emplace_back(i, next->edge_register.ID);
+                bb.effects.out_in_pairs.emplace_back(i, next->edge_register.index);
                 break;
             }
             next = next->target;
