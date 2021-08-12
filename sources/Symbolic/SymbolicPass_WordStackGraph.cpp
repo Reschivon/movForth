@@ -2,79 +2,85 @@
 
 using namespace mov;
 
-void propagate_stack(NodeList &stack,
-                     Instruction *instruction,
-                     BasicBlock &base,
-                     RegisterGen &register_gen) {
-
-    const auto effects = instruction->linked_word->effects;
-
-    // if the stack does not have at least (effects.num_popped) items for us,
-    // then we will create input nodes until there are enough items
-    unsigned int nodes_from_stack = std::min(effects.num_popped, (int) stack.size());
-    unsigned int nodes_from_input = std::max(effects.num_popped - (int)stack.size(), 0);
-
-    // pop input nodes from stack to current instruction
-    NodeList::move_top_elements(stack, instruction->pop_nodes,
-                                (int) nodes_from_stack);
-
-    while (nodes_from_input --> 0)
-        Node::link(base.my_graphs_inputs.new_front(),
-                   instruction->pop_nodes.new_back(),
-                   register_gen.get_input());
-
-    // make empty output nodes
-    for (int i = 0; i < effects.num_pushed; i++)
-        instruction->push_nodes.new_back();
-
-    // link output and input nodes that represent the same data
-    for (auto out_in_pair : effects.out_in_pairs)
-    {
-        auto pop_node = instruction->pop_nodes[out_in_pair.second];
-        auto push_node = instruction->push_nodes[out_in_pair.first];
-        Node::link(pop_node, push_node, pop_node->edge_register);
+struct Conflict{
+    BasicBlock *from, *to;
+    Conflict(BasicBlock *from, BasicBlock *to)
+        : from(from), to(to) {}
+    [[nodiscard]] std::string to_string() const{
+        return "conflict from bb#" +std::to_string(from->index) +
+                " to bb#" + std::to_string(to->index);
     }
 
-    // link output nodes to stack
-    for (auto push_node : instruction->push_nodes)
-        if(push_node->target)
-            Node::link_bidirection(push_node, stack.new_back(), push_node->edge_register);
-        else
-            Node::link_bidirection(push_node, stack.new_back(), register_gen.get());
+};
 
-    print("pops:");
-    for (auto node : instruction->pop_nodes)
-        print(" ", node->edge_register.to_string());
-    println();
+void explore_graph_dfs(NodeList stack, BasicBlock &bb){
+    if(bb.visited) return;
+             else  bb.enter_stack_size = (int) stack.size();
 
-    print("pushes:");
-    for (auto thing : instruction->push_nodes)
-        print(" ", thing->forward_edge_register.to_string());
-    println();
-}
-
-NodeList StackGrapher::basic_block_stack_graph(NodeList &running_stack, BasicBlock &bb,
-                                               RegisterGen register_gen) {
+    RegisterGen register_gen((int) bb.index);
 
     println();
-    println("generate stack graph for all instructions in bb#" , bb.index);
+    println("[bb#: " , bb.index , "] BEGIN stack graph");
+    indent();
 
-    for (auto instruction : bb.instructions)
-    {
-        auto definee = instruction->linked_word;
+    NodeList transformed_stack = StackGrapher::basic_block_stack_graph(stack,
+                                                                       bb,
+                                                                       register_gen);
+    StackGrapher::compute_matching_pairs(bb);
 
-        // update the bb's total Effects
-        bb.effects.acquire_side_effects(definee->effects);
+    unindent();
+    println("[bb#: " , bb.index , "] END stack graph");
+    println("push:" , bb.effects.num_pushed,
+            " pop:" , bb.effects.num_popped);
 
-        // propagate the stack state
-        dln();
-        dln("[", definee->name, "]");
-        propagate_stack(running_stack, instruction, bb, register_gen);
+    print("next: ");
+    for(auto next : bb.nextBBs())
+        print(next.get().index);
+    println();
 
-        dln();
-        dln("[stack:]");
-        for (auto thing : running_stack)
-            dln( thing->edge_register.to_string());
+    int exit_inputs = bb.enter_inputs + bb.effects.num_popped;
+
+    for(auto next : bb.nextBBs()){
+        if(next.get().visited){
+            if(exit_inputs != next.get().enter_inputs){
+                println("[FATAL] input size mismatch on edge from bb#" , bb.index , " to bb#" , next.get().index);
+                println("Past inputs: " , next.get().enter_inputs , " current: " , bb.enter_inputs);
+            }
+            if(transformed_stack.size() != next.get().enter_stack_size){
+                println("[FATAL] Control flow edge mismatch on edge from bb#" , bb.index , " to bb#" , next.get().index);
+                println("Past stack size: " , next.get().enter_stack_size , " current: " , transformed_stack.size());
+            }
+        }
+
+        next.get().enter_inputs = exit_inputs;
+        next.get().enter_stack_size = (int) transformed_stack.size();
+        explore_graph_dfs(transformed_stack, next);
     }
-    return running_stack;
+
+    bb.visited = true;
 }
+
+void StackGrapher::word_stack_graph(sWordptr wordptr) {
+    println();
+    println("Generate stack graph for all BBs of " , wordptr->name);
+
+    NodeList stack;
+    explore_graph_dfs(stack, wordptr->basic_blocks.front());
+
+    // propagate Effects through a single control path
+    auto &curr_bb = wordptr->basic_blocks.front();
+    Effects net_effects;
+    while (!curr_bb.is_exit()){
+        net_effects.acquire_side_effects(curr_bb.effects);
+        curr_bb = curr_bb.nextBBs().front();
+    }
+    wordptr->effects = net_effects;
+
+    // last BB guaranteed to be return
+    auto &lastBB = wordptr->basic_blocks.back();
+    wordptr->effects.num_popped = lastBB.enter_inputs;
+    wordptr->effects.num_pushed = lastBB.enter_stack_size;
+
+}
+
+

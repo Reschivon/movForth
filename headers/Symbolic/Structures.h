@@ -106,6 +106,11 @@ namespace mov {
 
             back->forward_edge_register = id;
         }
+
+        static void redefine_edge_behind(Node *node, Register id){
+            node->edge_register = id;
+            node->target->forward_edge_register = id;
+        }
     };
 
     // thin wrapper for convenience
