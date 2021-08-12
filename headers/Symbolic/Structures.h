@@ -60,13 +60,13 @@ namespace mov {
             switch (register_type)
             {
                 case NORMAL:
-                    return "(register " + std::to_string(groupID) + ":" + std::to_string(ID) + ")";
+                    return "(register " + std::to_string(groupID) + "-" + std::to_string(ID) + ")";
                 case PARAM:
-                    return "(input " + std::to_string(groupID) + ":" + std::to_string(ID) + ")";
+                    return "(input " + std::to_string(groupID) + "-" + std::to_string(ID) + ")";
                 case UNDEF:
-                    return "(undefined " + std::to_string(groupID) + ":" + std::to_string(ID) + ")";
+                    return "(undefined)";
                 default:
-                    return "(fucked " + std::to_string(groupID) + ":" + std::to_string(ID) + ")";
+                    return "(fucked)";
             }
         }
     };

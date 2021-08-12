@@ -62,7 +62,7 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
 
 void StackGrapher::word_stack_graph(sWordptr wordptr) {
     println();
-    println("BB cyclic pass");
+    println("Generate stack graph for all BBs of " , wordptr->name);
 
     NodeList stack;
     explore_graph_dfs(stack, wordptr->basic_blocks.front());

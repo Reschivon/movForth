@@ -56,6 +56,9 @@ void propagate_stack(NodeList &stack,
 NodeList StackGrapher::basic_block_stack_graph(NodeList &running_stack, BasicBlock &bb,
                                                RegisterGen register_gen) {
 
+    println();
+    println("generate stack graph for all instructions in bb#" , bb.index);
+
     for (auto instruction : bb.instructions)
     {
         auto definee = instruction->linked_word;

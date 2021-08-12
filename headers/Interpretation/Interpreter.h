@@ -16,7 +16,7 @@ namespace mov {
         std::vector<iData> dictionary;
         Stack stack;
         bool immediate = true;
-        iWordGenerator iWordGenerator;
+        iWordGenerator word_generator;
 
         void init_words();
 

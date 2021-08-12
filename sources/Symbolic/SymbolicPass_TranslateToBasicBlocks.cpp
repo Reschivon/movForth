@@ -14,6 +14,7 @@ private:
 
 public:
     using it_type = std::vector<BasicBlock>::iterator;
+
     BasicBlockBuilder(sWordptr new_word, short instructions)
         : new_word(new_word)
     {
@@ -58,27 +59,29 @@ public:
 sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
     auto new_word = new sWord(template_word->name(), primitive_words::OTHER);
 
-    println("make basic block entries for [" , template_word->name() , "]");
+    println("compute basic blocks for [" , template_word->name() , "]");
 
     // cache this word for the future
     visited_words[template_word] = new_word;
 
     BasicBlockBuilder bb_builder(new_word, (short) template_word->def().size());
 
-    // precompute BB and their entry points
+    // precompute BB entry points
     for(int i = 0; i < template_word->def().size(); i++){
         auto &template_sub_def = template_word->def().at(i);
         if(!template_sub_def.is_word())
             continue;
 
         if(template_sub_def.as_word()->id == primitive_words::BRANCH){
-            bb_builder.make_bb_for_jump(i, template_word->def()[i + 1].as_number());
+            auto next_number = template_word->def()[i + 1].as_number();
+            bb_builder.make_bb_for_jump(i, next_number);
         }
 
         if(template_sub_def.as_word()->id == primitive_words::BRANCHIF){
             bb_builder.make_bb_for_jump(i, 1);
             // must come after //TODO
-            bb_builder.make_bb_for_jump(i, template_word->def()[i + 1].as_number());
+            auto next_number = template_word->def()[i + 1].as_number();
+            bb_builder.make_bb_for_jump(i, next_number);
         }
     }
 
@@ -102,13 +105,13 @@ sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
         else if(template_sub_def->id == primitive_words::BRANCHIF)
             curr_bb->instructions.push_back(new BranchIfInstruction(
                     new_sub_def, next_data,
-                    bb_builder.get_bb_at_index(i+1+1).base(),
+                    bb_builder.get_bb_at_index(i+2).base(),
                     bb_builder.get_bb_for_branch_at(i).base()));
         else
             curr_bb->instructions.push_back(new Instruction(new_sub_def, next_data));
 
         // the next word will be consumed, so skip
-        if(template_word->def()[i].as_word()->stateful)
+        if(template_sub_def->stateful)
             i++;
 
         // reached the end of a BB, go to next

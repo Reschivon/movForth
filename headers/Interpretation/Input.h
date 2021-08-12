@@ -18,6 +18,14 @@ namespace mov {
          * @return std::string of token
          */
         virtual std::string next_token() = 0;
+
+    protected:
+        bool has_next = true;
+
+    public:
+        bool open(){
+            return has_next;
+        }
     };
 
 
@@ -32,8 +40,7 @@ namespace mov {
             bool open = (input >> ret).operator bool();
             if(open)
                 return ret;
-            return
-                    "";
+            return "";
         }
     };
 
@@ -55,9 +62,27 @@ namespace mov {
         }
 
         std::string next_token() override {
-            std::string ret;
-            if(file >> ret)
-                return ret;
+            std::string tok;
+
+            if(file >> tok)
+            {
+                std::string::size_type slash_index = tok.find('\\');
+                if(slash_index != std::string::npos){
+                    tok = tok.substr(0, slash_index);
+                    file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                }
+            }else
+            {
+                has_next = false;
+            }
+
+            if(tok.empty()){
+                if(has_next)
+                    return next_token();
+            }else{
+                return tok;
+            }
+
             return "";
         }
     };

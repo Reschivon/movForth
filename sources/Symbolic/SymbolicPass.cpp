@@ -34,14 +34,14 @@ sWordptr StackGrapher::static_analysis(iWordptr original_word) {
     if (auto forth_word = dynamic_cast<ForthWord *>(original_word))
     {
         dln();
-        dln("compute [", original_word->name(), "]");
+        dln("analyze [", original_word->name(), "]");
         indent();
 
         auto converted = translate_to_basic_blocks(forth_word);
         word_stack_graph(converted);
 
         unindent();
-        dln("finished compute [", original_word->name(), "]");
+        dln("finished analyzing [", original_word->name(), "]");
 
         return converted;
     }
