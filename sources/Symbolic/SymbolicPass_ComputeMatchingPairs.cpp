@@ -4,9 +4,6 @@ using namespace mov;
 
 void StackGrapher::compute_matching_pairs(BasicBlock &bb) {
 
-    bb.effects.num_popped = (int) bb.my_graphs_inputs.size();
-    bb.effects.num_pushed = (int) bb.my_graphs_outputs.size();
-
     // matching pairs
     for (int i = 0; i < bb.my_graphs_outputs.size(); i++)
     {

@@ -29,8 +29,6 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
 
     unindent();
     println("[bb#: " , bb.index , "] END stack graph");
-    println("push:" , bb.effects.num_pushed,
-            " pop:" , bb.effects.num_popped);
 
     print("next BBs:");
     for(auto next : bb.nextBBs())

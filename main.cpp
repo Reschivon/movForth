@@ -28,7 +28,7 @@ int main() {
     auto converted_word = stackGrapher.static_analysis(word_to_compile);
 
     // Show the fruits of labor from static analysis
-    // This function is still incomplete
+    println();
     println();
     mov::StackGrapher::show_word_info(converted_word);
 }
