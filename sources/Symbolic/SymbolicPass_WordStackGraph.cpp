@@ -74,11 +74,12 @@ void StackGrapher::word_stack_graph(sWordptr wordptr) {
 
     // compute total effects of word
     // propagate Effects through a single control path
-    auto &curr_bb = wordptr->basic_blocks.front();
+    // TODO awkward *cur_bb since there's some mischevious reference behavior
+    auto *curr_bb = wordptr->basic_blocks.begin().base();
     Effects net_effects;
-    while (!curr_bb.is_exit()){
-        net_effects.acquire_side_effects(curr_bb.effects);
-        curr_bb = curr_bb.nextBBs().front();
+    while (!curr_bb->is_exit()){
+        net_effects.acquire_side_effects(curr_bb->effects);
+        curr_bb = &curr_bb->nextBBs().begin().base()->get();
     }
     wordptr->effects = net_effects;
 
@@ -86,7 +87,6 @@ void StackGrapher::word_stack_graph(sWordptr wordptr) {
     auto &lastBB = wordptr->basic_blocks.back();
     wordptr->effects.num_popped = lastBB.enter_inputs;
     wordptr->effects.num_pushed = lastBB.enter_stack_size;
-
 }
 
 

@@ -59,6 +59,7 @@ sWordptr StackGrapher::show_word_info(sWordptr wordptr) {
             " pop:" , wordptr->effects.num_popped);
 
     println();
+    println("Basic Blocks:");
     for(const auto& bbe : wordptr->basic_blocks){
         println("bbe " + std::to_string(bbe.index) + ":");
         print("    ");
@@ -67,6 +68,41 @@ sWordptr StackGrapher::show_word_info(sWordptr wordptr) {
         println();
     }
     println();
+
+    println();
+    println("Stack Graph:");
+
+    for(auto &bb : wordptr->basic_blocks){
+        println();
+        println("[bb#: " , bb.index , "] BEGIN stack graph");
+        indent();
+
+        for(auto &instr : bb.instructions){
+            // propagate the stack state
+            dln();
+            dln("[", instr->name(), "]");
+
+            print("pops:");
+            for (auto node : instr->pop_nodes)
+                print(" ", node->edge_register.to_string());
+            println();
+
+            print("pushes:");
+            for (auto thing : instr->push_nodes)
+                print(" ", thing->forward_edge_register.to_string());
+            println();
+        }
+
+        unindent();
+        println("[bb#: " , bb.index , "] END stack graph");
+        println("push:" , bb.effects.num_pushed,
+                " pop:" , bb.effects.num_popped);
+
+        print("next BBs: ");
+        for(auto next : bb.nextBBs())
+            print(next.get().index);
+        println();
+    }
 
     return wordptr;
 }
