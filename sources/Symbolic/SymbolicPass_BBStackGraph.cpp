@@ -42,22 +42,22 @@ void propagate_stack(NodeList &stack,
         else
             Node::link_bidirection(push_node, stack.new_back(), register_gen.get());
 
-    print("pops:");
+    d("pops:");
     for (auto node : instruction->pop_nodes)
-        print(" ", node->edge_register.to_string());
-    println();
+        d(" ", node->edge_register.to_string());
+    dln();
 
-    print("pushes:");
+    d("pushes:");
     for (auto thing : instruction->push_nodes)
-        print(" ", thing->forward_edge_register.to_string());
-    println();
+        d(" ", thing->forward_edge_register.to_string());
+    dln();
 }
 
 NodeList StackGrapher::basic_block_stack_graph(NodeList &running_stack, BasicBlock &bb,
                                                RegisterGen register_gen) {
 
-    println();
-    println("generate stack graph for all instructions in bb#" , bb.index);
+    dln();
+    dln("generate stack graph for all instructions in bb#" , bb.index);
 
     for (auto instruction : bb.instructions)
     {

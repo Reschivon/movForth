@@ -17,8 +17,8 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
     if(bb.visited) return;
     else           bb.enter_stack_size = (int) stack.size();
 
-    println();
-    println("[bb#: " , bb.index , "] BEGIN stack graph");
+    dln();
+    dln("[bb#: " , bb.index , "] BEGIN stack graph");
     indent();
 
     // transformed stack == stack, but I want to make
@@ -28,12 +28,12 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
     StackGrapher::compute_matching_pairs(bb);
 
     unindent();
-    println("[bb#: " , bb.index , "] END stack graph");
+    dln("[bb#: " , bb.index , "] END stack graph");
 
-    print("next BBs:");
+    d("next BBs:");
     for(auto next : bb.nextBBs())
-        print(" " , next.get().index);
-    println();
+        d(" " , next.get().index);
+    dln();
 
     int exit_inputs = bb.enter_inputs + bb.effects.num_popped;
 
@@ -61,8 +61,8 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
 }
 
 void StackGrapher::word_stack_graph(sWordptr wordptr) {
-    println();
-    println("Generate stack graph for all BBs of " , wordptr->name);
+    dln();
+    dln("Generate stack graph for all BBs of " , wordptr->name);
 
     // build stack graph
     NodeList stack;

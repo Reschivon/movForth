@@ -59,7 +59,7 @@ public:
 sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
     auto new_word = new sWord(template_word->name(), primitive_words::OTHER);
 
-    println("compute basic blocks for [" , template_word->name() , "]");
+    dln("compute basic blocks for [" , template_word->name() , "]");
 
     // cache this word for the future
     visited_words[template_word] = new_word;

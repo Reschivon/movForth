@@ -6,6 +6,9 @@
 
 extern int indents;
 
+// Debug toggle - not the best, but works for now
+static const bool debug = false;
+
 template <typename... Args>
 inline void print(Args&&... args)
 {
@@ -21,9 +24,17 @@ inline void println(Args&&... args){
 }
 template <typename... Args>
 inline void dln(Args&&... args){
-    if(true) // Debug toggle - not the best, but works for now
+    if(debug)
     {
         println(args...);
+    }
+}
+
+template <typename... Args>
+inline void d(Args&&... args){
+    if(debug)
+    {
+        print(args...);
     }
 }
 
