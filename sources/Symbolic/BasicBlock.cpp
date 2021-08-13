@@ -3,7 +3,7 @@
 using namespace mov;
 
 
-BasicBlock::BasicBlock(BBgen &gen) : index(gen.get()) {}
+BasicBlock::BasicBlock(BBgen &gen) : index(gen.get()), register_gen((int) index) {}
 
 std::vector<BasicBlock::bb_ref> BasicBlock::nextBBs() {
     if (instructions.back()->id() == primitive_words::BRANCH)

@@ -36,6 +36,8 @@ namespace mov{
 
         // cyclic pass use only (*sigh* there was no other way)
         bool visited = false;
+        RegisterGen register_gen;
+        std::vector<Register> enter_registers;
         int enter_stack_size = 0;
         int enter_inputs = 0;
     };

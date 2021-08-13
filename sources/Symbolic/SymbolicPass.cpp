@@ -100,7 +100,7 @@ sWordptr StackGrapher::show_word_info(sWordptr wordptr) {
 
         print("next BBs: ");
         for(auto next : bb.nextBBs())
-            print(next.get().index);
+            print(next.get().index , " ");
         println();
     }
 

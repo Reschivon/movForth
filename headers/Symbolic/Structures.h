@@ -49,7 +49,7 @@ namespace mov {
     struct Register{
         int index = -1;
         int bb_index = -1;
-        enum registerType {UNDEF, NORMAL, INPUT, BBINPUT} register_type = UNDEF;
+        enum registerType {UNDEF, NORMAL, INPUT} register_type = UNDEF;
 
         Register operator++(int){
             index++;
@@ -63,9 +63,7 @@ namespace mov {
                     return "(register " + std::to_string(bb_index) + "-" + std::to_string(index) + ")";
                 case INPUT:
                     return "(input    " + std::to_string(bb_index) + "-" + std::to_string(index) + ")";
-                case BBINPUT:
-                    return "(BBinput  " + std::to_string(bb_index) + "-" + std::to_string(index) + ")";
-                case UNDEF:
+               case UNDEF:
                     return "(undefined)";
                 default:
                     return "(fucked)";
@@ -85,18 +83,11 @@ namespace mov {
             return ret;
         }
 
-        Register get_bb_input(){
-            auto ret = current_bb_input;
-            current_bb_input++;
-            return ret;
-        }
-
         explicit RegisterGen(int groupID) : groupID(groupID) {}
     private:
         const int groupID;
         Register current =       {1, groupID, Register::NORMAL};
         Register current_param = {1, groupID, Register::INPUT};
-        Register current_bb_input = {1, groupID, Register::BBINPUT};
     };
 
     struct Node{

@@ -76,5 +76,7 @@ NodeList StackGrapher::basic_block_stack_graph(NodeList &running_stack, BasicBlo
         for (auto thing : running_stack)
             dln( thing->edge_register.to_string());
     }
+
+    bb.my_graphs_outputs = running_stack;
     return running_stack;
 }
