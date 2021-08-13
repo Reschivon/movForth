@@ -29,3 +29,23 @@ std::vector<BasicBlock::bb_ref> BasicBlock::nextBBs() {
 bool BasicBlock::is_exit() {
     return instructions.size() > 0 && instructions.back()->id() == primitive_words::EXIT;
 }
+
+void BasicBlock::match_registers_of_unvisited(BasicBlock &prev, BasicBlock &post) {
+    if(!prev.visited && post.visited){
+        for(int i = 0; i< prev.my_graphs_outputs.size(); i++)
+            Node::redefine_preceding_edge(
+                    prev.my_graphs_outputs[i],
+                    post.enter_registers[i]);
+    }
+    if(prev.visited && !post.visited){
+        for(Node *thing : prev.my_graphs_outputs)
+            post.enter_registers.push_back(thing->forward_edge_register);
+    }
+    if(!prev.visited && !post.visited){
+        for(Node *thing : prev.my_graphs_outputs){
+            auto reg = post.register_gen.get();
+            post.enter_registers.push_back(reg);
+            Node::redefine_preceding_edge(thing, reg);
+        }
+    }
+}

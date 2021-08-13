@@ -40,6 +40,8 @@ namespace mov{
         std::vector<Register> enter_registers;
         int enter_stack_size = 0;
         int enter_inputs = 0;
+
+        static void match_registers_of_unvisited(BasicBlock &prev, BasicBlock &post);
     };
 }
 #endif // MOVFORTH_BASICBLOCK_H

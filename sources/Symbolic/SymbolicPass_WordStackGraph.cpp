@@ -49,40 +49,17 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
                 println("[FATAL] Control flow edge mismatch on edge from bb#" , bb.index , " to bb#" , next.get().index);
                 println("Past stack size: " , next.get().enter_stack_size , " current: " , transformed_stack.size());
             }
-            if(!bb.visited){
-                println("bb#" , bb.index , "not visited, bb#", next.get().index, "visited");
-                // prev not visited, post visited
-                auto reg_it = next.get().enter_registers.begin();
-                auto out_it = bb.my_graphs_outputs.begin();
-                while (reg_it != next.get().enter_registers.end()){
-                    Node::redefine_preceding_edge(*out_it, *reg_it);
-                    reg_it++; out_it++;
-                }
-            }
         }else{
             next.get().enter_inputs = exit_inputs;
             next.get().enter_stack_size = (int) transformed_stack.size();
-            if(bb.visited){
-                println("bb#" , bb.index , "visited, bb#", next.get().index, "not visited");
-                // prev visited, post not visited
-                for(Node *thing : bb.my_graphs_outputs){
-                    next.get().enter_registers.push_back(thing->forward_edge_register);
-                }
-            }else{
-                println("bb#" , bb.index , "not visited, bb#", next.get().index, "not visited");
-                bb.visited = true;
-                println("BB#" , bb.index , " VISITED");
-                // prev not visited, post not visited
-                for(Node *thing : bb.my_graphs_outputs){
-                    auto reg = next.get().register_gen.get();
-                    next.get().enter_registers.push_back(reg);
-                    Node::redefine_preceding_edge(thing, reg);
-                }
-            }
         }
+
+        BasicBlock::match_registers_of_unvisited(bb, next);
+        bb.visited = true;
+
         explore_graph_dfs(transformed_stack, next);
     }
-    bb.visited = true;
+    bb.visited = true; // need it again; what if bb.next is empty?
 }
 
 void StackGrapher::word_stack_graph(sWordptr wordptr) {
