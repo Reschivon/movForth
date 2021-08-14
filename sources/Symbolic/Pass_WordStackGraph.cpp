@@ -7,8 +7,8 @@ struct Conflict{
     Conflict(BasicBlock *from, BasicBlock *to)
         : from(from), to(to) {}
     [[nodiscard]] std::string to_string() const{
-        return "conflict from bb#" +std::to_string(from->index) +
-                " to bb#" + std::to_string(to->index);
+        return "conflict from " , from->name() +
+                " to " + to->name();
     }
 
 };
@@ -18,7 +18,7 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
     else           bb.enter_stack_size = (int) stack.size();
 
     dln();
-    dln("[bb#: " , bb.index , "] BEGIN stack graph");
+    dln("[" , bb.name() , "] BEGIN stack graph");
     indent();
 
     // transformed stack == stack, but I want to make
@@ -29,7 +29,7 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
     Analysis::compute_matching_pairs(bb);
 
     unindent();
-    dln("[bb#: " , bb.index , "] END stack graph");
+    dln("[" , bb.name() , "] END stack graph");
 
     d("next BBs:");
     for(auto next : bb.nextBBs())
@@ -41,11 +41,11 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
     for(auto next : bb.nextBBs()){
         if(next.get().visited){
             if(exit_inputs != next.get().enter_inputs){
-                println("[FATAL] input size mismatch on edge from bb#" , bb.index , " to bb#" , next.get().index);
-                println("Past inputs: " , next.get().enter_inputs , " current: " , bb.enter_inputs);
+                println("[FATAL] input size mismatch on edge from " , bb.name() , " to " , next.get().name());
+                println("Past input num: " , next.get().enter_inputs , " current: " , bb.enter_inputs);
             }
             if(transformed_stack.size() != next.get().enter_stack_size){
-                println("[FATAL] Control flow edge mismatch on edge from bb#" , bb.index , " to bb#" , next.get().index);
+                println("[FATAL] Control flow edge mismatch on edge from " , bb.name() , " to " , next.get().name());
                 println("Past stack size: " , next.get().enter_stack_size , " current: " , transformed_stack.size());
             }
         }else{

@@ -54,7 +54,6 @@ sWordptr Analysis::static_analysis(iWordptr original_word) {
 sWordptr Analysis::show_word_info(sWordptr wordptr) {
     println("============[", wordptr->name, "]===========");
 
-
     println("push:" , wordptr->effects.num_pushed,
             " pop:" , wordptr->effects.num_popped);
 
@@ -73,8 +72,8 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
     println("Stack Graph:");
 
     for(auto &bb : wordptr->basic_blocks){
-        println();
-        println("[bb#: " , bb.index , "] BEGIN stack graph");
+        println("----------------------------------");
+        println("[" , bb.name() , "] BEGIN stack graph");
         indent();
 
         for(auto &instr : bb.instructions){
@@ -94,7 +93,7 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
         }
 
         unindent();
-        println("[bb#: " , bb.index , "] END stack graph");
+        println("[" , bb.name() , "] END stack graph");
 
         print("next BBs: ");
         for(auto next : bb.nextBBs())

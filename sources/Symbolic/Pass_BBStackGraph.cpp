@@ -76,7 +76,7 @@ NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, BasicBlock &
                                            RegisterGen register_gen) {
 
     dln();
-    dln("generate stack graph for all instructions in bb#" , bb.index);
+    dln("generate stack graph for all instructions in " , bb.name() );
 
     for (auto instruction : bb.instructions)
     {

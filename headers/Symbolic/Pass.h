@@ -18,7 +18,7 @@ namespace mov {
     public:
         static void compute_matching_pairs(BasicBlock &bb);
         static NodeList basic_block_stack_graph(NodeList &running_stack, BasicBlock &bb, RegisterGen register_gen);
-
+    // public:
         sWordptr static_analysis(iWordptr original_word);
         static sWordptr show_word_info(sWordptr wordptr);
     };

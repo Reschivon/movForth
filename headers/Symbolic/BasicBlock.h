@@ -33,6 +33,7 @@ namespace mov{
 
         std::vector<bb_ref> nextBBs();
         bool is_exit();
+        std::string name();
 
         // cyclic pass use only (*sigh* there was no other way)
         bool visited = false;

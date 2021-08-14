@@ -49,3 +49,7 @@ void BasicBlock::match_registers_of_unvisited(BasicBlock &prev, BasicBlock &post
         }
     }
 }
+
+std::string BasicBlock::name() {
+    return "bb#" + std::to_string(index);
+}
