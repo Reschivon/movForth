@@ -33,11 +33,11 @@ add_executable(movForth
 
         sources/Symbolic/BasicBlock.cpp
 
-        sources/symbolic/symbolicPass.cpp
-        sources/Symbolic/SymbolicPass_TranslateToBasicBlocks.cpp
-        sources/Symbolic/SymbolicPass_BBStackGraph.cpp
-        sources/Symbolic/SymbolicPass_ComputeMatchingPairs.cpp
-        sources/Symbolic/SymbolicPass_WordStackGraph.cpp
+        sources/Symbolic/Pass.cpp
+        sources/Symbolic/Pass_TranslateToBasicBlocks.cpp
+        sources/Symbolic/Pass_BBStackGraph.cpp
+        sources/Symbolic/Pass_ComputeMatchingPairs.cpp
+        sources/Symbolic/Pass_WordStackGraph.cpp
 
         #headers/Generation/IRGenerator.h
 

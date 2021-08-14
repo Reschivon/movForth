@@ -1,4 +1,4 @@
-#include "../../headers/Symbolic/SymbolicPass.h"
+#include "../../headers/Symbolic/Pass.h"
 
 using namespace mov;
 
@@ -24,9 +24,9 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
     // transformed stack == stack, but I want to make
     // it clear that stack has been modified
     NodeList transformed_stack =
-            StackGrapher::basic_block_stack_graph(stack, bb, bb.register_gen);
+            Analysis::basic_block_stack_graph(stack, bb, bb.register_gen);
 
-    StackGrapher::compute_matching_pairs(bb);
+    Analysis::compute_matching_pairs(bb);
 
     unindent();
     dln("[bb#: " , bb.index , "] END stack graph");
@@ -61,7 +61,14 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
     bb.visited = true; // need it again; what if bb.next is empty?
 }
 
-void StackGrapher::word_stack_graph(sWordptr wordptr) {
+/**
+ * Generate stack graph for every basic block within wordptr
+ * Also make sure register names match between basic block edges
+ * Ensure that merging Bbs have the same stack size
+ * Set the new effects of wordptr
+ * @param wordptr the word whose definition will be graphed
+ */
+void Analysis::word_stack_graph(sWordptr wordptr) {
     dln();
     dln("Generate stack graph for all BBs of " , wordptr->name);
 

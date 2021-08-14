@@ -153,7 +153,7 @@ void Interpreter::init_words(){
     });
 
     word_generator.register_primitive("see", primitive_words::SEE, [&](IP &ip) {
-        println("\n\tSo you want to see?");
+        println("\n\tDefinitions:");
 
         for (iData dict_data : dictionary) {
             if(!dict_data.is_forth_word()) continue;

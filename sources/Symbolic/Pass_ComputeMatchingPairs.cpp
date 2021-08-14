@@ -1,8 +1,14 @@
-#include "../../headers/Symbolic/SymbolicPass.h"
+#include "../../headers/Symbolic/Pass.h"
 
 using namespace mov;
 
-void StackGrapher::compute_matching_pairs(BasicBlock &bb) {
+/**
+ * Check if any stack elments pass through bb without changes
+ * If so, registers a matching pair to bb, which can be used
+ * for optimizing register generation
+ * @param bb
+ */
+void Analysis::compute_matching_pairs(BasicBlock &bb) {
 
     // matching pairs
     for (int i = 0; i < bb.my_graphs_outputs.size(); i++)

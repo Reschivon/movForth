@@ -1,7 +1,18 @@
-#include "../../headers/Symbolic/SymbolicPass.h"
+#include "../../headers/Symbolic/Pass.h"
 
 using namespace mov;
 
+/**
+ * Simulate the effects of a single word on the stack
+ * Push and pop from the given stack according to the Instruction provided
+ * Generate registers between the elements on the stack and the Tnstruction
+ * If the stack is empty, will add to the basic block's list of inputs
+
+ * @param stack stack to be simulated and linked to/from
+ * @param instruction the Instruction whose effects will be used to simulate the stack
+ * @param base the basic block that includes instruction in its definition
+ * @param register_gen the context for naming registers
+ */
 void propagate_stack(NodeList &stack,
                      Instruction *instruction,
                      BasicBlock &base,
@@ -53,8 +64,16 @@ void propagate_stack(NodeList &stack,
     dln();
 }
 
-NodeList StackGrapher::basic_block_stack_graph(NodeList &running_stack, BasicBlock &bb,
-                                               RegisterGen register_gen) {
+/**
+ * Make a stack graph for an entire definition via multiple calls to propagate()
+ *
+ * @param running_stack inital state of the stack before bb is supposed to run
+ * @param bb the basic block whose definition with be graphed
+ * @param register_gen context for naming registers
+ * @return the running stack passed as parameter
+ */
+NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, BasicBlock &bb,
+                                           RegisterGen register_gen) {
 
     dln();
     dln("generate stack graph for all instructions in bb#" , bb.index);

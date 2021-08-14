@@ -19,18 +19,18 @@
 \
 \ When all offspring of a certain node have been built, the compiler searches
 \ the node(or word)'s definition for BRANCH and BRANCHIF. The compiler uses this
-\ information to make a control flow graph. Each word\node has its own control
+\ information to make a control flow graph. Each word/node has its own control
 \ flow graph
 \
-\ A sequence of words that don't include BRANCH or BRANCHIF
+\ A sequence of words that doesn't include BRANCH or BRANCHIF
 \ is a basic block. This is the same defintion that LLVM uses.
 \
 \
 \        Stack Graph:
 \ This compiler compiles forth to LLVM IR. Then LLVM does the hard work of
 \ optimizing and writing assembly. But LLVM uses SSA, which is a register-based
-\ format, and Forth is a stack-based. So a stack graph is needed to link the
-\ output of one word to the input of another.
+\ format, and Forth is a stack-based. So a stack graph is needed to symbolically
+\ link the output of one word to the input of another.
 \
 \ Imagine a sequence of words, each with as many input nodes as it
 \ takes from the stack and as many output nodes as it pushes to the
@@ -49,7 +49,10 @@
 \ that can be represented by BRANCH and BRANCHIF. Even if two basic blocks
 \ merge into the same final BB but push different register indexes,
 \ the registers that cross control flow edges are guaranteed to be the same
-\ for all merging basic blocks
+\ for all merging basic blocks.
+
+\ (I made a very elegant solution to this here. It piggybacks on the control
+\ flow-less stack graph DFS without needing passes of its own)
 
 \ This assumes that BBs that merge together push the same number of
 \ stack elements. Otherwise, this would be a very, very hard problem.
@@ -59,11 +62,9 @@
 
 : [,] immediate , ;
 
-: payload 11 . ;
-
 : negative -1 * ;
 
-: jump> \dsa
+: jump>
     literal branch ,
     here
     0 , ;

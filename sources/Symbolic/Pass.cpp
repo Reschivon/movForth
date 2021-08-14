@@ -1,13 +1,13 @@
 
 #include <set>
 #include <stack>
-#include "../../headers/Symbolic/SymbolicPass.h"
+#include "../../headers/Symbolic/Pass.h"
 #include "../../headers/Print.h"
 #include "../../headers/Interpretation/iData.h"
 
 using namespace mov;
 
-sData StackGrapher::symbolize_data(iData data) {
+sData Analysis::symbolize_data(iData data) {
     if (data.is_number())
         return sData(data.as_number());
     if (data.is_word())
@@ -18,7 +18,7 @@ sData StackGrapher::symbolize_data(iData data) {
     return sData(nullptr);
 }
 
-sWordptr StackGrapher::static_analysis(iWordptr original_word) {
+sWordptr Analysis::static_analysis(iWordptr original_word) {
     // check to see if we have passed over this word already
     // if so, return a pointer to it
     auto cached = visited_words.find(original_word);
@@ -51,7 +51,7 @@ sWordptr StackGrapher::static_analysis(iWordptr original_word) {
     return nullptr;
 }
 
-sWordptr StackGrapher::show_word_info(sWordptr wordptr) {
+sWordptr Analysis::show_word_info(sWordptr wordptr) {
     println("============[", wordptr->name, "]===========");
 
 

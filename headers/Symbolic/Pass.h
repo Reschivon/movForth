@@ -8,7 +8,7 @@
 #include "sWord.h"
 
 namespace mov {
-    class StackGrapher{
+    class Analysis{
         // cached results of already computed words
         std::unordered_map<iWordptr, sWordptr> visited_words{};
 

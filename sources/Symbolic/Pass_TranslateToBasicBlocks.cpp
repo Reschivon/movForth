@@ -1,5 +1,5 @@
 
-#include "../../headers/Symbolic/SymbolicPass.h"
+#include "../../headers/Symbolic/Pass.h"
 #include "../../headers/Interpretation/iData.h"
 
 using namespace mov;
@@ -59,7 +59,7 @@ public:
     }
 };
 
-sWordptr StackGrapher::translate_to_basic_blocks(ForthWord *template_word){
+sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
     auto new_word = new sWord(template_word->name(), primitive_words::OTHER);
 
     dln("compute basic blocks for [" , template_word->name() , "]");
