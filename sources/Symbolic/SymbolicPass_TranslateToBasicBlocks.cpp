@@ -4,6 +4,9 @@
 
 using namespace mov;
 
+// This might be more complicated than it needs
+// to be since I tried to keep everything O(n)
+
 struct BasicBlockBuilder{
 private:
     short* bbe_lookup;

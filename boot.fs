@@ -40,13 +40,20 @@
 \ The stack graph is printed out on the console during compilation.
 \
 \ Registers are named X-Y,
-\    where X is the index of the basic block it was produced in,
-\    and Y is another index that is unique to the register within its basic block
+\    where X is the index of the basic block it is consumed in,
+\    and Y is an index that is unique to the register within its basic block
 \
-
+\
 \        Stack Graph with Control Flow
-\ What happens when two basic blocks push to the same registers?
-\
+\ The compiler supports not just structured control flow but any CFG
+\ that can be represented by BRANCH and BRANCHIF. Even if two basic blocks
+\ merge into the same final BB but push different register indexes,
+\ the registers that cross control flow edges are guaranteed to be the same
+\ for all merging basic blocks
+
+\ This assumes that BBs that merge together push the same number of
+\ stack elements. Otherwise, this would be a very, very hard problem.
+
 
 : ['] immediate ' ;
 

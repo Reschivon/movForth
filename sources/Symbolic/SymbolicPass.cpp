@@ -79,8 +79,8 @@ sWordptr StackGrapher::show_word_info(sWordptr wordptr) {
 
         for(auto &instr : bb.instructions){
             // propagate the stack state
-            dln();
-            dln("[", instr->name(), "]");
+            println();
+            println("[", instr->name(), "]");
 
             print("pops:");
             for (auto node : instr->pop_nodes)

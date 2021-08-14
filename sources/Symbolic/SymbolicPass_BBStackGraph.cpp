@@ -37,7 +37,7 @@ void propagate_stack(NodeList &stack,
 
     // link output nodes to stack
     for (auto push_node : instruction->push_nodes)
-        if(push_node->target)
+        if(push_node->target != nullptr)
             Node::link_bidirection(push_node, stack.new_back(), push_node->edge_register);
         else
             Node::link_bidirection(push_node, stack.new_back(), register_gen.get());

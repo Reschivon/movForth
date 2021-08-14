@@ -23,8 +23,9 @@ void explore_graph_dfs(NodeList stack, BasicBlock &bb){
 
     // transformed stack == stack, but I want to make
     // it clear that stack has been modified
-    NodeList transformed_stack = StackGrapher::basic_block_stack_graph(stack,
-                                                                       bb, bb.register_gen);
+    NodeList transformed_stack =
+            StackGrapher::basic_block_stack_graph(stack, bb, bb.register_gen);
+
     StackGrapher::compute_matching_pairs(bb);
 
     unindent();
