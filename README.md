@@ -1,7 +1,7 @@
 # movForth
 LLVM frontend for the Forth language
 
-## Stil a WIP
+## Still a WIP
 
 ## v0.04
 
