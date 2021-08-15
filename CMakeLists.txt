@@ -3,6 +3,7 @@ project(movForth)
 
 set(CMAKE_CXX_STANDARD 20)
 
+#[[
 find_package(LLVM REQUIRED CONFIG)
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
@@ -17,6 +18,7 @@ separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
 llvm_map_components_to_libnames(llvm_libs support core irreader)
+]]
 
 add_executable(movForth
         main.cpp
@@ -43,4 +45,6 @@ add_executable(movForth
 
         headers/Interpretation/iData.h sources/Interpretation/iData.cpp)
 
+#[[
 target_link_libraries(movForth ${llvm_libs})
+]]
