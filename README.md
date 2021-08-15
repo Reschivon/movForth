@@ -12,9 +12,8 @@ LLVM frontend for the Forth language
         + Symbolic
             headers for static analysis
     + sources
-        + .cpp files
-            not all headers have sources
-            some headers defined inline
+        not all headers have sources
+        some headers defined inline
         + Interpretation
             sources for the interpreter
         + Symbolic
