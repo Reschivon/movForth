@@ -23,7 +23,7 @@ namespace mov {
     public:
         /**
          * Finds the most recent dictionary entry that matches the given name
-         * @param name name of word to be found
+         * @param name  name of word to be found
          * @return a pointer to the word, if found. Otherwise nullptr
          */
         iWordptr find(const std::string &name);

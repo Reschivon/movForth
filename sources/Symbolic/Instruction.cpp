@@ -18,9 +18,9 @@ ReturnInstruction *Instruction::as_return() {
 
 bool Instruction::branchy() const{
     return
-    linked_word->id == primitive_words::BRANCH ||
-    linked_word->id == primitive_words::BRANCHIF ||
-    linked_word->id == primitive_words::EXIT;
+        linked_word->id == primitive_words::BRANCH ||
+        linked_word->id == primitive_words::BRANCHIF ||
+        linked_word->id == primitive_words::EXIT;
 }
 
 std::string Instruction::name(){

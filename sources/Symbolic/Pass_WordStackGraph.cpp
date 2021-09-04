@@ -13,7 +13,7 @@ struct Conflict{
 
 };
 
-void explore_graph_dfs(NodeList stack, BasicBlock &bb){
+void Analysis::explore_graph_dfs(NodeList stack, BasicBlock &bb){
     if(bb.visited) return;
     else           bb.enter_stack_size = (int) stack.size();
 

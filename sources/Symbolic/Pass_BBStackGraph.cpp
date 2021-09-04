@@ -13,7 +13,7 @@ using namespace mov;
  * @param base the basic block that includes instruction in its definition
  * @param register_gen the context for naming registers
  */
-void propagate_stack(NodeList &stack,
+void Analysis::propagate_stack(NodeList &stack,
                      Instruction *instruction,
                      BasicBlock &base,
                      RegisterGen &register_gen) {
@@ -88,7 +88,7 @@ NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, BasicBlock &
         // propagate the stack state
         dln();
         dln("[", definee->name, "]");
-        propagate_stack(running_stack, instruction, bb, register_gen);
+        Analysis::propagate_stack(running_stack, instruction, bb, register_gen);
 
         dln();
         dln("[stack:]");

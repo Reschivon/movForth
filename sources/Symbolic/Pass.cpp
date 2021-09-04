@@ -81,15 +81,19 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
             println();
             println("[", instr->name(), "]");
 
-            print("pops:");
-            for (auto node : instr->pop_nodes)
-                print(" ", node->edge_register.to_string());
-            println();
+            if(instr->pop_nodes.size()) {
+                print("pops:");
+                for (auto node: instr->pop_nodes)
+                    print(" ", node->edge_register.to_string());
+                println();
+            }
 
-            print("pushes:");
-            for (auto thing : instr->push_nodes)
-                print(" ", thing->forward_edge_register.to_string());
-            println();
+            if(instr->push_nodes.size()) {
+                print("pushes:");
+                for (auto thing: instr->push_nodes)
+                    print(" ", thing->forward_edge_register.to_string());
+                println();
+            }
         }
 
         unindent();
