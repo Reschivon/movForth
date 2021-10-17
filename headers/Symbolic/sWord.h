@@ -12,8 +12,8 @@ namespace mov{
 
     class sWord{
     public:
-        primitive_words id = primitive_words::OTHER;
         const std::string name;
+        primitive_words id = primitive_words::OTHER;
 
         explicit sWord(std::string name, primitive_words id);
         explicit sWord(std::string name, primitive_words id, Effects effects);
