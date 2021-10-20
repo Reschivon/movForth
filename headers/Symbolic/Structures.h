@@ -77,7 +77,7 @@ namespace mov {
             current++;
             return ret;
         }
-        Register get_input(){
+        Register get_param(){
             auto ret = current_param;
             current_param++;
             return ret;
@@ -92,8 +92,8 @@ namespace mov {
 
     struct Node{
         Node* target = nullptr;
-        Register edge_register;
-        Register forward_edge_register;
+        Register edge_register; // guaranteed to exist
+        Register forward_edge_register; // may not always be nonnull
 
         static void link(Node *back, Node *front, Register id){
             front->target = back;

@@ -4,10 +4,13 @@
 #ifndef MOVFORTH_PRINT_H
 #define MOVFORTH_PRINT_H
 
+static std::string color_begin = "\\033[1;32m\\n";
+static std::string color_end = "\\033[0m\\n";
+
 extern int indents;
 
 // Debug toggle - not the best, but works for now
-static const bool debug = false;
+static const bool debug = true;
 
 template <typename... Args>
 inline void print(Args&&... args)

@@ -6,7 +6,7 @@
 #include "Structures.h"
 #include "../PrimitiveEnums.h"
 #include "Effects.h"
-#include "BasicBlock.h"
+#include "Block.h"
 
 namespace mov{
 
@@ -18,7 +18,7 @@ namespace mov{
         explicit sWord(std::string name, primitive_words id);
         explicit sWord(std::string name, primitive_words id, Effects effects);
 
-        std::vector<BasicBlock> basic_blocks{};
+        std::vector<Block> basic_blocks{};
 
         NodeList my_graphs_outputs{};
         NodeList my_graphs_inputs{};

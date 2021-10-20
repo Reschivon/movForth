@@ -8,12 +8,12 @@ using namespace mov;
  * for optimizing register generation
  * @param bb
  */
-void Analysis::compute_matching_pairs(BasicBlock &bb) {
+void Analysis::compute_matching_pairs(Block &bb) {
 
     // matching pairs
-    for (int i = 0; i < bb.my_graphs_outputs.size(); i++)
+    for (int i = 0; i < bb.outputs.size(); i++)
     {
-        Node *output = bb.my_graphs_outputs[i];
+        Node *output = bb.outputs[i];
 
         Node *next = output->target;
         while (true)
@@ -22,7 +22,7 @@ void Analysis::compute_matching_pairs(BasicBlock &bb) {
                 break;
             if (next->edge_register.register_type == Register::INPUT)
             {
-                bb.effects.out_in_pairs.emplace_back(i, next->edge_register.index);
+                bb.effects_without_push_pop.out_in_pairs.emplace_back(i, next->edge_register.index);
                 break;
             }
             next = next->target;

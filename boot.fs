@@ -110,10 +110,14 @@
 : repeatif immediate
     <jumpif ;
 
+: gen1 1 ;
+: consume . ;
+: stdout 42 . ;
+
 \ the word to be compiled. "test" is specified in main.cpp
 \ control flow words (BRANCH and BRANCHIF) compiled by IF, ELSE, and THEN
 \ are supported by the compiler
-: test 1 if 69 69 else 420 420 then ;
+: test gen1 if 69 69 else 420 420 then ;
 
 see
 

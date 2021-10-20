@@ -46,7 +46,7 @@ namespace mov {
          * @param stack inital stack state
          * @param bb
          */
-        void explore_graph_dfs(NodeList stack, BasicBlock &bb);
+        void explore_graph_dfs(NodeList stack, Block &bb);
 
         /**
          * Generates stack graph (and thus register edges) for all words in the
@@ -55,20 +55,20 @@ namespace mov {
          * @param bb basic block that will have a compted stack graph
          * @param register_gen register generator for new register edges
         */
-        static NodeList basic_block_stack_graph(NodeList &running_stack, BasicBlock &bb, RegisterGen register_gen);
+        static NodeList basic_block_stack_graph(NodeList &running_stack, Block &bb, RegisterGen register_gen);
 
         /**
          * Builds register graph for the space between the given stack
          * and the given word, and the space between the given word
          * and a new stack
-         * @param stack populated stack that serves as input stack elements
+         * @param stack populated stack that serves as params stack elements
          * @param instruction instruction that represents the word to be simulated
-         * @param base parent basic block for holding input nodes
+         * @param base parent basic block for holding params nodes
          * @param register_gen register generator for new register edges
          */
-        static void propagate_stack(NodeList &stack, Instruction *instruction, BasicBlock &base, RegisterGen &register_gen);
+        static void propagate_stack(NodeList &stack, Instruction *instruction, NodeList &params, RegisterGen &register_gen);
 
-        void compute_matching_pairs(BasicBlock &bb);
+        void compute_matching_pairs(Block &bb);
     public:
         sWordptr static_analysis(iWordptr original_word);
         static sWordptr show_word_info(sWordptr wordptr);

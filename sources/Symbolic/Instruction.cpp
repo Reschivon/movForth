@@ -36,12 +36,12 @@ primitive_words Instruction::id() const {
 }
 
 BranchInstruction::BranchInstruction(sWordptr linked_word, sData data,
-                                     BasicBlock *jump_to)
+                                     Block *jump_to)
         : Instruction(linked_word, data), jump_to(jump_to) {}
 
 BranchIfInstruction::BranchIfInstruction(sWordptr linked_word, sData data,
-                                         BasicBlock *jump_to_close,
-                                         BasicBlock *jump_to_far)
+                                         Block *jump_to_close,
+                                         Block *jump_to_far)
         : Instruction(linked_word, data), jump_to_next(jump_to_close), jump_to_far(jump_to_far) {}
 
 ReturnInstruction::ReturnInstruction()

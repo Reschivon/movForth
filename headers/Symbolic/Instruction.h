@@ -30,19 +30,19 @@ namespace mov{
         [[nodiscard]] bool branchy() const;
     };
 
-    struct BasicBlock;
+    struct Block;
 
     struct BranchInstruction : public Instruction {
-        BasicBlock *jump_to;
-        explicit BranchInstruction(sWordptr linked_word, sData data, BasicBlock *jump_to);
+        Block *jump_to;
+        explicit BranchInstruction(sWordptr linked_word, sData data, Block *jump_to);
 
         std::string name() override;
     };
 
     struct BranchIfInstruction : public Instruction {
-        BasicBlock *jump_to_next;
-        BasicBlock *jump_to_far;
-        explicit BranchIfInstruction(sWordptr linked_word, sData data, BasicBlock *jump_to_close, BasicBlock *jump_to_far);
+        Block *jump_to_next;
+        Block *jump_to_far;
+        explicit BranchIfInstruction(sWordptr linked_word, sData data, Block *jump_to_close, Block *jump_to_far);
 
         std::string name() override;
     };

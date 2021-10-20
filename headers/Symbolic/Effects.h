@@ -18,7 +18,7 @@ namespace mov{
         // mapping of index for identical registers
         std::vector<std::pair<int, int>> out_in_pairs;
 
-        void acquire_side_effects(Effects& other){
+        void acquire_side_effects_ignore_push_pop(Effects& other){
             // pop and push handled elsewhere
 
             if(other.consume_token) consume_token = true;

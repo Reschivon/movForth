@@ -1,7 +1,7 @@
 
 #include "headers/Interpretation/Interpreter.h"
 #include "headers/Symbolic/Pass.h"
-//#include "headers/Generation/IRGenerator.h"
+#include "headers/Generation/IRGenerator.h"
 
 int main() {
     //hello_word();
@@ -32,5 +32,10 @@ int main() {
     println();
     println();
     mov::Analysis::show_word_info(converted_word);
+
+
+    mov::IRGenerator ir_generator;
+    ir_generator.generate(converted_word);
+
 }
 

@@ -40,6 +40,9 @@ sWordptr Analysis::static_analysis(iWordptr original_word) {
         auto converted = translate_to_basic_blocks(forth_word);
         word_stack_graph(converted);
 
+        dln("pushes: ", converted->effects.num_pushed);
+        dln("pops: ", converted->effects.num_popped);
+
         unindent();
         dln("finished analyzing [", original_word->name(), "]");
 
@@ -73,7 +76,7 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
 
     for(auto &bb : wordptr->basic_blocks){
         println("----------------------------------");
-        println("[" , bb.name() , "] BEGIN stack graph");
+        println("[" , bb.name() , "] stack graph");
         indent();
 
         for(auto &instr : bb.instructions){
@@ -81,14 +84,14 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
             println();
             println("[", instr->name(), "]");
 
-            if(instr->pop_nodes.size()) {
+            if(!instr->pop_nodes.empty()) {
                 print("pops:");
                 for (auto node: instr->pop_nodes)
                     print(" ", node->edge_register.to_string());
                 println();
             }
 
-            if(instr->push_nodes.size()) {
+            if(!instr->push_nodes.empty()) {
                 print("pushes:");
                 for (auto thing: instr->push_nodes)
                     print(" ", thing->forward_edge_register.to_string());
@@ -97,7 +100,6 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
         }
 
         unindent();
-        println("[" , bb.name() , "] END stack graph");
 
         print("next BBs: ");
         for(auto next : bb.nextBBs())

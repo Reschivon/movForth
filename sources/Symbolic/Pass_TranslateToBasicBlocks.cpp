@@ -16,7 +16,7 @@ private:
     BBgen gen;
 
 public:
-    using it_type = std::vector<BasicBlock>::iterator;
+    using it_type = std::vector<Block>::iterator;
 
     BasicBlockBuilder(sWordptr new_word, short instructions)
         : new_word(new_word)
