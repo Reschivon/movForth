@@ -9,7 +9,7 @@ void Analysis::explore_graph_dfs(NodeList stack, Block &bb){
         bb.initial_stack_size = (int) stack.size();
 
     dln();
-    dln("[" , bb.name() , "] BEGIN stack graph");
+    d("[" , bb.name() , "] START making stack graph");
     indent();
 
     // transformed stack == stack, but I want to make
@@ -24,7 +24,7 @@ void Analysis::explore_graph_dfs(NodeList stack, Block &bb){
     dln();
 
     unindent();
-    dln("[" , bb.name() , "] END stack graph");
+    dln("[" , bb.name() , "] FINSIHED making stack graph");
 
     uint final_accumulated_params = bb.initial_accumulated_params + bb.params.size();
     uint final_accumulated_stack_size = transformed_stack.size();
@@ -66,7 +66,6 @@ void Analysis::explore_graph_dfs(NodeList stack, Block &bb){
  */
 void Analysis::word_stack_graph(sWordptr wordptr) {
     dln();
-    dln("Generate stack graph for all BBs of " , wordptr->name);
 
     // build stack graph
     NodeList stack;

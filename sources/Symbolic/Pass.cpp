@@ -33,18 +33,19 @@ sWordptr Analysis::static_analysis(iWordptr original_word) {
 
     if (auto forth_word = dynamic_cast<ForthWord *>(original_word))
     {
-        dln();
-        dln("analyze [", original_word->name(), "]");
-        indent();
 
         auto converted = translate_to_basic_blocks(forth_word);
+
+        dln();
+        d("[", original_word->name(), "] START graphing all BBs");
+        indent();
+
         word_stack_graph(converted);
 
+        unindent();
+        dln("[", original_word->name(), "] FINSIHED graphing all BBs");
         dln("pushes: ", converted->effects.num_pushed);
         dln("pops: ", converted->effects.num_popped);
-
-        unindent();
-        dln("finished analyzing [", original_word->name(), "]");
 
         return converted;
     }

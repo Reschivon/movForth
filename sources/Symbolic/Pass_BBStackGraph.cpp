@@ -20,12 +20,11 @@ void Analysis::propagate_stack(NodeList &stack,
     NodeList::move_top_elements(stack, instruction->pop_nodes,
                                 (int) nodes_from_stack);
 
-    while (nodes_from_params -- > 0) {
-        println(nodes_from_params);
+    while (nodes_from_params -- > 0)
         Node::link(params.new_bottom(),
                    instruction->pop_nodes.new_top(),
                    register_gen.get_param());
-    }
+
     // make empty output nodes
     for (int i = 0; i < effects.num_pushed; i++)
         instruction->push_nodes.new_top();
