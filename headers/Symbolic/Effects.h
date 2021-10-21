@@ -4,8 +4,8 @@
 
 namespace mov{
     struct Effects{
-        int num_popped = 0;
-        int num_pushed = 0;
+        uint num_popped = 0;
+        uint num_pushed = 0;
 
         bool consume_token = false; // ONLY for single token consumers, leave out "
 

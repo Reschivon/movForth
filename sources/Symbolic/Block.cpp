@@ -12,10 +12,10 @@ std::vector<Block::bb_ref> Block::nextBBs() {
 
     else if (instructions.back()->id() == primitive_words::BRANCHIF)
     {
-        std::vector<Block::bb_ref> ret;
-        ret.emplace_back(*instructions.back()->as_branchif()->jump_to_next),
-        ret.emplace_back(*instructions.back()->as_branchif()->jump_to_far);
-        return ret;
+        return {
+            *instructions.back()->as_branchif()->jump_to_next,
+            *instructions.back()->as_branchif()->jump_to_far
+        };
     }
     else if (instructions.back()->id() == primitive_words::EXIT)
 
@@ -27,7 +27,7 @@ std::vector<Block::bb_ref> Block::nextBBs() {
 }
 
 bool Block::is_exit() {
-    return instructions.size() > 0 && instructions.back()->id() == primitive_words::EXIT;
+    return !instructions.empty() && instructions.back()->id() == primitive_words::EXIT;
 }
 
 /**
@@ -48,7 +48,7 @@ bool Block::is_exit() {
  * @param prev
  * @param post
  */
-void Block::match_registers_of_unvisited(Block &prev, Block &post) {
+void Block::align_registers(Block &prev, Block &post) {
     if(!prev.visited && post.visited){
         for(int i = 0; i< prev.outputs.size(); i++)
             Node::redefine_preceding_edge(

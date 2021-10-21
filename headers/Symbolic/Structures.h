@@ -120,16 +120,16 @@ namespace mov {
             return back();
         }
 
-        Node* new_front(){
-            return push_front(new Node);
+        Node* new_bottom(){
+            return push_bottom(new Node);
         }
 
-        Node* push_front(Node *push){ // bad perf, but keeping it simple
+        Node* push_bottom(Node *push){ // bad perf, but keeping it simple
             std::vector<Node*>::insert(begin(), push);
             return back();
         }
 
-        Node* new_back(){
+        Node* new_top(){
             return push_back(new Node);
         }
 

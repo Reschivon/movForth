@@ -29,6 +29,11 @@ namespace mov{
         // Parameter nodes; added to by propagate stack
         NodeList params{};
 
+        // Do not store push/pop effects for Block
+        // in graph generation, the stack may come in
+        // with more than 0 elements, and this makes
+        // calculating push/pop complicated
+        // We never need this statistic anyways
         Effects effects_without_push_pop;
 
         explicit Block(BBgen& gen);
@@ -41,10 +46,11 @@ namespace mov{
         bool visited = false; // whether the graph has been generated yet
         RegisterGen register_gen; // to track registers for this BB
         std::vector<Register> initial_registers; // temporary store
-        int initial_stack_size = 0;
-        int initial_accumulated_params = 0;
 
-        static void match_registers_of_unvisited(Block &prev, Block &post);
+        uint initial_stack_size = 0;
+        uint initial_accumulated_params = 0;
+
+        static void align_registers(Block &prev, Block &post);
     };
 }
 #endif // MOVFORTH_BLOCK_H

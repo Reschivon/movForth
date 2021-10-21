@@ -2,17 +2,7 @@
 
 using namespace mov;
 
-/**
- * Simulate the effects_without_push_pop of a single word on the stack
- * Push and pop from the given stack according to the Instruction provided
- * Generate registers between the elements on the stack and the Tnstruction
- * If the stack is empty, will add to the basic block's list of params
 
- * @param stack stack to be simulated and linked to/from
- * @param instruction the Instruction whose effects_without_push_pop will be used to simulate the stack
- * @param params if additional parameter are necessary, register then in this NodeList
- * @param register_gen the context for naming registers
- */
 void Analysis::propagate_stack(NodeList &stack,
                      Instruction *instruction,
                      NodeList &params,
@@ -22,21 +12,23 @@ void Analysis::propagate_stack(NodeList &stack,
 
     // if the stack does not have at least (effects_without_push_pop.num_popped) items for us,
     // then we will create param nodes until there are enough items
-    unsigned int nodes_from_stack = std::min(effects.num_popped, (int) stack.size());
-    unsigned int nodes_from_params = std::max(effects.num_popped - (int)stack.size(), 0);
+    unsigned int nodes_from_stack = std::min(effects.num_popped, stack.size());
+    // we must make this comparison in signed integers
+    unsigned int nodes_from_params = std::max((int)effects.num_popped - (int)stack.size(), 0);
 
     // pop param nodes from stack to current instruction
     NodeList::move_top_elements(stack, instruction->pop_nodes,
                                 (int) nodes_from_stack);
 
-    while (nodes_from_params -- > 0)
-        Node::link(params.new_front(),
-                   instruction->pop_nodes.new_back(),
+    while (nodes_from_params -- > 0) {
+        println(nodes_from_params);
+        Node::link(params.new_bottom(),
+                   instruction->pop_nodes.new_top(),
                    register_gen.get_param());
-
+    }
     // make empty output nodes
     for (int i = 0; i < effects.num_pushed; i++)
-        instruction->push_nodes.new_back();
+        instruction->push_nodes.new_top();
 
     // link output and param nodes that represent the same data
     for (auto out_in_pair : effects.out_in_pairs)
@@ -49,9 +41,9 @@ void Analysis::propagate_stack(NodeList &stack,
     // link output nodes to stack
     for (auto push_node : instruction->push_nodes)
         if(push_node->target != nullptr)
-            Node::link_bidirection(push_node, stack.new_back(), push_node->edge_register);
+            Node::link_bidirection(push_node, stack.new_top(), push_node->edge_register);
         else
-            Node::link_bidirection(push_node, stack.new_back(), register_gen.get());
+            Node::link_bidirection(push_node, stack.new_top(), register_gen.get());
 
     d("pops:");
     for (auto node : instruction->pop_nodes)
@@ -64,19 +56,11 @@ void Analysis::propagate_stack(NodeList &stack,
     dln();
 }
 
-/**
- * Make a stack graph for an entire definition via multiple calls to propagate_stack()
- *
- * @param running_stack inital state of the stack before bb is supposed to run
- * @param bb the basic block whose definition with be graphed
- * @param register_gen context for naming registers
- * @return the running stack passed as parameter
- */
+
 NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb,
                                            RegisterGen register_gen) {
 
     dln();
-    dln("generate stack graph for all instructions in " , bb.name() );
 
     for (auto instruction : bb.instructions)
     {

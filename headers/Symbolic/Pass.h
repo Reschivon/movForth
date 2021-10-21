@@ -49,26 +49,38 @@ namespace mov {
         void explore_graph_dfs(NodeList stack, Block &bb);
 
         /**
-         * Generates stack graph (and thus register edges) for all words in the
-         * given basic block
-         * @param running_stack initial stack state
-         * @param bb basic block that will have a compted stack graph
-         * @param register_gen register generator for new register edges
-        */
+         * Make a stack graph for an entire definition via multiple calls to propagate_stack().
+         * Also compute and set all non-stack effects for bb
+         *
+         * @param running_stack inital state of the stack
+         * @param bb the basic block whose instructions with be graphed
+         * @param register_gen to generate the names of new registers
+         * @return the running stack
+         */
         static NodeList basic_block_stack_graph(NodeList &running_stack, Block &bb, RegisterGen register_gen);
 
         /**
-         * Builds register graph for the space between the given stack
-         * and the given word, and the space between the given word
-         * and a new stack
-         * @param stack populated stack that serves as params stack elements
-         * @param instruction instruction that represents the word to be simulated
-         * @param base parent basic block for holding params nodes
-         * @param register_gen register generator for new register edges
+         * Appends new register edges to the existing register graph, based on
+         * the push and pop effects of the provided instruction. Also updates
+         * stack parameter to the state of stack after this instruction
+         *
+         * @param stack current state of stack
+         * @param instruction dictates the number of graph edges to be added
+         * @param params if additional parameter nodes are required, they will be added here
+         * @param register_gen to generate the names of new registers
          */
         static void propagate_stack(NodeList &stack, Instruction *instruction, NodeList &params, RegisterGen &register_gen);
 
+        /**
+         * If there are stack elements that remain unchanged (but could be shuffled)
+         * between the start and end of this BB, then note the unchanged register pairs
+         * in bb.effects.matching pairs
+         *
+         * @param bb the basic block in which to find matching pairs
+         */
         void compute_matching_pairs(Block &bb);
+
+
     public:
         sWordptr static_analysis(iWordptr original_word);
         static sWordptr show_word_info(sWordptr wordptr);

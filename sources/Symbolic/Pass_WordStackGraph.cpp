@@ -2,17 +2,6 @@
 
 using namespace mov;
 
-struct Conflict{
-    Block *from, *to;
-    Conflict(Block *from, Block *to)
-        : from(from), to(to) {}
-    [[nodiscard]] std::string to_string() const{
-        return "conflict from " + from->name() +
-                " to " + to->name();
-    }
-
-};
-
 void Analysis::explore_graph_dfs(NodeList stack, Block &bb){
     if(bb.visited)
         return;
@@ -37,8 +26,8 @@ void Analysis::explore_graph_dfs(NodeList stack, Block &bb){
     unindent();
     dln("[" , bb.name() , "] END stack graph");
 
-    int final_accumulated_params = bb.initial_accumulated_params + bb.params.size();
-    int final_accumulated_stack_size = transformed_stack.size();
+    uint final_accumulated_params = bb.initial_accumulated_params + bb.params.size();
+    uint final_accumulated_stack_size = transformed_stack.size();
 
     for(auto next : bb.nextBBs()){
         if(next.get().visited){
@@ -52,14 +41,19 @@ void Analysis::explore_graph_dfs(NodeList stack, Block &bb){
             }
         }else{
             next.get().initial_accumulated_params = final_accumulated_params;
-            next.get().initial_stack_size = (int) transformed_stack.size();
+            next.get().initial_stack_size = final_accumulated_stack_size;
         }
 
-        Block::match_registers_of_unvisited(bb, next);
+        // aka align registers between control flow edges
+        Block::align_registers(bb, next);
+
+        // need to set this after align_registers but before
+        // calling explore_graph_dfs
         bb.visited = true;
 
         explore_graph_dfs(transformed_stack, next);
     }
+
     bb.visited = true; // need it again; what if bb.nextBBs() is empty?
 }
 
@@ -95,8 +89,8 @@ void Analysis::word_stack_graph(sWordptr wordptr) {
     wordptr->effects.num_popped = lastBB.initial_accumulated_params;
     wordptr->effects.num_pushed = lastBB.initial_stack_size;
 
-    int total_accumulated_params = lastBB.initial_accumulated_params + lastBB.params.size();
-    int total_accumulated_stack_size = lastBB.outputs.size();
+    uint total_accumulated_params = lastBB.initial_accumulated_params + lastBB.params.size();
+    uint total_accumulated_stack_size = lastBB.outputs.size();
 
 //    dln("popped (from last BB): ", total_accumulated_params);
 //    dln("pushed (from last BB): ", total_accumulated_stack_size);
