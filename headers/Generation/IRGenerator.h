@@ -8,53 +8,32 @@
 #include <llvm/IR/LLVMContext.h>
 
 #include "../Symbolic/sWord.h"
+#include "Variables.h"
+#include "FBuilder.h"
 
 using namespace llvm;
 namespace mov {
 
-    class Variables {
-
-        // prepare lookup for Register -> Value and Block::index -> BasicBlock
-        std::unordered_map<Register, AllocaInst*, Register::RegisterHash> allocs;
-
-        std::unordered_map<uint, BasicBlock*> blocks;
-
-        Function *the_function;
-        LLVMContext &the_context;
-
-        AllocaInst* create_entry_block_alloca(Function *func, const std::string &var_name);
-
-    public:
-        explicit Variables(Function *the_function, LLVMContext &the_context);
-        AllocaInst *create_alloc(Register reg);
-        AllocaInst *get_alloc(Register reg);
-        void create_block(uint index, BasicBlock* block);
-        BasicBlock* get_block(uint index);
-
-    };
-
     class IRGenerator {
     private:
+        std::unordered_map<sWordptr, Function*> visited_words{};
+
         LLVMContext the_context;
         std::unique_ptr<Module> the_module;
-        IRBuilder<> builder;
-
-        Function* make_main();
-        void print_module();
-        void exec_module();
+        FBuilder builder;
 
         void declare_printf();
+        Function* make_main();
 
-        BasicBlock* make_basic_block(std::string name, Value* body, Function *function);
-        Function* make_function(std::string name,std::vector<Twine> param_names);
-        Value* make_constant(int val);
-        Value* make_add(Value *first, Value *second);
-        Value* make_function_call(std::string name, std::vector<Value*> arguments);
+        void print_module();
+        static void exec_module();
 
-            public:
-        explicit IRGenerator();
+    public:
+        IRGenerator();
 
-        void generate(sWord *fword, bool is_root);
+        Function* get_function(sWordptr word);
+
+        Function* generate(sWord *fword, bool is_root);
 
         int hello_world();
         void hello_world2();

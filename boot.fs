@@ -119,7 +119,7 @@
 \ are supported by the compiler
 \ : main 0 if 69 69 else 420 420 then . . ;
 
-: main 20 . 1 . ;
+: main 20 . 1 . 1 if then ;
 
 main
 

@@ -50,10 +50,12 @@ add_executable(movForth
 
         sources/Generation/IRGenerator.cpp
 
-        headers/Interpretation/iData.h
         sources/Interpretation/iData.cpp
 
-        sources/SystemExec.cpp)
+        sources/SystemExec.cpp
+        sources/Generation/Variables.cpp
+        sources/Generation/FBuilder.cpp
+        )
 
 
 

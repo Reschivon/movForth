@@ -51,6 +51,8 @@ namespace mov {
         /**
          * Make a stack graph for an entire definition via multiple calls to propagate_stack().
          * Also compute and set all non-stack effects for bb
+         * Also sets inputs and outputs, the OVERALL stack state before and after
+         * the block executes, respectively
          *
          * @param running_stack inital state of the stack
          * @param bb the basic block whose instructions with be graphed

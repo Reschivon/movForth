@@ -55,7 +55,7 @@ namespace mov {
     struct Register{
         int index = -1;
         int bb_index = -1;
-        enum registerType {UNDEF=0, NORMAL=1, PARAM=2} register_type = UNDEF;
+        enum registerType {UNDEF=0, NORMAL=1, PARAM=2, RETURN=3} register_type = UNDEF;
 
         Register operator++(int){
             index++;
@@ -75,7 +75,9 @@ namespace mov {
                     return "(register " + std::to_string(bb_index) + "-" + std::to_string(index) + ")";
                 case PARAM:
                     return "(param    " + std::to_string(bb_index) + "-" + std::to_string(index) + ")";
-               case UNDEF:
+                case RETURN:
+                    return "(return    " + std::to_string(bb_index) + "-" + std::to_string(index) + ")";
+                case UNDEF:
                     return "(undefined)";
                 default:
                     return "(fucked)";
@@ -89,6 +91,8 @@ namespace mov {
                     return "reg" + std::to_string(bb_index) + "." + std::to_string(index);
                 case PARAM:
                     return "par" + std::to_string(bb_index) + "." + std::to_string(index);
+                case RETURN:
+                    return "ret" + std::to_string(bb_index) + "." + std::to_string(index);
                 case UNDEF:
                     return "undef";
                 default:
@@ -154,6 +158,12 @@ namespace mov {
         static void redefine_preceding_edge(Node *node, Register id){
             node->backward_edge_register = id;
             node->target->forward_edge_register = id;
+        }
+
+        static void redefine_preceding_type(Node *node, Register::registerType ty){
+            Register old_reg = node->backward_edge_register;
+            old_reg.register_type = ty;
+            redefine_preceding_edge(node, old_reg);
         }
     };
 

@@ -4,83 +4,63 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/DIBuilder.h>
-#include <llvm/IR/LLVMContext.h>
-#include "llvm/IR/Verifier.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
 #include "../../headers/SystemExec.h"
 
 #include "../../headers/Generation/IRGenerator.h"
-#include "../../headers/Symbolic/Structures.h"
 
 using namespace llvm;
 using namespace mov;
 
+
 IRGenerator::IRGenerator()
-    : the_context(LLVMContext()),
-      the_module(std::make_unique<Module>("MovForth", the_context)),
-      builder(llvm::IRBuilder(the_context)) {
+        : the_context(LLVMContext()),
+          the_module(std::make_unique<Module>("MovForth", the_context)),
+          builder(the_context) {
 }
 
 
-Variables::Variables(Function *the_function, LLVMContext &the_context)
-        : the_function(the_function), the_context(the_context)
-{
-    allocs.reserve(10); // there are usually less then 10 Variables in a word
-    blocks.reserve(5); // there are usually less then 10 blocks in a word
+Function *IRGenerator::get_function(sWordptr fword) {
+    auto pair = visited_words.insert(std::pair(fword, generate(fword, false)));
+    return pair.first->second;
 }
 
-AllocaInst * Variables::create_alloc(Register reg) {
-    bool already_has = allocs.find(reg) != allocs.end();
-    if(!already_has) {
-        println("inserted new alloca: ", reg.to_string_allowed_chars());
-        AllocaInst* new_alloc = create_entry_block_alloca(the_function, reg.to_string_allowed_chars());
-        allocs.insert(std::make_pair(reg, new_alloc));
-        return new_alloc;
-    } else {
-        println("already have alloca: ", reg.to_string_allowed_chars());
-        return allocs.at(reg);
-    }
-}
-
-AllocaInst * Variables::get_alloc(Register reg) {
-    AllocaInst *alloca;
-    try {
-        alloca = allocs.at(reg);
-    } catch (std::out_of_range&){
-        println("register " + reg.to_string_allowed_chars(), " does not exist");
-    }
-    println("retrived register " + reg.to_string_allowed_chars());
-    return alloca;
-}
-
-void Variables::create_block(uint index, BasicBlock* block) {
-    blocks.insert(std::make_pair(index, block));
-}
-
-BasicBlock* Variables::get_block(uint index) {
-    return blocks.at(index);
-}
-
-AllocaInst* Variables::create_entry_block_alloca(Function *func, const std::string &var_name) {
-    IRBuilder<> entry_builder(&func->getEntryBlock(),
-                              func->getEntryBlock().begin());
-    return entry_builder.CreateAlloca(Type::getInt32Ty(the_context), nullptr, var_name);
-}
-
-
-void IRGenerator::generate(mov::sWord* fword, bool is_root) {
+Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
     if(is_root && fword->effects.num_popped != 0) {
         print("Word ", fword , " must not pop from stack to be compiled");
-        return;
+        return nullptr;
     }
 
     if(is_root && fword->effects.num_pushed != 0) {
         print("Word ", fword , " must not push to stack to be compiled");
+        return nullptr;
     }
 
     declare_printf();
     // make_main();
+/*
+    // jank fix for module::print bug
+    if(fword->blocks.size() == 1){
+        // remove exit instruction
+        fword->blocks[0].instructions.pop_back();
+
+        // make new end block
+        BBgen dummy;
+        Block true_end(dummy);
+        // add exit instruction to new block
+        true_end.instructions.push_back(new ReturnInstruction());
+        // copyless move the block to fword
+        fword->blocks.emplace_back(true_end);
+
+        // add branch instruction
+        fword->blocks[0].instructions.push_back(new BranchInstruction(
+                new sWord("branch", primitive_words::BRANCH),
+                new sData(nullptr),
+                fword->blocks[1].
+                ));
+    }*/
+
 
     uint num_params = fword->effects.num_popped;
     uint num_returns = fword->effects.num_pushed;
@@ -94,7 +74,7 @@ void IRGenerator::generate(mov::sWord* fword, bool is_root) {
                      the_module.get());
 
 
-    Variables variables(the_function, the_context);
+    builder.set_function(the_function);
 
     // create empty basic blocks - not added to function yet
     for(const auto& block : fword->blocks) {
@@ -105,7 +85,7 @@ void IRGenerator::generate(mov::sWord* fword, bool is_root) {
         else
             newbb = BasicBlock::Create(the_context, std::to_string(block.index) + ".br");
 
-        variables.create_block(block.index, newbb);
+        builder.create_block(block.index, newbb);
     }
 
     builder.SetInsertPoint(&the_function->getEntryBlock());
@@ -115,21 +95,19 @@ void IRGenerator::generate(mov::sWord* fword, bool is_root) {
     // and record the AllocaInst in the register map
     uint word_arg = 0;
     for (auto &arg : the_function->args()) {
-        Register reg = fword->my_graphs_inputs[word_arg++]->forward_edge_register;
+        Register reg = fword->my_graphs_params[word_arg++]->forward_edge_register;
         arg.setName(reg.to_string_allowed_chars() + "reg");
 
-        AllocaInst *alloc = variables.create_alloc(reg);
-        builder.CreateStore(&arg, alloc);
-
-        println("insert alloc: ", reg.to_string_allowed_chars(), " ", alloc->getName().str());
+        builder.build_store_register(&arg, reg);
     }
 
 
     // now lets iterate over every instruction in every Block
     for(const auto& block : fword->blocks) {
-        BasicBlock *bb = variables.get_block(block.index);
         println("IR for Basic Block #", block.index);
         indent();
+
+        BasicBlock *bb = builder.get_block(block.index);
 
         the_function->getBasicBlockList().push_back(bb);
         builder.SetInsertPoint(bb);
@@ -139,21 +117,17 @@ void IRGenerator::generate(mov::sWord* fword, bool is_root) {
             if(instr->id() == primitive_words::LITERAL) {
                 println("Literal(", instr->data.as_num(), ")");
 
-                Value *constant = builder.CreateAdd(
-                        ConstantInt::get(the_context, APInt(32, instr->data.as_num())),
-                        ConstantInt::get(the_context, APInt(1, 0))
-                );
+                Value *constant = builder.CreateForthConstant(instr->data.as_num());
 
                 Register push_to_reg = instr->push_nodes[0]->forward_edge_register;
-                AllocaInst *push_to_alloc = variables.create_alloc(push_to_reg);
 
-                builder.CreateStore(constant, push_to_alloc);
+                builder.build_store_register(constant, push_to_reg);
             }
             if(instr->id() == primitive_words::BRANCH) {
                 println("Branch");
 
                 Block *jump_to = instr->as_branch()->jump_to;
-                BasicBlock *dest = variables.get_block(jump_to->index);
+                BasicBlock *dest = builder.get_block(jump_to->index);
 
                 builder.CreateBr(dest);
             }
@@ -161,9 +135,8 @@ void IRGenerator::generate(mov::sWord* fword, bool is_root) {
                 println("Branchif");
 
                 Register condition = instr->pop_nodes[0]->backward_edge_register;
-                AllocaInst *alloca = variables.get_alloc(condition);
 
-                Value *cond_value = builder.CreateLoad(alloca);
+                Value *cond_value = builder.build_load_register(condition);
 
                 Value *TF = builder.CreateICmpEQ(
                         ConstantInt::get(the_context, APInt(32, 0)),
@@ -173,8 +146,8 @@ void IRGenerator::generate(mov::sWord* fword, bool is_root) {
                 Block *jump_true = instr->as_branchif()->jump_to_next;
                 Block *jump_false = instr->as_branchif()->jump_to_far;
 
-                BasicBlock *true_dest = variables.get_block(jump_true->index);
-                BasicBlock *false_dest = variables.get_block(jump_false->index);
+                BasicBlock *true_dest = builder.get_block(jump_true->index);
+                BasicBlock *false_dest = builder.get_block(jump_false->index);
 
                 // yes, true_dest and false_dest are flipped
                 builder.CreateCondBr(TF, false_dest, true_dest);
@@ -183,31 +156,106 @@ void IRGenerator::generate(mov::sWord* fword, bool is_root) {
             if(instr->id() == primitive_words::EMIT) {
                 println("Emit");
 
-                Register condition = instr->pop_nodes[0]->backward_edge_register;
-                AllocaInst *alloc = variables.get_alloc(condition);
+                Register num = instr->pop_nodes[0]->backward_edge_register;
 
-                Value *cond_value = builder.CreateLoad(alloc);
+                Value *num_value = builder.build_load_register(num);
 
                 std::vector<Value *> print_args{
                         builder.CreateGlobalStringPtr("%d\n"),
-                        cond_value
+                        num_value
                 };
 
                 builder.CreateCall(the_module->getFunction("printf"), print_args);
             }
+
+            if(instr->id() == primitive_words::ADD) {
+                Register one = instr->pop_nodes[0]->backward_edge_register;
+                Register two = instr->pop_nodes[1]->backward_edge_register;
+
+                Value *one_v = builder.build_load_register(one);
+                Value *two_v = builder.build_load_register(two);
+
+                Value* sum = builder.CreateAdd(one_v, two_v);
+                Register sum_register = instr->push_nodes[0]->forward_edge_register;
+
+                builder.build_store_register(sum, sum_register);
+            }
+
+            if(instr->id() == primitive_words::SUBTRACT) {
+                Register one = instr->pop_nodes[0]->backward_edge_register;
+                Register two = instr->pop_nodes[1]->backward_edge_register;
+
+                Value *one_v = builder.build_load_register(one);
+                Value *two_v = builder.build_load_register(two);
+
+                Value* diff = builder.CreateSub(one_v, two_v);
+                Register diff_register = instr->push_nodes[0]->forward_edge_register;
+
+                builder.build_store_register(diff, diff_register);
+            }
+
+            if(instr->id() == primitive_words::MULTIPLY) {
+                Register one = instr->pop_nodes[0]->backward_edge_register;
+                Register two = instr->pop_nodes[1]->backward_edge_register;
+
+                Value *one_v = builder.build_load_register(one);
+                Value *two_v = builder.build_load_register(two);
+
+                Value* product = builder.CreateMul(one_v, two_v);
+                Register product_register = instr->push_nodes[0]->forward_edge_register;
+
+                builder.build_store_register(product, product_register);
+            }
+
+            if(instr->id() == primitive_words::DIVIDE) {
+                Register one = instr->pop_nodes[0]->backward_edge_register;
+                Register two = instr->pop_nodes[1]->backward_edge_register;
+
+                Value *one_v = builder.build_load_register(one);
+                Value *two_v = builder.build_load_register(two);
+
+                Value* factor = builder.CreateSDiv(one_v, two_v);
+                Register factor_register = instr->push_nodes[0]->forward_edge_register;
+
+                builder.build_store_register(factor, factor_register);
+            }
+
+            if(instr->id() == primitive_words::OTHER) {
+                println("other");
+
+                std::vector<Value*> arg_values;
+
+                for(auto pop : instr->pop_nodes)
+                    arg_values.push_back(builder.build_load_register(pop->backward_edge_register));
+                for(auto push : instr->push_nodes)
+                    arg_values.push_back(builder.build_load_register(push->forward_edge_register));
+
+                sWordptr werd = instr->linked_word;
+                Function *funk = get_function(werd);
+
+                builder.CreateCall(the_module->getFunction(werd->name), arg_values);
+
+                auto *push = new Register[instr->pop_nodes.size()];
+
+            }
         }
 
         unindent();
+        println("Done IR for Basic Block #", block.index);
         println();
+
     }
 
-    println("Done building IR");
-
+    builder.SetInsertPoint(&the_function->getBasicBlockList().back());
     builder.CreateRetVoid();
+
+    println("Done building IR");
 
     print_module();
 
     exec_module();
+
+    return the_function;
 }
 
 
@@ -216,7 +264,7 @@ void IRGenerator::print_module() {
     println();
     println("==========[LLVM IR]===========");
 
-    the_module->print(errs(), nullptr);
+    the_module->print(outs(), nullptr);
 
     // print to file
     std::error_code EC;
@@ -259,44 +307,6 @@ Function* IRGenerator::make_main(){
     return main;
 }
 
-Value* IRGenerator::make_constant(int val){
-    return ConstantInt::get(Type::getInt32Ty(the_context), val);
-}
-
-Value* IRGenerator::make_add(Value *first, Value *second){
-    return builder.CreateAdd(first, second, "addtmp");
-}
-
-Value* IRGenerator::make_function_call(std::string name, std::vector<Value*> arguments){
-    Function *calle = the_module->getFunction(name);
-    return builder.CreateCall(calle, arguments, "calltmp");
-}
-
-Function* IRGenerator::make_function(std::string name,std::vector<Twine> param_names){
-    std::vector<Type*> parameters(param_names.size(), Type::getInt32Ty(the_context));
-    FunctionType *function_type = FunctionType::get(Type::getInt32Ty(the_context), parameters, false);
-    Function *the_function = Function::Create(function_type, Function::ExternalLinkage, name, the_module.get());
-
-    auto param_name = param_names.begin();
-    for(auto arg = the_function->arg_begin(); arg != the_function->arg_end(); arg++, param_name++){
-        arg->setName(*param_name);
-    }
-
-    return the_function;
-}
-
-
-bool verify_function(Function *function) {
-    return verifyFunction(*function);
-}
-
-BasicBlock* IRGenerator::make_basic_block(std::string name, Value* body, Function *function) {
-    BasicBlock *bb = BasicBlock::Create(the_context, name, function);
-    builder.SetInsertPoint(bb);
-    builder.CreateRet(body);
-
-    return bb;
-}
 
 void IRGenerator::hello_world2() {
     declare_printf();
@@ -354,3 +364,5 @@ int IRGenerator::hello_world() {
 
     return 0;
 }
+
+

@@ -20,7 +20,7 @@ namespace mov{
 
         std::vector<Block> blocks{};
 
-        NodeList my_graphs_inputs{};
+        NodeList my_graphs_params{};
 
         Effects effects;
 

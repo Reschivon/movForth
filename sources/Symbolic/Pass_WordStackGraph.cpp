@@ -72,7 +72,7 @@ void Analysis::word_stack_graph(sWordptr wordptr) {
     // build stack graph
     NodeList stack;
     // This function does all the heavy lifting
-    explore_graph_dfs(stack, wordptr->blocks.front(), wordptr->my_graphs_inputs);
+    explore_graph_dfs(stack, wordptr->blocks.front(), wordptr->my_graphs_params);
 
     // compute total effects_without_push_pop of word
     // propagate Effects through a single control path
@@ -84,6 +84,13 @@ void Analysis::word_stack_graph(sWordptr wordptr) {
         curr_bb = &curr_bb->nextBBs().begin().base()->get();
     }
     wordptr->effects = net_effects;
+
+    // mark remaining registers as return
+    NodeList &return_nodes = wordptr->blocks.back().outputs;
+    for(auto node : return_nodes){
+        Node::redefine_preceding_type(node, Register::registerType::RETURN);
+    }
+
 
     // last BB guaranteed to be return
     auto &lastBB = wordptr->blocks.back();
