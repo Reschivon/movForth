@@ -15,7 +15,7 @@ namespace mov {
         Function *the_function;
         LLVMContext &the_context;
 
-        std::unordered_map<Register, Value*, Register::RegisterHash> var_ptrs;
+        std::unordered_map<Register, Value*, Register::RegisterHash> val_ptrs;
 
         std::unordered_map<uint, BasicBlock *> blocks;
     public:
@@ -24,7 +24,6 @@ namespace mov {
         Value* build_load_register(Register reg);
 
         void build_store_register(Value* value, Register reg);
-
 
         AllocaInst *create_entry_block_alloca(Function *func, const std::string &var_name);
 
@@ -43,7 +42,7 @@ namespace mov {
             );
         }
 
-        void insert_var_ptr(Register reg, Value *a_i);
+        void insert_val_ptr(Register reg, Value *a_i);
     };
 }
 

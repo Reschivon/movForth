@@ -8,7 +8,7 @@ using namespace llvm;
 FBuilder::FBuilder(LLVMContext &context, Function *the_function) :
         IRBuilder<>(context), the_context(context), the_function(the_function)
 {
-    var_ptrs.reserve(10); // there are usually less then 10 Variables in a word
+    val_ptrs.reserve(10); // there are usually less then 10 Variables in a word
     blocks.reserve(5); // there are usually less then 10 blocks in a word
 }
 
@@ -25,24 +25,22 @@ void FBuilder::build_store_register(Value *value, Register reg) {
 
 
 Value* FBuilder::create_ptr_to_val(Register reg) {
-    bool already_has = var_ptrs.find(reg) != var_ptrs.end();
+    bool already_has = val_ptrs.find(reg) != val_ptrs.end();
     if(!already_has) {
         println("inserted new alloca: ", reg.to_string_allowed_chars());
         AllocaInst* new_alloc = create_entry_block_alloca(the_function, reg.to_string_allowed_chars());
-        print("type of allocIinst: ");
-        new_alloc->print(outs());
-        var_ptrs.insert(std::make_pair(reg, new_alloc));
+        val_ptrs.insert(std::make_pair(reg, new_alloc));
         return new_alloc;
     } else {
         println("already have alloca: ", reg.to_string_allowed_chars());
-        return var_ptrs.at(reg);
+        return val_ptrs.at(reg);
     }
 }
 
 Value* FBuilder::get_ptr_to_val(Register reg) {
     Value *ptr_to_val;
     try {
-        ptr_to_val = var_ptrs.at(reg);
+        ptr_to_val = val_ptrs.at(reg);
     } catch (std::out_of_range&){
         println("register " + reg.to_string_allowed_chars(), " does not exist");
         return nullptr;
@@ -51,8 +49,8 @@ Value* FBuilder::get_ptr_to_val(Register reg) {
     return ptr_to_val;
 }
 
-void FBuilder::insert_var_ptr(Register reg, Value *a_i){
-    var_ptrs.insert(std::make_pair(reg, a_i));
+void FBuilder::insert_val_ptr(Register reg, Value *a_i){
+    val_ptrs.insert(std::make_pair(reg, a_i));
 }
 
 

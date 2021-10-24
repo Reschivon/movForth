@@ -56,7 +56,7 @@ namespace mov {
          *
          * @param running_stack inital state of the stack
          * @param bb the basic block whose instructions with be graphed
-         * @param register_gen to generate the names of new registers
+         * @param register_gen to generate_function the names of new registers
          * @param params Nodelist where additional params will be noted
          * @return the running stack
          */
@@ -70,7 +70,7 @@ namespace mov {
          * @param stack current state of stack
          * @param instruction dictates the number of graph edges to be added
          * @param params if additional parameter nodes are required, they will be added here
-         * @param register_gen to generate the names of new registers
+         * @param register_gen to generate_function the names of new registers
          */
         static void propagate_stack(NodeList &stack, Instruction *instruction, NodeList &params, RegisterGen &register_gen);
 

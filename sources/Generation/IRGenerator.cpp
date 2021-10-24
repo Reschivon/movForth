@@ -17,32 +17,36 @@ using namespace mov;
 
 IRGenerator::IRGenerator()
         : the_context(LLVMContext()),
-          the_module(std::make_unique<Module>("MovForth", the_context))
+          the_module(std::make_shared<Module>("MovForth", the_context))
 {}
 
 
 Function *IRGenerator::get_function(sWordptr fword) {
     bool already_generated = visited_words.find(fword) != visited_words.end();
     if(!already_generated) {
-        auto pair = visited_words.insert(std::pair(fword, generate(fword, false)));
+        auto pair = visited_words.insert(std::pair(fword, generate_function(fword, false)));
         return pair.first->second;
     }else{
         return visited_words.at(fword);
     }
 }
 
-Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
+std::shared_ptr<Module> IRGenerator::generate(mov::sWord *root) {
+    declare_printf();
+    generate_function(root, true);
+    return the_module;
+}
+Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
     if(is_root && fword->effects.num_popped != 0) {
-        print("Word ", fword , " must not pop from stack to be compiled");
+        print("Word ", fword->name, " must not pop from stack to be compiled");
         return nullptr;
     }
 
     if(is_root && fword->effects.num_pushed != 0) {
-        print("Word ", fword , " must not push to stack to be compiled");
+        print("Word ", fword->name, " must not push to stack to be compiled");
         return nullptr;
     }
 
-    declare_printf();
     // make_main();
 
     uint num_params = fword->effects.num_popped;
@@ -96,7 +100,7 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
         Register reg = fword->my_graphs_returns[word_ret++]->backward_edge_register;
         arg->setName(reg.to_string_allowed_chars() + "reg");
 
-        builder.insert_var_ptr(reg, arg);
+        builder.insert_val_ptr(reg, arg);
     }
 
     // now lets iterate over every instruction in every Block

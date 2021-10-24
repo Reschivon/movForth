@@ -115,8 +115,9 @@
 \ the word to be compiled.
 \ : main 0 if 69 69 else 420 420 then . . ;
 
+: fourx 4 * ;
 
-: main gen . ;
+: main 4 fourx . ;
 
 main
 

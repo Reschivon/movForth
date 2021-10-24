@@ -34,7 +34,7 @@ int main() {
     mov::Analysis::show_word_info(converted_word);
 
     mov::IRGenerator ir_generator;
-    ir_generator.generate(converted_word, true);
+    ir_generator.generate(converted_word);
 
 }
 

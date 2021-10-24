@@ -28,8 +28,8 @@ namespace mov{
         NodeList inputs{};
         // Nodes of this basic block after the last instruction
         NodeList outputs{};
-        // Parameter nodes; added to by propagate stack
-        // not used for now
+        // Parameter nodes used in ONLY this block;
+        // added by propagate stack
         NodeList params{};
 
         // Do not store push/pop effects for Block

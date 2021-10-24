@@ -27,6 +27,7 @@ void Analysis::explore_graph_dfs(NodeList stack, Block &bb, NodeList &params){
     dln("[" , bb.name() , "] FINSIHED making stack graph");
 
     uint final_accumulated_params = params.size();
+    bb.params = params;
     uint final_accumulated_stack_size = transformed_stack.size();
 
     dln("accumulated total params: ", final_accumulated_params);
@@ -99,6 +100,8 @@ void Analysis::word_stack_graph(sWordptr wordptr) {
     wordptr->effects.num_pushed = lastBB.initial_accumulated_stack_size;
 
     uint total_accumulated_params = lastBB.initial_accumulated_params + lastBB.params.size();
+    print("word final params: ", total_accumulated_params);
+
     uint total_accumulated_stack_size = lastBB.outputs.size();
 
 //    dln("popped (from last BB): ", total_accumulated_params);
