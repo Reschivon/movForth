@@ -3,6 +3,7 @@
 #include "headers/Symbolic/Pass.h"
 #include "headers/Generation/IRGenerator.h"
 
+
 int main() {
 
     // Create a plain old interpreter that interprets
@@ -27,18 +28,15 @@ int main() {
     //    how the compiler converts from stack to SSA format)
     auto converted_word = analysis.static_analysis(word_to_compile);
 
-    mov::Register r{1, 1, mov::Register::registerType::PARAM};
-    std::unordered_map<mov::Register, std::string, mov::Register::RegisterHash> d;
-    d.insert(std::make_pair(r, "tadaaa"));
-    println(d.at(r));
-
     // Show the fruits of labor from static analysis
     println();
     println();
     mov::Analysis::show_word_info(converted_word);
 
     mov::IRGenerator ir_generator;
-    ir_generator.generate(converted_word, false);
+    // ir_generator.generate(converted_word, false);
+
+    ir_generator.hello_world();
 
 }
 

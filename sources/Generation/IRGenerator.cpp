@@ -193,12 +193,16 @@ void IRGenerator::generate(mov::sWord* fword, bool is_root) {
                         cond_value
                 };
                 builder.CreateCall(the_module->getFunction("printf"), print_args);
+
+                println("done with emit");
             }
         }
 
         unindent();
         println();
     }
+
+    println("Done building IR");
 
     builder.CreateRetVoid();
 
@@ -217,7 +221,7 @@ void IRGenerator::print_module() {
     // print to file
     std::error_code EC;
     raw_fd_ostream out_stream("../MovForth.ll", EC, sys::fs::OpenFlags::F_None);
-    the_module->print(out_stream, nullptr);
+    the_module->print(out_stream, nullptr, true, true);
 }
 
 
@@ -295,8 +299,7 @@ BasicBlock* IRGenerator::make_basic_block(std::string name, Value* body, Functio
 }
 
 
-
-int hello_word() {
+int IRGenerator::hello_world() {
     // create context, the_module and builder
     LLVMContextRef context = LLVMContextCreate();
     LLVMModuleRef  module = LLVMModuleCreateWithNameInContext("hello", context);
@@ -345,7 +348,3 @@ int hello_word() {
 
     return 0;
 }
-
-
-
-

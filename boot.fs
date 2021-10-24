@@ -117,7 +117,9 @@
 \ the word to be compiled. "test" is specified in main.cpp
 \ control flow words (BRANCH and BRANCHIF) compiled by IF, ELSE, and THEN
 \ are supported by the compiler
-: main if 69 69 else 420 420 then . . ;
+\ : main if 69 69 else 420 420 then . . ;
+
+: main 100 . 1 if then ;
 
 main
 

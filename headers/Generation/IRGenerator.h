@@ -56,8 +56,10 @@ namespace mov {
 
         void generate(sWord *fword, bool is_root);
 
+        int hello_world();
     };
 }
+
 
 
 #endif //MOVFORTH_IRGENERATOR_H
