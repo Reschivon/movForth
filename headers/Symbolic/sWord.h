@@ -21,6 +21,7 @@ namespace mov{
         std::vector<Block> blocks{};
 
         NodeList my_graphs_params{};
+        NodeList my_graphs_returns{};
 
         Effects effects;
 

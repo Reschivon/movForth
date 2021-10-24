@@ -87,7 +87,8 @@ void Analysis::word_stack_graph(sWordptr wordptr) {
 
     // mark remaining registers as return
     NodeList &return_nodes = wordptr->blocks.back().outputs;
-    for(auto node : return_nodes){
+    wordptr->my_graphs_returns = return_nodes;
+    for(auto &node : return_nodes){
         Node::redefine_preceding_type(node, Register::registerType::RETURN);
     }
 

@@ -94,13 +94,26 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
     // store the arg register in the space,
     // and record the AllocaInst in the register map
     uint word_arg = 0;
-    for (auto &arg : the_function->args()) {
+    for (int i = 0; i < fword->effects.num_popped; i++) {
+        auto *arg = the_function->args().begin() + i;
         Register reg = fword->my_graphs_params[word_arg++]->forward_edge_register;
-        arg.setName(reg.to_string_allowed_chars() + "reg");
+        arg->setName(reg.to_string_allowed_chars() + "reg");
 
-        builder.build_store_register(&arg, reg);
+        builder.build_store_register(arg, reg);
     }
 
+    // register all reference params as AllocInst* in the lookup
+    uint word_ret = 0;
+    for (int i = fword->effects.num_popped; i < fword->effects.num_popped + fword->effects.num_pushed; i++) {
+        // Value that is actually Alloca instance (pointer)
+        Value *arg = the_function->args().begin() + i;
+        AllocaInst* arg_ref = cast<AllocaInst>(arg);
+
+        Register reg = fword->my_graphs_returns[word_ret++]->backward_edge_register;
+        arg_ref->setName(reg.to_string_allowed_chars() + "reg");
+
+        builder.insert_alloc(reg, arg_ref);
+    }
 
     // now lets iterate over every instruction in every Block
     for(const auto& block : fword->blocks) {
@@ -228,14 +241,13 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
                 for(auto pop : instr->pop_nodes)
                     arg_values.push_back(builder.build_load_register(pop->backward_edge_register));
                 for(auto push : instr->push_nodes)
-                    arg_values.push_back(builder.build_load_register(push->forward_edge_register));
+                    // alloca instance (pointer) hidden as value
+                    arg_values.push_back(builder.create_alloc(push->forward_edge_register));
 
                 sWordptr werd = instr->linked_word;
                 Function *funk = get_function(werd);
 
                 builder.CreateCall(the_module->getFunction(werd->name), arg_values);
-
-                auto *push = new Register[instr->pop_nodes.size()];
 
             }
         }

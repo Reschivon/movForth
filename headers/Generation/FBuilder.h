@@ -46,6 +46,8 @@ namespace mov {
         }
 
         Value *build_load_register_as_ref(Register reg);
+
+        void insert_alloc(Register reg, AllocaInst *a_i);
     };
 }
 

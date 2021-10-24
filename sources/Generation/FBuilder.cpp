@@ -28,6 +28,9 @@ AllocaInst * FBuilder::create_alloc(Register reg) {
     }
 }
 
+void FBuilder::insert_alloc(Register reg, AllocaInst* a_i){
+    allocs.insert(std::make_pair(reg, a_i));
+}
 
 Value* FBuilder::build_load_register(Register reg) {
     AllocaInst *alloc = get_alloc(reg);
@@ -36,7 +39,7 @@ Value* FBuilder::build_load_register(Register reg) {
 
 Value* FBuilder::build_load_register_as_ref(Register reg){
     AllocaInst *alloc = get_alloc(reg);
-    return (Value*) alloc;
+    return cast<Value>(alloc);
 }
 
 void FBuilder::build_store_register(Value *value, Register reg) {
