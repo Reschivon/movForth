@@ -36,7 +36,5 @@ int main() {
     mov::IRGenerator ir_generator;
     ir_generator.generate(converted_word, true);
 
-    // ir_generator.hello_world2();
-
 }
 

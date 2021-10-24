@@ -15,13 +15,11 @@ namespace mov {
         Function *the_function;
         LLVMContext &the_context;
 
-        std::unordered_map<Register, AllocaInst *, Register::RegisterHash> allocs;
+        std::unordered_map<Register, Value*, Register::RegisterHash> var_ptrs;
 
         std::unordered_map<uint, BasicBlock *> blocks;
     public:
-        explicit FBuilder(LLVMContext &context);
-
-        void set_function(Function *func);
+        explicit FBuilder(LLVMContext &context, Function *the_function);
 
         Value* build_load_register(Register reg);
 
@@ -30,9 +28,9 @@ namespace mov {
 
         AllocaInst *create_entry_block_alloca(Function *func, const std::string &var_name);
 
-        AllocaInst *create_alloc(Register reg);
+        Value * create_ptr_to_val(Register reg);
 
-        AllocaInst *get_alloc(Register reg);
+        Value * get_ptr_to_val(Register reg);
 
         void create_block(uint index, BasicBlock *block);
 
@@ -45,9 +43,7 @@ namespace mov {
             );
         }
 
-        Value *build_load_register_as_ref(Register reg);
-
-        void insert_alloc(Register reg, AllocaInst *a_i);
+        void insert_var_ptr(Register reg, Value *a_i);
     };
 }
 

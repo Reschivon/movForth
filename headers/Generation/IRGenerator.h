@@ -20,7 +20,6 @@ namespace mov {
 
         LLVMContext the_context;
         std::unique_ptr<Module> the_module;
-        FBuilder builder;
 
         void declare_printf();
         Function* make_main();

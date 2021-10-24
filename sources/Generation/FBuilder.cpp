@@ -1,63 +1,60 @@
 
+#include <llvm/Support/raw_ostream.h>
 #include "../../headers/Generation/FBuilder.h"
 
 using namespace mov;
 using namespace llvm;
 
-FBuilder::FBuilder(LLVMContext &context) :
-        IRBuilder<>(context), the_context(context)
+FBuilder::FBuilder(LLVMContext &context, Function *the_function) :
+        IRBuilder<>(context), the_context(context), the_function(the_function)
 {
-    allocs.reserve(10); // there are usually less then 10 Variables in a word
+    var_ptrs.reserve(10); // there are usually less then 10 Variables in a word
     blocks.reserve(5); // there are usually less then 10 blocks in a word
 }
 
-void FBuilder::set_function(Function *func) {
-    the_function = func;
-}
-
-AllocaInst * FBuilder::create_alloc(Register reg) {
-    bool already_has = allocs.find(reg) != allocs.end();
-    if(!already_has) {
-        println("inserted new alloca: ", reg.to_string_allowed_chars());
-        AllocaInst* new_alloc = create_entry_block_alloca(the_function, reg.to_string_allowed_chars());
-        allocs.insert(std::make_pair(reg, new_alloc));
-        return new_alloc;
-    } else {
-        println("already have alloca: ", reg.to_string_allowed_chars());
-        return allocs.at(reg);
-    }
-}
-
-void FBuilder::insert_alloc(Register reg, AllocaInst* a_i){
-    allocs.insert(std::make_pair(reg, a_i));
-}
 
 Value* FBuilder::build_load_register(Register reg) {
-    AllocaInst *alloc = get_alloc(reg);
+    Value *alloc = get_ptr_to_val(reg);
     return CreateLoad(alloc);
 }
 
-Value* FBuilder::build_load_register_as_ref(Register reg){
-    AllocaInst *alloc = get_alloc(reg);
-    return cast<Value>(alloc);
-}
-
 void FBuilder::build_store_register(Value *value, Register reg) {
-    AllocaInst *alloc = create_alloc(reg);
+    Value *alloc = create_ptr_to_val(reg);
     CreateStore(value, alloc);
 }
 
-AllocaInst * FBuilder::get_alloc(Register reg) {
-    AllocaInst *alloca;
+
+Value* FBuilder::create_ptr_to_val(Register reg) {
+    bool already_has = var_ptrs.find(reg) != var_ptrs.end();
+    if(!already_has) {
+        println("inserted new alloca: ", reg.to_string_allowed_chars());
+        AllocaInst* new_alloc = create_entry_block_alloca(the_function, reg.to_string_allowed_chars());
+        print("type of allocIinst: ");
+        new_alloc->print(outs());
+        var_ptrs.insert(std::make_pair(reg, new_alloc));
+        return new_alloc;
+    } else {
+        println("already have alloca: ", reg.to_string_allowed_chars());
+        return var_ptrs.at(reg);
+    }
+}
+
+Value* FBuilder::get_ptr_to_val(Register reg) {
+    Value *ptr_to_val;
     try {
-        alloca = allocs.at(reg);
+        ptr_to_val = var_ptrs.at(reg);
     } catch (std::out_of_range&){
         println("register " + reg.to_string_allowed_chars(), " does not exist");
         return nullptr;
     }
     println("retrived register " + reg.to_string_allowed_chars());
-    return alloca;
+    return ptr_to_val;
 }
+
+void FBuilder::insert_var_ptr(Register reg, Value *a_i){
+    var_ptrs.insert(std::make_pair(reg, a_i));
+}
+
 
 void FBuilder::create_block(uint index, BasicBlock* block) {
     blocks.insert(std::make_pair(index, block));

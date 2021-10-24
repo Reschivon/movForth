@@ -17,14 +17,18 @@ using namespace mov;
 
 IRGenerator::IRGenerator()
         : the_context(LLVMContext()),
-          the_module(std::make_unique<Module>("MovForth", the_context)),
-          builder(the_context) {
-}
+          the_module(std::make_unique<Module>("MovForth", the_context))
+{}
 
 
 Function *IRGenerator::get_function(sWordptr fword) {
-    auto pair = visited_words.insert(std::pair(fword, generate(fword, false)));
-    return pair.first->second;
+    bool already_generated = visited_words.find(fword) != visited_words.end();
+    if(!already_generated) {
+        auto pair = visited_words.insert(std::pair(fword, generate(fword, false)));
+        return pair.first->second;
+    }else{
+        return visited_words.at(fword);
+    }
 }
 
 Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
@@ -45,15 +49,17 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
     uint num_returns = fword->effects.num_pushed;
 
     // create empty function corresponding to fword
-    std::vector<Type*> arg_types (num_params + num_returns, builder.getInt32Ty());
-    FunctionType *func_type = FunctionType::get(builder.getVoidTy(), arg_types, false);
+    std::vector<Type*> arg_types;
+    arg_types.insert(arg_types.end(), num_params, Type::getInt32Ty(the_context));
+    arg_types.insert(arg_types.end(), num_returns,Type::getInt32PtrTy(the_context));
+
+    FunctionType *func_type = FunctionType::get(Type::getVoidTy(the_context), arg_types, false);
     Function* the_function = Function::Create(func_type,
                      is_root? Function::ExternalLinkage : Function::PrivateLinkage,
                      fword->name,
                      the_module.get());
 
-
-    builder.set_function(the_function);
+    FBuilder builder(the_context, the_function);
 
     // create empty basic blocks - not added to function yet
     for(const auto& block : fword->blocks) {
@@ -75,23 +81,22 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
     uint word_arg = 0;
     for (int i = 0; i < fword->effects.num_popped; i++) {
         auto *arg = the_function->args().begin() + i;
+
         Register reg = fword->my_graphs_params[word_arg++]->forward_edge_register;
         arg->setName(reg.to_string_allowed_chars() + "reg");
 
         builder.build_store_register(arg, reg);
     }
-
     // register all reference params as AllocInst* in the lookup
     uint word_ret = 0;
     for (uint i = fword->effects.num_popped; i < fword->effects.num_popped + fword->effects.num_pushed; i++) {
         // Value that is actually Alloca instance (pointer)
         Value *arg = the_function->args().begin() + i;
-        auto* arg_ref = cast<AllocaInst>(arg);
 
         Register reg = fword->my_graphs_returns[word_ret++]->backward_edge_register;
-        arg_ref->setName(reg.to_string_allowed_chars() + "reg");
+        arg->setName(reg.to_string_allowed_chars() + "reg");
 
-        builder.insert_alloc(reg, arg_ref);
+        builder.insert_var_ptr(reg, arg);
     }
 
     // now lets iterate over every instruction in every Block
@@ -106,6 +111,27 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
 
         for(auto instr : block.instructions) {
             println();
+
+            if(instr->id() == primitive_words::OTHER) {
+                println("other");
+
+                std::vector<Value *> arg_values;
+
+                for (auto pop: instr->pop_nodes) {
+                    println("push value to arg");
+                    arg_values.push_back(builder.build_load_register(pop->backward_edge_register));
+                }
+                for(auto push : instr->push_nodes) {
+                    // alloca instruction (pointer) hidden as value
+                    println("push AllocaInstr to arg");
+                    arg_values.push_back(builder.create_ptr_to_val(push->forward_edge_register));
+                }
+                sWordptr werd = instr->linked_word;
+                Function *funk = get_function(werd);
+
+                builder.CreateCall(funk, arg_values);
+
+            }
             if(instr->id() == primitive_words::LITERAL) {
                 println("Literal(", instr->data.as_num(), ")");
 
@@ -212,27 +238,9 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
                 builder.build_store_register(factor, factor_register);
             }
 
-            if(instr->id() == primitive_words::OTHER) {
-                println("other");
-
-                std::vector<Value*> arg_values;
-
-                for(auto pop : instr->pop_nodes)
-                    arg_values.push_back(builder.build_load_register(pop->backward_edge_register));
-                for(auto push : instr->push_nodes)
-                    // alloca instance (pointer) hidden as value
-                    arg_values.push_back(builder.create_alloc(push->forward_edge_register));
-
-                sWordptr werd = instr->linked_word;
-                Function *funk = get_function(werd);
-
-                builder.CreateCall(funk, arg_values);
-
-            }
         }
 
         unindent();
-        println("Done IR for Basic Block #", block.index);
         println();
     }
 
@@ -241,12 +249,12 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
 
     println("Done building IR");
 
+    print_module();
+
     if(verifyFunction(*the_function, &outs()))
         println("there is a fucking error");
     else
         println("there is no error ... for now");
-
-    print_module();
 
     exec_module();
 
@@ -278,15 +286,17 @@ void IRGenerator::exec_module() {
 void IRGenerator::declare_printf(){
     // declare printf
     std::vector<Type*> printf_arg_types {Type::getInt8PtrTy(the_context)};
-    FunctionType *printf_type = FunctionType::get(builder.getInt32Ty(), printf_arg_types, true);
+    FunctionType *printf_type = FunctionType::get(Type::getInt32Ty(the_context), printf_arg_types, true);
     Function::Create(printf_type, Function::ExternalLinkage, "printf", the_module.get());
 }
 
 Function* IRGenerator::make_main(){
 
     // create empty main function
-    FunctionType *main_type = FunctionType::get(builder.getInt32Ty(), false);
+    FunctionType *main_type = FunctionType::get(Type::getInt32Ty(the_context), false);
     Function *main = Function::Create(main_type, Function::ExternalLinkage, "main", the_module.get());
+
+    FBuilder builder(the_context, main);
 
     // create empty entry BB in main function
     BasicBlock *entry = BasicBlock::Create(the_context, "entry", main);
