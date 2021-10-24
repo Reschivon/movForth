@@ -27,7 +27,7 @@ public:
 
         // ensure there is always entry block
         bbe_lookup[0] = 0;
-        new_word->basic_blocks.emplace_back(gen);
+        new_word->blocks.emplace_back(gen);
 
         const short jump_lookup_size = instructions;
         jump_lookup = new short[jump_lookup_size];
@@ -36,8 +36,8 @@ public:
 
     void make_bb_at_index(short index){
         if(bbe_lookup[index] == -1){
-            bbe_lookup[index] = new_word->basic_blocks.size();
-            new_word->basic_blocks.emplace_back(gen);
+            bbe_lookup[index] = new_word->blocks.size();
+            new_word->blocks.emplace_back(gen);
         }
     }
 
@@ -47,7 +47,7 @@ public:
     }
 
     it_type get_bb_at_index(int index){
-        return new_word->basic_blocks.begin() + bbe_lookup[index];
+        return new_word->blocks.begin() + bbe_lookup[index];
     }
 
     it_type get_bb_for_branch_at(int index){
@@ -129,7 +129,7 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
     }
 
     // ensure last instr of last BB is `return`
-    auto &last_bb = new_word->basic_blocks.back();
+    auto &last_bb = new_word->blocks.back();
     auto &last_instr = last_bb.instructions.back();
 
     if(last_bb.instructions.empty() || last_instr->name() != "is_exit")

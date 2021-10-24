@@ -3,6 +3,7 @@
 #define MOVFORTH_mov_TYPES_H
 
 #include <string>
+#include <utility>
 #include <variant>
 #include <vector>
 #include <iostream>
@@ -30,12 +31,17 @@ namespace mov {
         bool is_empty() {return data.index() == 0;};
 
         std::string type(){
-        switch(data.index()) {case 1: return "number"; case 2: return "xt"; case 0: return "unknown"; default: return "";}
+            switch(data.index()) {
+                case 0: return "unknown";
+                case 1: return "number";
+                case 2: return "xt";
+                default: return "";
+            }
         }
         int as_num() {return std::get<int>(data);}
         sWordptr as_xt() {return std::get<sWordptr>(data);}
 
-        explicit sData(std::variant<std::nullptr_t, int, sWordptr> data) : data(data) {}
+        explicit sData(std::variant<std::nullptr_t, int, sWordptr> data) : data(std::move(data)) {}
 
         std::string to_string(){
             if(is_xt())
@@ -49,11 +55,17 @@ namespace mov {
     struct Register{
         int index = -1;
         int bb_index = -1;
-        enum registerType {UNDEF, NORMAL, INPUT} register_type = UNDEF;
+        enum registerType {UNDEF=0, NORMAL=1, PARAM=2} register_type = UNDEF;
 
         Register operator++(int){
             index++;
             return *this;
+        }
+
+        bool operator==(const Register &other) const {
+            return (index == other.index &&
+                    bb_index == other.bb_index &&
+                    register_type == other.register_type);
         }
 
         [[nodiscard]] std::string to_string() const{
@@ -61,14 +73,46 @@ namespace mov {
             {
                 case NORMAL:
                     return "(register " + std::to_string(bb_index) + "-" + std::to_string(index) + ")";
-                case INPUT:
-                    return "(input    " + std::to_string(bb_index) + "-" + std::to_string(index) + ")";
+                case PARAM:
+                    return "(param    " + std::to_string(bb_index) + "-" + std::to_string(index) + ")";
                case UNDEF:
                     return "(undefined)";
                 default:
                     return "(fucked)";
             }
         }
+
+        [[nodiscard]] std::string to_string_allowed_chars() const {
+            switch (register_type)
+            {
+                case NORMAL:
+                    return "reg" + std::to_string(bb_index) + "." + std::to_string(index);
+                case PARAM:
+                    return "par" + std::to_string(bb_index) + "." + std::to_string(index);
+                case UNDEF:
+                    return "undef";
+                default:
+                    return "fuck";
+            }
+        }
+
+    public:
+        struct RegisterHash{
+            std::size_t operator()(const Register& r) const
+            {
+                using std::size_t;
+
+                std::size_t concatenated = (uint) r.index;
+                concatenated <<= 32;
+                concatenated |= (uint) r.bb_index;
+                std::size_t enh = (uint) r.register_type;
+                enh <<= 61;
+                concatenated |= enh;
+
+                return concatenated;
+            }
+        };
+
     };
 
     struct RegisterGen{
@@ -87,28 +131,28 @@ namespace mov {
     private:
         const int groupID;
         Register current =       {1, groupID, Register::NORMAL};
-        Register current_param = {1, groupID, Register::INPUT};
+        Register current_param = {1, groupID, Register::PARAM};
     };
 
     struct Node{
         Node* target = nullptr;
-        Register edge_register; // guaranteed to exist
+        Register backward_edge_register; // guaranteed to exist
         Register forward_edge_register; // may not always be nonnull
 
         static void link(Node *back, Node *front, Register id){
             front->target = back;
-            front->edge_register = id;
+            front->backward_edge_register = id;
         }
 
         static void link_bidirection(Node *back, Node *front, Register id){
             front->target = back;
-            front->edge_register = id;
+            front->backward_edge_register = id;
 
             back->forward_edge_register = id;
         }
 
         static void redefine_preceding_edge(Node *node, Register id){
-            node->edge_register = id;
+            node->backward_edge_register = id;
             node->target->forward_edge_register = id;
         }
     };

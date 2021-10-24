@@ -18,9 +18,8 @@ namespace mov{
         explicit sWord(std::string name, primitive_words id);
         explicit sWord(std::string name, primitive_words id, Effects effects);
 
-        std::vector<Block> basic_blocks{};
+        std::vector<Block> blocks{};
 
-        NodeList my_graphs_outputs{};
         NodeList my_graphs_inputs{};
 
         Effects effects;

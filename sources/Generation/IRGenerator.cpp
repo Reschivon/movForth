@@ -11,6 +11,7 @@
 #include "../../headers/SystemExec.h"
 
 #include "../../headers/Generation/IRGenerator.h"
+#include "../../headers/Symbolic/Structures.h"
 
 using namespace llvm;
 using namespace mov;
@@ -21,18 +22,191 @@ IRGenerator::IRGenerator()
       builder(llvm::IRBuilder(the_context)) {
 }
 
-void IRGenerator::generate(mov::sWord* root) {
-//        if(root->effects.num_popped != 0) {
-//            print("Word ", root , " must not pop from stack to be compiled");
-//            return;
-//        }
 
-    make_main();
+Variables::Variables(Function *the_function, LLVMContext &the_context)
+        : the_function(the_function), the_context(the_context)
+{
+    allocs.reserve(10); // there are usually less then 10 Variables in a word
+    blocks.reserve(5); // there are usually less then 10 blocks in a word
+}
+
+AllocaInst * Variables::create_alloc(Register reg) {
+    bool already_has = allocs.find(reg) != allocs.end();
+    if(!already_has) {
+        println("inserted new alloca: ", reg.to_string_allowed_chars());
+        AllocaInst* new_alloc = create_entry_block_alloca(the_function, reg.to_string_allowed_chars());
+        allocs.insert(std::make_pair(reg, new_alloc));
+        return new_alloc;
+    } else {
+        println("already have alloca: ", reg.to_string_allowed_chars());
+        return allocs.at(reg);
+    }
+}
+
+AllocaInst * Variables::get_alloc(Register reg) {
+    AllocaInst *alloca;
+    try {
+        alloca = allocs.at(reg);
+    } catch (std::out_of_range&){
+        println("register " + reg.to_string_allowed_chars(), " does not exist");
+    }
+    println("retrived register " + reg.to_string_allowed_chars());
+    return alloca;
+}
+
+void Variables::create_block(uint index, BasicBlock* block) {
+    blocks.insert(std::make_pair(index, block));
+}
+
+BasicBlock* Variables::get_block(uint index) {
+    return blocks.at(index);
+}
+
+AllocaInst* Variables::create_entry_block_alloca(Function *func, const std::string &var_name) {
+    IRBuilder<> entry_builder(&func->getEntryBlock(),
+                              func->getEntryBlock().begin());
+    return entry_builder.CreateAlloca(Type::getInt32Ty(the_context), nullptr, var_name);
+}
+
+
+void IRGenerator::generate(mov::sWord* fword, bool is_root) {
+    if(is_root && fword->effects.num_popped != 0) {
+        print("Word ", fword , " must not pop from stack to be compiled");
+        return;
+    }
+
+    declare_printf();
+    // make_main();
+
+    uint num_params = fword->effects.num_popped;
+    uint num_returns = fword->effects.num_pushed;
+
+    // create empty function corresponding to fword
+    std::vector<Type*> arg_types (num_params + num_returns, builder.getInt32Ty());
+    FunctionType *func_type = FunctionType::get(builder.getVoidTy(), arg_types, false);
+    Function* the_function = Function::Create(func_type,
+                     is_root? Function::ExternalLinkage : Function::PrivateLinkage,
+                     fword->name,
+                     the_module.get());
+
+
+    Variables variables(the_function, the_context);
+
+    // create empty basic blocks - not added to function yet
+    for(const auto& block : fword->blocks) {
+        bool is_first = block.index == 1;
+        BasicBlock *newbb;
+        if(is_first)
+            newbb = BasicBlock::Create(the_context,"entry", the_function);
+        else
+            newbb = BasicBlock::Create(the_context, std::to_string(block.index) + ".br");
+
+        variables.create_block(block.index, newbb);
+    }
+
+    builder.SetInsertPoint(&the_function->getEntryBlock());
+
+    // set names for all arguments, alloca space for them,
+    // store the arg register in the space,
+    // and record the AllocaInst in the register map
+    uint word_arg = 0;
+    for (auto &arg : the_function->args()) {
+        Register reg = fword->my_graphs_inputs[word_arg++]->forward_edge_register;
+        arg.setName(reg.to_string_allowed_chars() + "reg");
+
+        AllocaInst *alloc = variables.create_alloc(reg);
+        builder.CreateStore(&arg, alloc);
+
+        println("insert alloc: ", reg.to_string_allowed_chars(), " ", alloc->getName().str());
+    }
+
+
+    // now lets iterate over every instruction in every Block
+    for(const auto& block : fword->blocks) {
+        BasicBlock *bb = variables.get_block(block.index);
+        println("IR for Basic Block #", block.index);
+        indent();
+
+        the_function->getBasicBlockList().push_back(bb);
+        builder.SetInsertPoint(bb);
+
+        for(auto instr : block.instructions) {
+            if(instr->id() == primitive_words::LITERAL) {
+                println("Literal");
+                println("data: ", instr->data.as_num());
+
+                Value *constant = builder.CreateSelect(
+                        ConstantInt::get(the_context, APInt(1, 1)),
+                        ConstantInt::get(the_context, APInt(32, instr->data.as_num())),
+                        ConstantInt::get(the_context, APInt(32, 0))
+                );
+                Register push_to_reg = instr->push_nodes[0]->forward_edge_register;
+                AllocaInst *push_to_alloc = variables.create_alloc(push_to_reg);
+                // might already have one
+                builder.CreateStore(constant, push_to_alloc);
+
+                println("push to: ", push_to_reg.to_string_allowed_chars());
+            }
+            if(instr->id() == primitive_words::BRANCH) {
+                println("Branch");
+
+                Block *jump_to = instr->as_branch()->jump_to;
+                BasicBlock *dest = variables.get_block(jump_to->index);
+
+                builder.CreateBr(dest);
+            }
+            if(instr->id() == primitive_words::BRANCHIF) {
+                println("Branchif");
+
+                Register condition = instr->pop_nodes[0]->backward_edge_register;
+                println("pull from: ", condition.to_string_allowed_chars());
+
+                AllocaInst *alloca = variables.get_alloc(condition);
+                Value *cond_value = builder.CreateLoad(alloca);
+
+                Value *TF = builder.CreateICmpEQ(
+                        ConstantInt::get(the_context, APInt(32, 0)),
+                        cond_value
+                        );
+
+                Block *jump_true = instr->as_branchif()->jump_to_next;
+                Block *jump_false = instr->as_branchif()->jump_to_far;
+                BasicBlock *true_dest = variables.get_block(jump_true->index);
+                BasicBlock *false_dest = variables.get_block(jump_false->index);
+
+                // yes, true_dest and false_dest are flipped becasue we are
+                // comparing to  =0
+                builder.CreateCondBr(TF, false_dest, true_dest);
+            }
+
+            if(instr->id() == primitive_words::EMIT) {
+                println("Emit");
+
+                Register condition = instr->pop_nodes[0]->backward_edge_register;
+                println("pull from: ", condition.to_string_allowed_chars());
+
+                AllocaInst *alloc = variables.get_alloc(condition);
+                Value *cond_value = builder.CreateLoad(alloc);
+
+                std::vector<Value *> print_args{
+                        builder.CreateGlobalStringPtr("%d\n"),
+                        cond_value
+                };
+                builder.CreateCall(the_module->getFunction("printf"), print_args);
+            }
+        }
+
+        unindent();
+        println();
+    }
+
+    builder.CreateRetVoid();
 
     print_module();
 
     exec_module();
 }
+
 
 void IRGenerator::print_module() {
 
@@ -46,17 +220,22 @@ void IRGenerator::print_module() {
     the_module->print(out_stream, nullptr);
 }
 
+
+
 void IRGenerator::exec_module() {
     println();
     println("==========[Execution]===========");
     println(exec("lli-6.0 ../MovForth.ll"));
 }
 
-Function* IRGenerator::make_main(){
+void IRGenerator::declare_printf(){
     // declare printf
     std::vector<Type*> printf_arg_types {Type::getInt8PtrTy(the_context)};
     FunctionType *printf_type = FunctionType::get(builder.getInt32Ty(), printf_arg_types, true);
     Function::Create(printf_type, Function::ExternalLinkage, "printf", the_module.get());
+}
+
+Function* IRGenerator::make_main(){
 
     // create empty main function
     FunctionType *main_type = FunctionType::get(builder.getInt32Ty(), false);

@@ -21,7 +21,7 @@ void Analysis::propagate_stack(NodeList &stack,
                                 (int) nodes_from_stack);
 
     while (nodes_from_params -- > 0)
-        Node::link(params.new_bottom(),
+        Node::link_bidirection(params.new_top(),
                    instruction->pop_nodes.new_top(),
                    register_gen.get_param());
 
@@ -34,19 +34,19 @@ void Analysis::propagate_stack(NodeList &stack,
     {
         auto pop_node = instruction->pop_nodes[out_in_pair.second];
         auto push_node = instruction->push_nodes[out_in_pair.first];
-        Node::link(pop_node, push_node, pop_node->edge_register);
+        Node::link(pop_node, push_node, pop_node->backward_edge_register);
     }
 
     // link output nodes to stack
     for (auto push_node : instruction->push_nodes)
         if(push_node->target != nullptr)
-            Node::link_bidirection(push_node, stack.new_top(), push_node->edge_register);
+            Node::link_bidirection(push_node, stack.new_top(), push_node->backward_edge_register);
         else
             Node::link_bidirection(push_node, stack.new_top(), register_gen.get());
 
     d("pops:");
     for (auto node : instruction->pop_nodes)
-        d(" ", node->edge_register.to_string());
+        d(" ", node->backward_edge_register.to_string());
     dln();
 
     d("pushes:");
@@ -56,10 +56,12 @@ void Analysis::propagate_stack(NodeList &stack,
 }
 
 
-NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb,
+NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb, NodeList &params,
                                            RegisterGen register_gen) {
 
     dln();
+
+    bb.inputs = running_stack;
 
     for (auto instruction : bb.instructions)
     {
@@ -71,12 +73,12 @@ NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb,
         // propagate the stack state
         dln();
         dln("[", definee->name, "]");
-        Analysis::propagate_stack(running_stack, instruction, bb.params, register_gen);
+        Analysis::propagate_stack(running_stack, instruction, params, register_gen);
 
         dln();
         dln("[stack:]");
         for (auto thing : running_stack)
-            dln( thing->edge_register.to_string());
+            dln( thing->backward_edge_register.to_string());
     }
 
     bb.outputs = running_stack;

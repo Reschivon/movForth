@@ -20,9 +20,9 @@ void Analysis::compute_matching_pairs(Block &bb) {
         {
             if (next->target == nullptr)
                 break;
-            if (next->edge_register.register_type == Register::INPUT)
+            if (next->backward_edge_register.register_type == Register::PARAM)
             {
-                bb.effects_without_push_pop.out_in_pairs.emplace_back(i, next->edge_register.index);
+                bb.effects_without_push_pop.out_in_pairs.emplace_back(i, next->backward_edge_register.index);
                 break;
             }
             next = next->target;

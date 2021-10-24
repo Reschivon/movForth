@@ -24,9 +24,12 @@ namespace mov{
 
         std::vector<Instruction*> instructions{}; //TODO reference wrapper
 
+        // Nodes of this basic block before the first instruction
+        NodeList inputs{};
         // Nodes of this basic block after the last instruction
         NodeList outputs{};
         // Parameter nodes; added to by propagate stack
+        // not used for now
         NodeList params{};
 
         // Do not store push/pop effects for Block
@@ -47,10 +50,11 @@ namespace mov{
         RegisterGen register_gen; // to track registers for this BB
         std::vector<Register> initial_registers; // temporary store
 
-        uint initial_stack_size = 0;
+        uint initial_accumulated_stack_size = 0;
         uint initial_accumulated_params = 0;
 
         static void align_registers(Block &prev, Block &post);
+
     };
 }
 #endif // MOVFORTH_BLOCK_H

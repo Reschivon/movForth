@@ -63,7 +63,7 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
 
     println();
     println("Basic Blocks:");
-    for(const auto& bbe : wordptr->basic_blocks){
+    for(const auto& bbe : wordptr->blocks){
         println("bbe " + std::to_string(bbe.index) + ":");
         print("    ");
         for(auto instr : bbe.instructions)
@@ -75,7 +75,7 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
     println();
     println("Stack Graph:");
 
-    for(auto &bb : wordptr->basic_blocks){
+    for(auto &bb : wordptr->blocks){
         println("----------------------------------");
         println("[" , bb.name() , "] stack graph");
         indent();
@@ -88,7 +88,7 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
             if(!instr->pop_nodes.empty()) {
                 print("pops:");
                 for (auto node: instr->pop_nodes)
-                    print(" ", node->edge_register.to_string());
+                    print(" ", node->backward_edge_register.to_string());
                 println();
             }
 
