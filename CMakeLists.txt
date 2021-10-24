@@ -58,3 +58,5 @@ add_executable(movForth
 
 
 target_link_libraries(movForth ${llvm_libs})
+
+SET(LLVM_ENABLE_DUMP ON)

@@ -57,6 +57,7 @@ namespace mov {
         void generate(sWord *fword, bool is_root);
 
         int hello_world();
+        void hello_world2();
     };
 }
 

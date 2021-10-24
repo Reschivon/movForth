@@ -75,6 +75,10 @@ void IRGenerator::generate(mov::sWord* fword, bool is_root) {
         return;
     }
 
+    if(is_root && fword->effects.num_pushed != 0) {
+        print("Word ", fword , " must not push to stack to be compiled");
+    }
+
     declare_printf();
     // make_main();
 
@@ -131,21 +135,19 @@ void IRGenerator::generate(mov::sWord* fword, bool is_root) {
         builder.SetInsertPoint(bb);
 
         for(auto instr : block.instructions) {
+            println();
             if(instr->id() == primitive_words::LITERAL) {
-                println("Literal");
-                println("data: ", instr->data.as_num());
+                println("Literal(", instr->data.as_num(), ")");
 
-                Value *constant = builder.CreateSelect(
-                        ConstantInt::get(the_context, APInt(1, 1)),
+                Value *constant = builder.CreateAdd(
                         ConstantInt::get(the_context, APInt(32, instr->data.as_num())),
-                        ConstantInt::get(the_context, APInt(32, 0))
+                        ConstantInt::get(the_context, APInt(1, 0))
                 );
+
                 Register push_to_reg = instr->push_nodes[0]->forward_edge_register;
                 AllocaInst *push_to_alloc = variables.create_alloc(push_to_reg);
-                // might already have one
-                builder.CreateStore(constant, push_to_alloc);
 
-                println("push to: ", push_to_reg.to_string_allowed_chars());
+                builder.CreateStore(constant, push_to_alloc);
             }
             if(instr->id() == primitive_words::BRANCH) {
                 println("Branch");
@@ -159,23 +161,22 @@ void IRGenerator::generate(mov::sWord* fword, bool is_root) {
                 println("Branchif");
 
                 Register condition = instr->pop_nodes[0]->backward_edge_register;
-                println("pull from: ", condition.to_string_allowed_chars());
-
                 AllocaInst *alloca = variables.get_alloc(condition);
+
                 Value *cond_value = builder.CreateLoad(alloca);
 
                 Value *TF = builder.CreateICmpEQ(
                         ConstantInt::get(the_context, APInt(32, 0)),
                         cond_value
-                        );
+                );
 
                 Block *jump_true = instr->as_branchif()->jump_to_next;
                 Block *jump_false = instr->as_branchif()->jump_to_far;
+
                 BasicBlock *true_dest = variables.get_block(jump_true->index);
                 BasicBlock *false_dest = variables.get_block(jump_false->index);
 
-                // yes, true_dest and false_dest are flipped becasue we are
-                // comparing to  =0
+                // yes, true_dest and false_dest are flipped
                 builder.CreateCondBr(TF, false_dest, true_dest);
             }
 
@@ -183,18 +184,16 @@ void IRGenerator::generate(mov::sWord* fword, bool is_root) {
                 println("Emit");
 
                 Register condition = instr->pop_nodes[0]->backward_edge_register;
-                println("pull from: ", condition.to_string_allowed_chars());
-
                 AllocaInst *alloc = variables.get_alloc(condition);
+
                 Value *cond_value = builder.CreateLoad(alloc);
 
                 std::vector<Value *> print_args{
                         builder.CreateGlobalStringPtr("%d\n"),
                         cond_value
                 };
-                builder.CreateCall(the_module->getFunction("printf"), print_args);
 
-                println("done with emit");
+                builder.CreateCall(the_module->getFunction("printf"), print_args);
             }
         }
 
@@ -216,7 +215,8 @@ void IRGenerator::print_module() {
 
     println();
     println("==========[LLVM IR]===========");
-    the_module->print(outs(), nullptr);
+
+    the_module->print(errs(), nullptr);
 
     // print to file
     std::error_code EC;
@@ -296,6 +296,12 @@ BasicBlock* IRGenerator::make_basic_block(std::string name, Value* body, Functio
     builder.CreateRet(body);
 
     return bb;
+}
+
+void IRGenerator::hello_world2() {
+    declare_printf();
+    make_main();
+    print_module();
 }
 
 
