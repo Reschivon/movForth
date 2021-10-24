@@ -4,6 +4,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/DIBuilder.h>
+#include <llvm/IR/Verifier.h>
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
 #include "../../headers/SystemExec.h"
@@ -39,28 +40,6 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
 
     declare_printf();
     // make_main();
-/*
-    // jank fix for module::print bug
-    if(fword->blocks.size() == 1){
-        // remove exit instruction
-        fword->blocks[0].instructions.pop_back();
-
-        // make new end block
-        BBgen dummy;
-        Block true_end(dummy);
-        // add exit instruction to new block
-        true_end.instructions.push_back(new ReturnInstruction());
-        // copyless move the block to fword
-        fword->blocks.emplace_back(true_end);
-
-        // add branch instruction
-        fword->blocks[0].instructions.push_back(new BranchInstruction(
-                new sWord("branch", primitive_words::BRANCH),
-                new sData(nullptr),
-                fword->blocks[1].
-                ));
-    }*/
-
 
     uint num_params = fword->effects.num_popped;
     uint num_returns = fword->effects.num_pushed;
@@ -83,7 +62,7 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
         if(is_first)
             newbb = BasicBlock::Create(the_context,"entry", the_function);
         else
-            newbb = BasicBlock::Create(the_context, std::to_string(block.index) + ".br");
+            newbb = BasicBlock::Create(the_context, std::to_string(block.index) + ".br", the_function);
 
         builder.create_block(block.index, newbb);
     }
@@ -104,10 +83,10 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
 
     // register all reference params as AllocInst* in the lookup
     uint word_ret = 0;
-    for (int i = fword->effects.num_popped; i < fword->effects.num_popped + fword->effects.num_pushed; i++) {
+    for (uint i = fword->effects.num_popped; i < fword->effects.num_popped + fword->effects.num_pushed; i++) {
         // Value that is actually Alloca instance (pointer)
         Value *arg = the_function->args().begin() + i;
-        AllocaInst* arg_ref = cast<AllocaInst>(arg);
+        auto* arg_ref = cast<AllocaInst>(arg);
 
         Register reg = fword->my_graphs_returns[word_ret++]->backward_edge_register;
         arg_ref->setName(reg.to_string_allowed_chars() + "reg");
@@ -122,7 +101,7 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
 
         BasicBlock *bb = builder.get_block(block.index);
 
-        the_function->getBasicBlockList().push_back(bb);
+        // the_function->getBasicBlockList().push_back(bb);
         builder.SetInsertPoint(bb);
 
         for(auto instr : block.instructions) {
@@ -247,7 +226,7 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
                 sWordptr werd = instr->linked_word;
                 Function *funk = get_function(werd);
 
-                builder.CreateCall(the_module->getFunction(werd->name), arg_values);
+                builder.CreateCall(funk, arg_values);
 
             }
         }
@@ -255,13 +234,17 @@ Function *IRGenerator::generate(mov::sWord* fword, bool is_root) {
         unindent();
         println("Done IR for Basic Block #", block.index);
         println();
-
     }
 
     builder.SetInsertPoint(&the_function->getBasicBlockList().back());
     builder.CreateRetVoid();
 
     println("Done building IR");
+
+    if(verifyFunction(*the_function, &outs()))
+        println("there is a fucking error");
+    else
+        println("there is no error ... for now");
 
     print_module();
 
