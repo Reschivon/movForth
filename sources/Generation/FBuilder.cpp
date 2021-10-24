@@ -34,6 +34,11 @@ Value* FBuilder::build_load_register(Register reg) {
     return CreateLoad(alloc);
 }
 
+Value* FBuilder::build_load_register_as_ref(Register reg){
+    AllocaInst *alloc = get_alloc(reg);
+    return (Value*) alloc;
+}
+
 void FBuilder::build_store_register(Value *value, Register reg) {
     AllocaInst *alloc = create_alloc(reg);
     CreateStore(value, alloc);

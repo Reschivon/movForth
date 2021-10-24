@@ -44,6 +44,8 @@ namespace mov {
                     ConstantInt::get(Context, APInt(1, 0))
             );
         }
+
+        Value *build_load_register_as_ref(Register reg);
     };
 }
 
