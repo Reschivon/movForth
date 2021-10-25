@@ -21,8 +21,11 @@ MovForth achieves LLVM IR generation in three steps
 MovForth is powerful becasue operations that are immediate in a traditional interpreted Forth are actually run during compile time. So, you can still have all your meta-compilation words, like `IF`, `REPEAT`, and `COMMA`
 
 Words available during immediate mode:
+
 ```ADD SUBTRACT MULTIPLY DIVIDE SWAP ROT DUP DROP EMIT SHOW TICK COMMA SEE TOIMMEDIATE TOCOMPILE IMMEDIATE ALLOT FETCH STORE BRANCH BRANCHIF LITERAL HERE CREATE EXIT```
+
 Words available during run time:
+
 ```+ - * / BRANCH BRANCHIF . ```
 
 ## API
