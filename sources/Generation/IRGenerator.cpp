@@ -29,8 +29,8 @@ IRGenerator::IRGenerator()
 {
 
     // Promote allocas to registers.
-    fpm->add(createFunctionInliningPass(50)); // TODO not sure what threshold means
-    fpm->add(createPromoteMemoryToRegisterPass()); //SSA conversion
+    fpm->add(createPartialInliningPass()); // TODO not sure what threshold means
+//    fpm->add(createPromoteMemoryToRegisterPass()); //SSA conversion
 //    fpm->add(createCFGSimplificationPass()); //Dead code elimination
 //    fpm->add(createSROAPass());
 //    fpm->add(createLoopSimplifyCFGPass());
@@ -301,6 +301,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
     builder.CreateRetVoid();
 
     // do optimizations
+    print("Running optimization passes")
     fpm->run(*the_function);
 
     // see if it's all right?
