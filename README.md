@@ -21,3 +21,5 @@ MovForth achieves LLVM IR generation in three steps
 There are two ways to run movForth; through the command line utility and programmatically through C++. The command line utility is not finished.
 
 You can find an example usage of the C++ API in `main.cpp`. The source file read by this example is `boot.fs`.
+
+Additionally, you can find Forth source and its corresponding IR file in `Examples/`
