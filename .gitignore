@@ -1,5 +1,3 @@
 # Project exclude paths
 /.idea/
-/hello.ll
-/MovForth.ll
-/MovForthSimp.ll
+/*.ll
