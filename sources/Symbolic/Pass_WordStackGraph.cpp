@@ -2,7 +2,7 @@
 
 using namespace mov;
 
-void Analysis::explore_graph_dfs(NodeList stack, Block &bb, NodeList &params){
+void Analysis::explore_graph_dfs(NodeList stack, Block &bb, RegisterGen param_gen) {
     if(bb.visited)
         return;
     else
@@ -14,7 +14,11 @@ void Analysis::explore_graph_dfs(NodeList stack, Block &bb, NodeList &params){
 
     // transformed stack == stack, but I want to make
     // it clear that stack has been modified
-    NodeList transformed_stack = Analysis::basic_block_stack_graph(stack, bb, params, bb.register_gen);
+
+    // param_gen passed by reference, we want to know if params
+    // got used in there
+    NodeList transformed_stack = Analysis::basic_block_stack_graph(stack, bb, bb.params,
+                                                                   bb.register_gen, param_gen);
 
     Analysis::compute_matching_pairs(bb);
 
@@ -26,8 +30,7 @@ void Analysis::explore_graph_dfs(NodeList stack, Block &bb, NodeList &params){
     unindent();
     dln("[" , bb.name() , "] FINSIHED making stack graph");
 
-    uint final_accumulated_params = params.size();
-    bb.params = params;
+    uint final_accumulated_params = bb.initial_accumulated_params + bb.params.size();
     uint final_accumulated_stack_size = transformed_stack.size();
 
     dln("accumulated total params: ", final_accumulated_params);
@@ -54,7 +57,9 @@ void Analysis::explore_graph_dfs(NodeList stack, Block &bb, NodeList &params){
         // calling explore_graph_dfs
         bb.visited = true;
 
-        explore_graph_dfs(transformed_stack, next, params);
+        // param gen is passed by value becasue each control flow
+        // edge tracks the accumulated params at that point
+        explore_graph_dfs(transformed_stack, next, param_gen);
     }
 
     bb.visited = true; // need it again; what if bb.nextBBs() is empty?
@@ -72,19 +77,25 @@ void Analysis::word_stack_graph(sWordptr wordptr) {
 
     // build stack graph
     NodeList stack;
-    // This function does all the heavy lifting
-    explore_graph_dfs(stack, wordptr->blocks.front(), wordptr->my_graphs_params);
+    // parameters are global (zero means no BB owns it)
+    RegisterGen param_gen(0);
 
-    // compute total effects_without_push_pop of word
-    // propagate Effects through a single control path
-    // TODO awkward *cur_bb since there's some mischevious reference behavior
-    auto *curr_bb = wordptr->blocks.begin().base();
-    Effects net_effects;
-    while (!curr_bb->is_exit()){
-        net_effects.acquire_side_effects_ignore_push_pop(curr_bb->effects_without_push_pop);
-        curr_bb = &curr_bb->nextBBs().begin().base()->get();
-    }
-    wordptr->effects = net_effects;
+
+    // This function does all the heavy lifting
+    explore_graph_dfs(stack, wordptr->blocks.front(), param_gen);
+
+
+//    // compute total effects_without_push_pop of word
+//    // propagate Effects through a single control path
+//    // TODO this is dumb and doesn't work
+//    auto *curr_bb = wordptr->blocks.begin().base();
+//    Effects net_effects;
+//    while (!curr_bb->is_exit()){
+//        net_effects.acquire_side_effects_ignore_push_pop(curr_bb->effects_without_push_pop);
+//        curr_bb = &curr_bb->nextBBs().begin().base()->get();
+//    }
+//    wordptr->effects = net_effects;
+
 
     // mark remaining registers as return
     NodeList &return_nodes = wordptr->blocks.back().outputs;
@@ -93,19 +104,11 @@ void Analysis::word_stack_graph(sWordptr wordptr) {
         Node::redefine_preceding_type(node, Register::registerType::RETURN);
     }
 
-
-    // last BB guaranteed to be return
+    // compute push/pop effects for this word
     auto &lastBB = wordptr->blocks.back();
-    wordptr->effects.num_popped = lastBB.initial_accumulated_params;
-    wordptr->effects.num_pushed = lastBB.initial_accumulated_stack_size;
 
     uint total_accumulated_params = lastBB.initial_accumulated_params + lastBB.params.size();
-    print("word final params: ", total_accumulated_params);
-
     uint total_accumulated_stack_size = lastBB.outputs.size();
-
-//    dln("popped (from last BB): ", total_accumulated_params);
-//    dln("pushed (from last BB): ", total_accumulated_stack_size);
 
     wordptr->effects.num_popped = total_accumulated_params;
     wordptr->effects.num_pushed = total_accumulated_stack_size;

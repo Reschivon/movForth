@@ -110,21 +110,11 @@
 : repeatif immediate
     <jumpif ;
 
-: gen 177013 ;
+: gen32 32 32 ;
 
-\ the word to be compiled.
-
-: generate 32 ;
+: gen42 42 42 ;
 
 : print . ;
 
-\ : main 0 if generate generate else 420 420 then . . ;
-
-\ : main fourx add fourx add fourx add fourx add add . ;
-
-: main while 32 . 1 repeatif ;
-
-
-main
-
-see
+: say 1 if . . else . . then ;
+: main 3 4 say ;

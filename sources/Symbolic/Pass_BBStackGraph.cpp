@@ -3,10 +3,8 @@
 using namespace mov;
 
 
-void Analysis::propagate_stack(NodeList &stack,
-                     Instruction *instruction,
-                     NodeList &params,
-                     RegisterGen &register_gen) {
+void Analysis::propagate_stack(NodeList &stack, Instruction *instruction, NodeList &params, RegisterGen &register_gen,
+                               RegisterGen &param_gen) {
 
     const auto effects = instruction->linked_word->effects;
 
@@ -23,7 +21,7 @@ void Analysis::propagate_stack(NodeList &stack,
     while (nodes_from_params -- > 0)
         Node::link_bidirection(params.new_top(),
                    instruction->pop_nodes.new_top(),
-                   register_gen.get_param());
+                   param_gen.get_param());
 
     // make empty output nodes
     for (int i = 0; i < effects.num_pushed; i++)
@@ -56,11 +54,12 @@ void Analysis::propagate_stack(NodeList &stack,
 }
 
 
-NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb, NodeList &params,
-                                           RegisterGen register_gen) {
+NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb, NodeList &params, RegisterGen &register_gen,
+                                           RegisterGen &param_gen) {
 
     dln();
 
+    // a copy of the stack
     bb.inputs = running_stack;
 
     for (auto instruction : bb.instructions)
@@ -73,7 +72,7 @@ NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb, N
         // propagate the stack state
         dln();
         dln("[", definee->name, "]");
-        Analysis::propagate_stack(running_stack, instruction, params, register_gen);
+        Analysis::propagate_stack(running_stack, instruction, params, register_gen, param_gen);
 
         dln();
         dln("[stack:]");
@@ -81,6 +80,7 @@ NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb, N
             dln( thing->backward_edge_register.to_string());
     }
 
+    // a copy of the stack
     bb.outputs = running_stack;
 
     return running_stack;

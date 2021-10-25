@@ -18,8 +18,16 @@ namespace mov {
         std::unordered_map<Register, Value*, Register::RegisterHash> val_ptrs;
 
         std::unordered_map<uint, BasicBlock *> blocks;
+
+        Value* emit_string_ptr = nullptr;
     public:
         explicit FBuilder(LLVMContext &context, Function *the_function);
+
+        Value* get_emit_string_ptr(){
+            if(!emit_string_ptr)
+                emit_string_ptr = CreateGlobalStringPtr("%d\n");
+            return emit_string_ptr;
+        }
 
         Value* build_load_register(Register reg);
 

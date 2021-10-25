@@ -22,32 +22,37 @@ IRGenerator::IRGenerator()
           the_module(std::make_shared<Module>("MovForth", the_context)),
           fpm(std::make_unique<legacy::FunctionPassManager>(the_module.get()))
 {
+
     // Promote allocas to registers.
     fpm->add(createPromoteMemoryToRegisterPass()); //SSA conversion
-    fpm->add(createCFGSimplificationPass()); //Dead code elimination
-    fpm->add(createSROAPass());
-    fpm->add(createLoopSimplifyCFGPass());
-    fpm->add(createConstantPropagationPass());
-    fpm->add(createNewGVNPass());//Global value numbering
-    fpm->add(createReassociatePass());
-    fpm->add(createPartiallyInlineLibCallsPass()); //Inline standard calls
-    fpm->add(createDeadCodeEliminationPass());
-    fpm->add(createCFGSimplificationPass()); //Cleanup
-    fpm->add(createInstructionCombiningPass());
-    fpm->add(createFlattenCFGPass()); //Flatten the control flow graph.
+//    fpm->add(createCFGSimplificationPass()); //Dead code elimination
+//    fpm->add(createSROAPass());
+//    fpm->add(createLoopSimplifyCFGPass());
+//    fpm->add(createConstantPropagationPass());
+//    fpm->add(createNewGVNPass());//Global value numbering
+//    fpm->add(createReassociatePass());
+//    fpm->add(createPartiallyInlineLibCallsPass()); //Inline standard calls
+//    fpm->add(createDeadCodeEliminationPass());
+//    fpm->add(createCFGSimplificationPass()); //Cleanup
+//    fpm->add(createInstructionCombiningPass());
+//    fpm->add(createFlattenCFGPass()); //Flatten the control flow graph.
 
+    fpm->doInitialization();
 }
 
 std::shared_ptr<Module> IRGenerator::generate(mov::sWord *root) {
+
     declare_printf();
 
     generate_function(root, true);
 
     print_module();
 
+    // optimize_module_becasue_for_some_reason_FPM_isnt_doing_anything();
+    fpm->doFinalization();
+
     exec_module();
 
-    optimize_module_becasue_for_some_reason_FPM_isnt_doing_anything();
 
     return the_module;
 
@@ -92,28 +97,35 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
     FBuilder builder(the_context, the_function);
 
+    // create an empty entry block -- sometimes forth code
+    // will branch to entry, which is not allowed
+    BasicBlock::Create(the_context, "entry", the_function);
+
     // create empty basic blocks - not added to function yet
     for(const auto& block : fword->blocks) {
-        bool is_first = block.index == 1;
-        BasicBlock *newbb;
-        if(is_first)
-            newbb = BasicBlock::Create(the_context,"entry", the_function);
-        else
-            newbb = BasicBlock::Create(the_context, std::to_string(block.index) + ".br", the_function);
-
+        BasicBlock *newbb = BasicBlock::Create(
+                the_context,
+                std::to_string(block.index) + ".br",
+                the_function);
         builder.create_block(block.index, newbb);
     }
 
+    // insert at the entry block
     builder.SetInsertPoint(&the_function->getEntryBlock());
+    builder.CreateBr(builder.get_block(1));
+
+    // insert at the first Forth block
+    builder.SetInsertPoint(builder.get_block(1));
 
     // set names for all arguments, alloca space for them,
     // store the arg register in the space,
     // and record the AllocaInst in the register map
     uint word_arg = 0;
+    RegisterGen param_name_gen(0);
     for (int i = 0; i < fword->effects.num_popped; i++) {
         auto *arg = the_function->args().begin() + i;
 
-        Register reg = fword->my_graphs_params[word_arg++]->forward_edge_register;
+        Register reg = param_name_gen.get_param();
         arg->setName(reg.to_string_allowed_chars() + "reg");
 
         builder.build_store_register(arg, reg);
@@ -210,7 +222,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                 Value *num_value = builder.build_load_register(num);
 
                 std::vector<Value *> print_args{
-                        builder.CreateGlobalStringPtr("%d\n"),
+                        builder.get_emit_string_ptr(),
                         num_value
                 };
 
@@ -286,7 +298,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
         println("there is no error ... for now");
 
 
-    // bool modified = fpm->run(*the_function);
+    bool modified = fpm->run(*the_function);
 
     // print("function was optimized? ", modified);
 

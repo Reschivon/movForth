@@ -46,7 +46,7 @@ namespace mov {
          * @param stack inital stack state
          * @param bb
          */
-        void explore_graph_dfs(NodeList stack, Block &bb, NodeList &params);
+        void explore_graph_dfs(NodeList stack, Block &bb, RegisterGen param_gen);
 
         /**
          * Make a stack graph for an entire definition via multiple calls to propagate_stack().
@@ -60,7 +60,9 @@ namespace mov {
          * @param params Nodelist where additional params will be noted
          * @return the running stack
          */
-        static NodeList basic_block_stack_graph(NodeList &running_stack, Block &bb, NodeList &params, RegisterGen register_gen);
+        static NodeList
+        basic_block_stack_graph(NodeList &running_stack, Block &bb, NodeList &params, RegisterGen &register_gen,
+                                RegisterGen &param_gen);
 
         /**
          * Appends new register edges to the existing register graph, based on
@@ -72,7 +74,9 @@ namespace mov {
          * @param params if additional parameter nodes are required, they will be added here
          * @param register_gen to generate_function the names of new registers
          */
-        static void propagate_stack(NodeList &stack, Instruction *instruction, NodeList &params, RegisterGen &register_gen);
+        static void
+        propagate_stack(NodeList &stack, Instruction *instruction, NodeList &params, RegisterGen &register_gen,
+                        RegisterGen &param_gen);
 
         /**
          * If there are stack elements that remain unchanged (but could be shuffled)
