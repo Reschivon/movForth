@@ -26,7 +26,7 @@ IRGenerator::IRGenerator()
           fpm(std::make_unique<legacy::FunctionPassManager>(the_module.get()))
 {
     // Promote allocas to registers.
-    //fpm->add(createPromoteMemoryToRegisterPass());
+    fpm->add(createPromoteMemoryToRegisterPass());
     // Do simple "peephole" optimizations and bit-twiddling optzns.
     fpm->add(createInstructionCombiningPass());
     // Reassociate expressions.
