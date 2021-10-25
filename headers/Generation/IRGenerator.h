@@ -6,6 +6,7 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
+#include "llvm/IR/LegacyPassManager.h"
 
 #include "../Symbolic/sWord.h"
 #include "FBuilder.h"
@@ -19,6 +20,7 @@ namespace mov {
 
         LLVMContext the_context;
         std::shared_ptr<Module> the_module;
+        std::unique_ptr<legacy::FunctionPassManager> fpm;
 
         void declare_printf();
         Function* make_main();

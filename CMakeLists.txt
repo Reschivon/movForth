@@ -1,3 +1,13 @@
+
+
+
+
+
+
+
+
+
+
 cmake_minimum_required(VERSION 3.16)
 project(movForth)
 
@@ -6,7 +16,10 @@ project(movForth)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(_IMPORT_PREFIX "/usr/lib/llvm-3.8")
+# set(_IMPORT_PREFIX "/usr/lib/llvm-3.8")
+
+#SET(IMPORT_ROOT "/home/reschivon/Hard-Drive/clang+llvm-12.0.1-x86_64-linux-gnu-ubuntu-")
+#set(LLVM_DIR "${IMPORT_ROOT}/lib/cmake/llvm")
 
 # set(LLVM_CMAKE_DIR "/usr/share/llvm-3.8")
 

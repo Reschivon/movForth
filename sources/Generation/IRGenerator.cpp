@@ -7,6 +7,11 @@
 #include <llvm/IR/Verifier.h>
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
+#include "llvm/Transforms/Scalar.h"
+// #include "llvm/Transforms/Utils.h"
+#include "llvm/Transforms/InstCombine/InstCombine.h"
+#include "llvm/Transforms/Scalar/GVN.h"
+// #include "llvm/LinkAllPasses.h"
 #include "../../headers/SystemExec.h"
 
 #include "../../headers/Generation/IRGenerator.h"
@@ -17,9 +22,34 @@ using namespace mov;
 
 IRGenerator::IRGenerator()
         : the_context(LLVMContext()),
-          the_module(std::make_shared<Module>("MovForth", the_context))
-{}
+          the_module(std::make_shared<Module>("MovForth", the_context)),
+          fpm(std::make_unique<legacy::FunctionPassManager>(the_module.get()))
+{
+ /*   // Promote allocas to registers.
+    fpm->add(createPromoteMemoryToRegisterPass());
+    // Do simple "peephole" optimizations and bit-twiddling optzns.
+    fpm->add(createInstructionCombiningPass());
+    // Reassociate expressions.
+    fpm->add(createReassociatePass());
+    // Eliminate Common SubExpressions.
+    fpm->add(createGVNPass());
+    // Simplify the control flow graph (deleting unreachable blocks, etc).
+    fpm->add(createCFGSimplificationPass());*/
 
+}
+
+std::shared_ptr<Module> IRGenerator::generate(mov::sWord *root) {
+    declare_printf();
+
+    generate_function(root, true);
+
+    print_module();
+
+    exec_module();
+
+    return the_module;
+
+}
 
 Function *IRGenerator::get_function(sWordptr fword) {
     bool already_generated = visited_words.find(fword) != visited_words.end();
@@ -31,11 +61,6 @@ Function *IRGenerator::get_function(sWordptr fword) {
     }
 }
 
-std::shared_ptr<Module> IRGenerator::generate(mov::sWord *root) {
-    declare_printf();
-    generate_function(root, true);
-    return the_module;
-}
 Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
     if(is_root && fword->effects.num_popped != 0) {
         print("Word ", fword->name, " must not pop from stack to be compiled");
@@ -253,14 +278,11 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
     println("Done building IR");
 
-    print_module();
-
-    if(verifyFunction(*the_function, &outs()))
+    if (verifyFunction(*the_function, &outs()))
         println("there is a fucking error");
     else
         println("there is no error ... for now");
 
-    exec_module();
 
     return the_function;
 }
