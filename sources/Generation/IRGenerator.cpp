@@ -175,6 +175,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                 builder.CreateCall(funk, arg_values);
 
             }
+
             if(instr->id() == primitive_words::LITERAL) {
                 println("Literal(", instr->data.as_num(), ")");
 
@@ -184,6 +185,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
                 builder.build_store_register(constant, push_to_reg);
             }
+
             if(instr->id() == primitive_words::BRANCH) {
                 println("Branch");
 
@@ -192,6 +194,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
                 builder.CreateBr(dest);
             }
+
             if(instr->id() == primitive_words::BRANCHIF) {
                 println("Branchif");
 
@@ -287,20 +290,21 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
         println();
     }
 
+    // insert return at end
     builder.SetInsertPoint(&the_function->getBasicBlockList().back());
     builder.CreateRetVoid();
 
-    println("Done building IR");
+    // do optimizations
+    fpm->run(*the_function);
 
+    // see if it's all right?
     if (verifyFunction(*the_function, &outs()))
         println("there is a fucking error");
     else
         println("there is no error ... for now");
 
-
-    bool modified = fpm->run(*the_function);
-
-    // print("function was optimized? ", modified);
+    // yay
+    println("Done building IR");
 
     return the_function;
 }
