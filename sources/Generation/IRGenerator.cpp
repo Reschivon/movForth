@@ -7,8 +7,13 @@
 #include <llvm/IR/Verifier.h>
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
-#include "llvm/Transforms/Scalar.h"
+
+#include "llvm/Transforms/Scalar.h" // for some reason some passes live here
 #include "llvm/Transforms/Scalar/GVN.h"
+
+#include "llvm/Transforms/IPO.h"
+#include "llvm/Transforms/IPO/Inliner.h"
+
 
 #include "../../headers/SystemExec.h"
 #include "../../headers/Generation/IRGenerator.h"
@@ -24,6 +29,7 @@ IRGenerator::IRGenerator()
 {
 
     // Promote allocas to registers.
+    fpm->add(createFunctionInliningPass(50)); // TODO not sure what threshold means
     fpm->add(createPromoteMemoryToRegisterPass()); //SSA conversion
 //    fpm->add(createCFGSimplificationPass()); //Dead code elimination
 //    fpm->add(createSROAPass());
