@@ -22,7 +22,7 @@ MovForth is powerful becasue operations that are immediate in a traditional inte
 
 Words available during immediate mode:
 
-```ADD SUBTRACT MULTIPLY DIVIDE SWAP ROT DUP DROP EMIT SHOW TICK COMMA SEE TOIMMEDIATE TOCOMPILE IMMEDIATE ALLOT FETCH STORE BRANCH BRANCHIF LITERAL HERE CREATE EXIT```
+```+ - * / SWAP ROT DUP DROP . SHOW ' , SEE [ ] IMMEDIATE ALLOT @ ~ BRANCH BRANCHIF LITERAL HERE CREATE```
 
 Words available during run time:
 
