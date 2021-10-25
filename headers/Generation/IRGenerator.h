@@ -39,6 +39,8 @@ namespace mov {
         void hello_world2();
 
         std::shared_ptr<Module> generate(sWord *root);
+
+        void optimize_module_becasue_for_some_reason_FPM_isnt_doing_anything();
     };
 }
 

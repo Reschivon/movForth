@@ -113,13 +113,17 @@
 : gen 177013 ;
 
 \ the word to be compiled.
-\ : main 0 if 69 69 else 420 420 then . . ;
 
-: fourx 1 1 1 1 ;
-: add + + + ;
+: generate 32 ;
 
+: print . ;
 
-: main fourx add fourx add fourx add fourx add add . ;
+\ : main 0 if generate generate else 420 420 then . . ;
+
+\ : main fourx add fourx add fourx add fourx add add . ;
+
+: main while 32 . 1 repeatif ;
+
 
 main
 

@@ -8,12 +8,9 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Transforms/Scalar.h"
-// #include "llvm/Transforms/Utils.h"
-#include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Scalar/GVN.h"
-// #include "llvm/LinkAllPasses.h"
-#include "../../headers/SystemExec.h"
 
+#include "../../headers/SystemExec.h"
 #include "../../headers/Generation/IRGenerator.h"
 
 using namespace llvm;
@@ -26,15 +23,18 @@ IRGenerator::IRGenerator()
           fpm(std::make_unique<legacy::FunctionPassManager>(the_module.get()))
 {
     // Promote allocas to registers.
-    fpm->add(createPromoteMemoryToRegisterPass());
-    // Do simple "peephole" optimizations and bit-twiddling optzns.
-    fpm->add(createInstructionCombiningPass());
-    // Reassociate expressions.
+    fpm->add(createPromoteMemoryToRegisterPass()); //SSA conversion
+    fpm->add(createCFGSimplificationPass()); //Dead code elimination
+    fpm->add(createSROAPass());
+    fpm->add(createLoopSimplifyCFGPass());
+    fpm->add(createConstantPropagationPass());
+    fpm->add(createNewGVNPass());//Global value numbering
     fpm->add(createReassociatePass());
-    // Eliminate Common SubExpressions.
-    fpm->add(createGVNPass());
-    // Simplify the control flow graph (deleting unreachable blocks, etc).
-    fpm->add(createCFGSimplificationPass());
+    fpm->add(createPartiallyInlineLibCallsPass()); //Inline standard calls
+    fpm->add(createDeadCodeEliminationPass());
+    fpm->add(createCFGSimplificationPass()); //Cleanup
+    fpm->add(createInstructionCombiningPass());
+    fpm->add(createFlattenCFGPass()); //Flatten the control flow graph.
 
 }
 
@@ -46,6 +46,8 @@ std::shared_ptr<Module> IRGenerator::generate(mov::sWord *root) {
     print_module();
 
     exec_module();
+
+    optimize_module_becasue_for_some_reason_FPM_isnt_doing_anything();
 
     return the_module;
 
@@ -284,6 +286,10 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
         println("there is no error ... for now");
 
 
+    // bool modified = fpm->run(*the_function);
+
+    // print("function was optimized? ", modified);
+
     return the_function;
 }
 
@@ -307,6 +313,13 @@ void IRGenerator::exec_module() {
     println();
     println("==========[Execution]===========");
     println(exec("lli ../MovForth.ll"));
+}
+
+
+void IRGenerator::optimize_module_becasue_for_some_reason_FPM_isnt_doing_anything() {
+    println();
+    println("==========[Optimize]===========");
+    println(exec("opt ../MovForth.ll -O3 -S"));
 }
 
 void IRGenerator::declare_printf(){
