@@ -25,8 +25,8 @@ IRGenerator::IRGenerator()
           the_module(std::make_shared<Module>("MovForth", the_context)),
           fpm(std::make_unique<legacy::FunctionPassManager>(the_module.get()))
 {
- /*   // Promote allocas to registers.
-    fpm->add(createPromoteMemoryToRegisterPass());
+    // Promote allocas to registers.
+    //fpm->add(createPromoteMemoryToRegisterPass());
     // Do simple "peephole" optimizations and bit-twiddling optzns.
     fpm->add(createInstructionCombiningPass());
     // Reassociate expressions.
@@ -34,7 +34,7 @@ IRGenerator::IRGenerator()
     // Eliminate Common SubExpressions.
     fpm->add(createGVNPass());
     // Simplify the control flow graph (deleting unreachable blocks, etc).
-    fpm->add(createCFGSimplificationPass());*/
+    fpm->add(createCFGSimplificationPass());
 
 }
 
@@ -306,7 +306,7 @@ void IRGenerator::print_module() {
 void IRGenerator::exec_module() {
     println();
     println("==========[Execution]===========");
-    println(exec("lli-6.0 ../MovForth.ll"));
+    println(exec("lli ../MovForth.ll"));
 }
 
 void IRGenerator::declare_printf(){
