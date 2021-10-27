@@ -236,9 +236,10 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     Value *one_v = builder.build_load_register(one);
                     Value *two_v = builder.build_load_register(two);
 
-                    Value *equals = builder.CreateICmpEQ(one_v, two_v);
-                    Register diff_register = instr->push_nodes[0]->forward_edge_register;
+                    Value *equals_bool = builder.CreateICmpEQ(one_v, two_v);
+                    Value *equals = builder.CreateIntCast(equals_bool, builder.getInt32Ty(), true);
 
+                    Register diff_register = instr->push_nodes[0]->forward_edge_register;
                     builder.build_store_register(equals, diff_register);
                     break;
                 }

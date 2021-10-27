@@ -36,7 +36,7 @@ int main() {
     // Note: invokes `lli` command in a new shell instance
     // May not work on every system
 
-    // ir_generator.exec_module(module);
+    ir_generator.exec_module(module);
 
 }
 

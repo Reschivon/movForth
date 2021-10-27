@@ -127,7 +127,7 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
 
         } else if(template_sub_def->id == primitive_words::BRANCHIF) {
             println("Branch instruction branches to #",
-                    bb_builder.index_of_bb_at(i+2), " and #"
+                    bb_builder.index_of_bb_at(i+2), " and #",
                     bb_builder.get_bb_index_for_branch_at(i));
             curr_bb->instructions.push_back(new BranchIfInstruction(
                     new_sub_def, next_data,
