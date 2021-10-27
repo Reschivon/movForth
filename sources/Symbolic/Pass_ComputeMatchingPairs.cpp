@@ -15,17 +15,17 @@ void Analysis::compute_matching_pairs(Block &bb) {
     {
         Node *output = bb.outputs[i];
 
-        Node *next = output->target;
+        Node *next = output->prev_node;
         while (true)
         {
-            if (next->target == nullptr)
+            if (next->prev_node == nullptr)
                 break;
             if (next->backward_edge_register.register_type == Register::PARAM)
             {
                 bb.effects_without_push_pop.out_in_pairs.emplace_back(i, next->backward_edge_register.index);
                 break;
             }
-            next = next->target;
+            next = next->prev_node;
         }
     }
 }

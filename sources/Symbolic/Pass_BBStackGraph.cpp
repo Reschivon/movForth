@@ -37,7 +37,7 @@ void Analysis::propagate_stack(NodeList &stack, Instruction *instruction, NodeLi
 
     // link output nodes to stack
     for (auto push_node : instruction->push_nodes)
-        if(push_node->target != nullptr)
+        if(push_node->prev_node != nullptr)
             Node::link_bidirection(push_node, stack.new_top(), push_node->backward_edge_register);
         else
             Node::link_bidirection(push_node, stack.new_top(), register_gen.get());
@@ -61,6 +61,17 @@ NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb, N
 
     // a copy of the stack
     bb.inputs = running_stack;
+
+    // set inputs to pregenerated register_names during rgister alignment
+    dln("Loading initial registers");
+    indent();
+    int i = 0;
+    for(auto *node : bb.inputs){
+        dln("Load ", bb.initial_registers[i].to_string());
+        node->backward_edge_register = bb.initial_registers[i];
+        i++;
+    }
+    unindent();
 
     for (auto instruction : bb.instructions)
     {

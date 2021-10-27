@@ -55,7 +55,7 @@ namespace mov{
         uint initial_accumulated_stack_size = 0;
         uint initial_accumulated_params = 0;
 
-        static void align_registers(Block &prev, Block &post);
+        void align_registers();
 
     };
 }

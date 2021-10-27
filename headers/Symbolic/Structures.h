@@ -139,17 +139,17 @@ namespace mov {
     };
 
     struct Node{
-        Node* target = nullptr;
+        Node* prev_node = nullptr;
         Register backward_edge_register; // guaranteed to exist
         Register forward_edge_register; // may not always be nonnull
 
         static void link(Node *back, Node *front, Register id){
-            front->target = back;
+            front->prev_node = back;
             front->backward_edge_register = id;
         }
 
         static void link_bidirection(Node *back, Node *front, Register id){
-            front->target = back;
+            front->prev_node = back;
             front->backward_edge_register = id;
 
             back->forward_edge_register = id;
@@ -157,7 +157,7 @@ namespace mov {
 
         static void redefine_preceding_edge(Node *node, Register id){
             node->backward_edge_register = id;
-            node->target->forward_edge_register = id;
+            node->prev_node->forward_edge_register = id;
         }
 
         static void redefine_preceding_type(Node *node, Register::registerType ty){

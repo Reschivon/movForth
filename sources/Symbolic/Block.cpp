@@ -49,12 +49,34 @@ bool Block::is_exit() {
  * @param prev
  * @param post
  */
-void Block::align_registers(Block &prev, Block &post) {
+static void align_register_edge(Block &prev, Block &post);
+void Block::align_registers() {
+    auto nexts = nextBBs();
+    if(nexts.size() == 2){
+        if(nexts[0].get().inputs_aligned) {
+            align_register_edge(*this, nexts[0]);
+            align_register_edge(*this, nexts[1]);
+        }
+        else if(nexts[1].get().inputs_aligned) {
+            align_register_edge(*this, nexts[1]);
+            align_register_edge(*this, nexts[0]);
+        }
+        else {
+            align_register_edge(*this, nexts[1]);
+            align_register_edge(*this, nexts[0]);
+        }
+    }
+    if(nexts.size() == 1) {
+        align_register_edge(*this, nexts[0].get());
+    }
+}
+
+static void align_register_edge(Block &prev, Block &post) {
     dln("Align registers from #", prev.index, " to #", post.index);
     if(!prev.outputs_aligned && post.inputs_aligned){
         println("Gen nodes for prev");
         indent();
-        for(int i = 0; i< prev.outputs.size(); i++) {
+        for(int i = 0; i < prev.outputs.size(); i++) {
             print(post.initial_registers[i].to_string());
             Node::redefine_preceding_edge(
                     prev.outputs[i],
@@ -68,8 +90,8 @@ void Block::align_registers(Block &prev, Block &post) {
         print("Gen nodes for post");
         indent();
         for(Node *thing : prev.outputs) {
-            println(thing->forward_edge_register.to_string());
-            post.initial_registers.push_back(thing->forward_edge_register);
+            println(thing->backward_edge_register.to_string());
+            post.initial_registers.push_back(thing->backward_edge_register);
         }
         unindent();
         post.inputs_aligned = true;

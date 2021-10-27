@@ -31,7 +31,7 @@ IRGenerator::IRGenerator()
 {
 
     // Promote allocas to registers.
-//    fpm->add(createPromoteMemoryToRegisterPass()); //SSA conversion
+    fpm->add(createPromoteMemoryToRegisterPass()); //SSA conversion
 //    fpm->add(createCFGSimplificationPass()); //Dead code elimination
 //    fpm->add(createSROAPass());
 //    fpm->add(new InlinerPass()); // TODO not sure what threshold means
