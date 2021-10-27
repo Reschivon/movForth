@@ -30,7 +30,13 @@ int main() {
 
     // Generate IR from the symbolic object
     mov::IRGenerator ir_generator;
-    ir_generator.generate(converted_word);
+    auto module = ir_generator.generate(converted_word);
+
+    // Run the new module
+    // Note: invokes `lli` command in a new shell instance
+    // May not work on every system
+
+    // ir_generator.exec_module(module);
 
 }
 

@@ -78,6 +78,10 @@ namespace mov {
         }
 
         iData top(){
+            if(stack.empty()) {
+                println("tried getting top of empty stack");
+                return iData(nullptr);
+            }
             return stack.back();
         }
 

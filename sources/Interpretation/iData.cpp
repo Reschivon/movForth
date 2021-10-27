@@ -12,6 +12,10 @@ iWord* iData::as_word()
         return std::get<ForthWord*>(*this);
     if(is_primitive())
         return std::get<Primitive*>(*this);
+    if(is_number()) {
+        println("Expected a word, got number");
+        return nullptr;
+    }
     return std::get<iWord*>(*this); // assume word if not FW
 }
 ForthWord* iData::as_forth_word()  { return std::get<ForthWord*>(*this);}

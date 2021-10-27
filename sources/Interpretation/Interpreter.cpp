@@ -79,6 +79,10 @@ iWordptr Interpreter::find(const std::string& name) {
 
 void Interpreter::init_words(){
 
+    word_generator.register_primitive("=", primitive_words::EQUALS, [&](IP &ip) {
+        stack.push(stack.pop_number() == stack.pop_number());
+    });
+
     word_generator.register_primitive("+", primitive_words::ADD, [&](IP &ip) {
         stack.push(stack.pop_number() + stack.pop_number());
     });

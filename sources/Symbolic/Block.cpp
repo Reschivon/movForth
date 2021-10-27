@@ -22,7 +22,8 @@ std::vector<Block::bb_ref> Block::nextBBs() {
         return {};
 
     // should never happen
-    println("FUCK");
+    println("Expected next BB to be return or branch; was not. \n",
+            "Instead got ", instructions.back()->id());
     return {};
 }
 

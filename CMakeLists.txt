@@ -43,6 +43,10 @@ add_executable(movForth
         sources/Generation/IRGenerator.cpp
         sources/Generation/FBuilder.cpp
 
+#        DirtyPass/Inliner.cpp
+#        DirtyPass/IPO.h
+#        DirtyPass/InlineSimple.cpp
+#        DirtyPass/LegacyPassManager.cpp
         )
 
 # Find the libraries that correspond to the LLVM components

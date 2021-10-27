@@ -9,14 +9,16 @@
 #include "llvm/Support/FileSystem.h"
 
 #include "llvm/Transforms/Scalar.h" // for some reason some passes live here
-#include "llvm/Transforms/Scalar/GVN.h"
+//#include "llvm/Transforms/Scalar/GVN.h"
 
 #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/IPO/Inliner.h"
-
+//#include "../../DirtyPass/IPO.h"
+//#include "../../DirtyPass/Inliner.h"
 
 #include "../../headers/SystemExec.h"
 #include "../../headers/Generation/IRGenerator.h"
+#include "../../headers/Interpretation/iWord.h"
 
 using namespace llvm;
 using namespace mov;
@@ -29,17 +31,18 @@ IRGenerator::IRGenerator()
 {
 
     // Promote allocas to registers.
-    fpm->add(createPartialInliningPass()); // TODO not sure what threshold means
 //    fpm->add(createPromoteMemoryToRegisterPass()); //SSA conversion
 //    fpm->add(createCFGSimplificationPass()); //Dead code elimination
-//    fpm->add(createSROAPass());
+    fpm->add(createSROAPass());
+//    fpm->add(new InlinerPass()); // TODO not sure what threshold means
+//    fpm->add(createFunctionInliningPass());
 //    fpm->add(createLoopSimplifyCFGPass());
-//    fpm->add(createConstantPropagationPass());
+    fpm->add(createConstantPropagationPass());
 //    fpm->add(createNewGVNPass());//Global value numbering
-//    fpm->add(createReassociatePass());
+    fpm->add(createReassociatePass());
 //    fpm->add(createPartiallyInlineLibCallsPass()); //Inline standard calls
 //    fpm->add(createDeadCodeEliminationPass());
-//    fpm->add(createCFGSimplificationPass()); //Cleanup
+    fpm->add(createCFGSimplificationPass()); //Cleanup
 //    fpm->add(createInstructionCombiningPass());
 //    fpm->add(createFlattenCFGPass()); //Flatten the control flow graph.
 
@@ -56,9 +59,6 @@ std::shared_ptr<Module> IRGenerator::generate(mov::sWord *root) {
 
     // optimize_module_becasue_for_some_reason_FPM_isnt_doing_anything();
     fpm->doFinalization();
-
-    exec_module();
-
 
     return the_module;
 
@@ -161,135 +161,163 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
         for(auto instr : block.instructions) {
             println();
 
-            if(instr->id() == primitive_words::OTHER) {
-                println("other");
+            switch (instr->id()) {
+                case OTHER: {
+                    println("other");
 
-                std::vector<Value *> arg_values;
+                    std::vector<Value *> arg_values;
 
-                for (auto pop: instr->pop_nodes) {
-                    println("push value to arg");
-                    arg_values.push_back(builder.build_load_register(pop->backward_edge_register));
+                    for (auto pop: instr->pop_nodes) {
+                        println("push value to arg");
+                        arg_values.push_back(builder.build_load_register(pop->backward_edge_register));
+                    }
+                    for (auto push: instr->push_nodes) {
+                        // alloca instruction (pointer) hidden as value
+                        println("push AllocaInstr to arg");
+                        arg_values.push_back(builder.create_ptr_to_val(push->forward_edge_register));
+                    }
+                    sWordptr werd = instr->linked_word;
+                    Function *funk = get_function(werd);
+
+                    builder.CreateCall(funk, arg_values);
+                    break;
                 }
-                for(auto push : instr->push_nodes) {
-                    // alloca instruction (pointer) hidden as value
-                    println("push AllocaInstr to arg");
-                    arg_values.push_back(builder.create_ptr_to_val(push->forward_edge_register));
+
+                case LITERAL: {
+                    println("Literal(", instr->data.as_num(), ")");
+
+                    Value *constant = builder.CreateForthConstant(instr->data.as_num());
+
+                    Register push_to_reg = instr->push_nodes[0]->forward_edge_register;
+
+                    builder.build_store_register(constant, push_to_reg);
+                    break;
                 }
-                sWordptr werd = instr->linked_word;
-                Function *funk = get_function(werd);
 
-                builder.CreateCall(funk, arg_values);
+                case BRANCH: {
+                    println("Branch");
 
+                    Block *jump_to = instr->as_branch()->jump_to;
+                    BasicBlock *dest = builder.get_block(jump_to->index);
+
+                    builder.CreateBr(dest);
+                    break;
+                }
+
+                case BRANCHIF: {
+                    println("Branchif");
+
+                    Register condition = instr->pop_nodes[0]->backward_edge_register;
+
+                    Value *cond_value = builder.build_load_register(condition);
+
+                    Value *TF = builder.CreateICmpEQ(
+                            ConstantInt::get(the_context, APInt(32, 0)),
+                            cond_value
+                    );
+
+                    Block *jump_true = instr->as_branchif()->jump_to_next;
+                    Block *jump_false = instr->as_branchif()->jump_to_far;
+
+                    BasicBlock *true_dest = builder.get_block(jump_true->index);
+                    BasicBlock *false_dest = builder.get_block(jump_false->index);
+
+                    // yes, true_dest and false_dest are flipped
+                    builder.CreateCondBr(TF, false_dest, true_dest);
+                    break;
+                }
+
+                case EQUALS: {
+                    println("Equals");
+
+                    Register one = instr->pop_nodes[0]->backward_edge_register;
+                    Register two = instr->pop_nodes[1]->backward_edge_register;
+
+                    Value *one_v = builder.build_load_register(one);
+                    Value *two_v = builder.build_load_register(two);
+
+                    Value *equals = builder.CreateICmpEQ(one_v, two_v);
+                    Register diff_register = instr->push_nodes[0]->forward_edge_register;
+
+                    builder.build_store_register(equals, diff_register);
+                    break;
+                }
+
+                case EMIT: {
+                    println("Emit");
+
+                    Register num = instr->pop_nodes[0]->backward_edge_register;
+
+                    Value *num_value = builder.build_load_register(num);
+
+                    std::vector<Value *> print_args{
+                            builder.get_emit_string_ptr(),
+                            num_value
+                    };
+
+                    builder.CreateCall(the_module->getFunction("printf"), print_args);
+                    break;
+                }
+
+                case ADD: {
+                    Register one = instr->pop_nodes[0]->backward_edge_register;
+                    Register two = instr->pop_nodes[1]->backward_edge_register;
+
+                    Value *one_v = builder.build_load_register(one);
+                    Value *two_v = builder.build_load_register(two);
+
+                    Value *sum = builder.CreateAdd(one_v, two_v);
+                    Register sum_register = instr->push_nodes[0]->forward_edge_register;
+
+                    builder.build_store_register(sum, sum_register);
+                    break;
+                }
+
+                case SUBTRACT: {
+                    Register one = instr->pop_nodes[0]->backward_edge_register;
+                    Register two = instr->pop_nodes[1]->backward_edge_register;
+
+                    Value *one_v = builder.build_load_register(one);
+                    Value *two_v = builder.build_load_register(two);
+
+                    Value *diff = builder.CreateSub(one_v, two_v);
+                    Register diff_register = instr->push_nodes[0]->forward_edge_register;
+
+                    builder.build_store_register(diff, diff_register);
+                    break;
+                }
+
+                case MULTIPLY: {
+                    Register one = instr->pop_nodes[0]->backward_edge_register;
+                    Register two = instr->pop_nodes[1]->backward_edge_register;
+
+                    Value *one_v = builder.build_load_register(one);
+                    Value *two_v = builder.build_load_register(two);
+
+                    Value *product = builder.CreateMul(one_v, two_v);
+                    Register product_register = instr->push_nodes[0]->forward_edge_register;
+
+                    builder.build_store_register(product, product_register);
+                    break;
+                }
+
+                case DIVIDE: {
+                    Register one = instr->pop_nodes[0]->backward_edge_register;
+                    Register two = instr->pop_nodes[1]->backward_edge_register;
+
+                    Value *one_v = builder.build_load_register(one);
+                    Value *two_v = builder.build_load_register(two);
+
+                    Value *factor = builder.CreateSDiv(one_v, two_v);
+                    Register factor_register = instr->push_nodes[0]->forward_edge_register;
+
+                    builder.build_store_register(factor, factor_register);
+                    break;
+                }
+
+                default:
+                    println("Word ", instr->name(), " is not a word supported at runtime");
             }
-
-            if(instr->id() == primitive_words::LITERAL) {
-                println("Literal(", instr->data.as_num(), ")");
-
-                Value *constant = builder.CreateForthConstant(instr->data.as_num());
-
-                Register push_to_reg = instr->push_nodes[0]->forward_edge_register;
-
-                builder.build_store_register(constant, push_to_reg);
-            }
-
-            if(instr->id() == primitive_words::BRANCH) {
-                println("Branch");
-
-                Block *jump_to = instr->as_branch()->jump_to;
-                BasicBlock *dest = builder.get_block(jump_to->index);
-
-                builder.CreateBr(dest);
-            }
-
-            if(instr->id() == primitive_words::BRANCHIF) {
-                println("Branchif");
-
-                Register condition = instr->pop_nodes[0]->backward_edge_register;
-
-                Value *cond_value = builder.build_load_register(condition);
-
-                Value *TF = builder.CreateICmpEQ(
-                        ConstantInt::get(the_context, APInt(32, 0)),
-                        cond_value
-                );
-
-                Block *jump_true = instr->as_branchif()->jump_to_next;
-                Block *jump_false = instr->as_branchif()->jump_to_far;
-
-                BasicBlock *true_dest = builder.get_block(jump_true->index);
-                BasicBlock *false_dest = builder.get_block(jump_false->index);
-
-                // yes, true_dest and false_dest are flipped
-                builder.CreateCondBr(TF, false_dest, true_dest);
-            }
-
-            if(instr->id() == primitive_words::EMIT) {
-                println("Emit");
-
-                Register num = instr->pop_nodes[0]->backward_edge_register;
-
-                Value *num_value = builder.build_load_register(num);
-
-                std::vector<Value *> print_args{
-                        builder.get_emit_string_ptr(),
-                        num_value
-                };
-
-                builder.CreateCall(the_module->getFunction("printf"), print_args);
-            }
-
-            if(instr->id() == primitive_words::ADD) {
-                Register one = instr->pop_nodes[0]->backward_edge_register;
-                Register two = instr->pop_nodes[1]->backward_edge_register;
-
-                Value *one_v = builder.build_load_register(one);
-                Value *two_v = builder.build_load_register(two);
-
-                Value* sum = builder.CreateAdd(one_v, two_v);
-                Register sum_register = instr->push_nodes[0]->forward_edge_register;
-
-                builder.build_store_register(sum, sum_register);
-            }
-
-            if(instr->id() == primitive_words::SUBTRACT) {
-                Register one = instr->pop_nodes[0]->backward_edge_register;
-                Register two = instr->pop_nodes[1]->backward_edge_register;
-
-                Value *one_v = builder.build_load_register(one);
-                Value *two_v = builder.build_load_register(two);
-
-                Value* diff = builder.CreateSub(one_v, two_v);
-                Register diff_register = instr->push_nodes[0]->forward_edge_register;
-
-                builder.build_store_register(diff, diff_register);
-            }
-
-            if(instr->id() == primitive_words::MULTIPLY) {
-                Register one = instr->pop_nodes[0]->backward_edge_register;
-                Register two = instr->pop_nodes[1]->backward_edge_register;
-
-                Value *one_v = builder.build_load_register(one);
-                Value *two_v = builder.build_load_register(two);
-
-                Value* product = builder.CreateMul(one_v, two_v);
-                Register product_register = instr->push_nodes[0]->forward_edge_register;
-
-                builder.build_store_register(product, product_register);
-            }
-
-            if(instr->id() == primitive_words::DIVIDE) {
-                Register one = instr->pop_nodes[0]->backward_edge_register;
-                Register two = instr->pop_nodes[1]->backward_edge_register;
-
-                Value *one_v = builder.build_load_register(one);
-                Value *two_v = builder.build_load_register(two);
-
-                Value* factor = builder.CreateSDiv(one_v, two_v);
-                Register factor_register = instr->push_nodes[0]->forward_edge_register;
-
-                builder.build_store_register(factor, factor_register);
-            }
-
         }
 
         unindent();
@@ -301,8 +329,8 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
     builder.CreateRetVoid();
 
     // do optimizations
-    print("Running optimization passes")
-    fpm->run(*the_function);
+    println("Running optimization passes");
+    // fpm->run(*the_function);
 
     // see if it's all right?
     if (verifyFunction(*the_function, &outs()))
@@ -332,10 +360,16 @@ void IRGenerator::print_module() {
 
 
 
-void IRGenerator::exec_module() {
+void IRGenerator::exec_module(std::shared_ptr<Module> module) {
     println();
     println("==========[Execution]===========");
-    println(exec("lli ../MovForth.ll"));
+    auto command = "lli ../" + module->getName() + ".ll";
+    auto command2 = command.str();
+
+    println("Run command ", command2);
+    char arr[command2.size() + 1];
+    strcpy(arr, command2.c_str());
+    println(exec(arr));
 }
 
 

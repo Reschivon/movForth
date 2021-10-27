@@ -6,8 +6,8 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
-#include "llvm/IR/LegacyPassManager.h"
-
+//#include "llvm/IR/LegacyPassManager.h"
+#include "../../DirtyPass/LegacyPassManager.h"
 #include "../Symbolic/sWord.h"
 #include "FBuilder.h"
 
@@ -26,14 +26,14 @@ namespace mov {
         Function* make_main();
 
         void print_module();
-        static void exec_module();
-
         Function* generate_function(sWord *fword, bool is_root);
+
         Function* get_function(sWordptr word);
 
     public:
         IRGenerator();
 
+        static void exec_module(std::shared_ptr<Module> module);
 
         int hello_world();
         void hello_world2();

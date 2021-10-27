@@ -108,13 +108,34 @@
     <jump ;
 
 : repeatif immediate
+    literal literal , \ compile `0 =` into word being defined
+    0 ,
+    literal = ,
     <jumpif ;
 
-: gen32 32 32 ;
+: until0 immediate
+    literal literal , \ compile `1 -` into word being defined
+    1 ,
+    literal - ,
 
-: gen42 42 42 ;
+    literal dup ,     \ compile `dup` into word being defined
 
-: print . ;
+    literal literal , \ compile `0 =` into word being defined
+    0 ,
+    literal = ,
 
-: say 1 if . . else . . then ;
-: main 3 4 say ;
+    <jumpif ;
+
+
+: main
+    12 while
+        dup .
+    until0
+    drop
+;
+
+main
+
+see
+
+
