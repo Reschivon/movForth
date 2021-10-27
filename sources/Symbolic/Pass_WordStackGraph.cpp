@@ -3,7 +3,7 @@
 using namespace mov;
 
 void Analysis::explore_graph_dfs(NodeList stack, Block &bb, RegisterGen param_gen) {
-    if(bb.visited)
+    if(bb.outputs_aligned)
         return;
     else
         bb.initial_accumulated_stack_size = (int) stack.size();
@@ -36,7 +36,7 @@ void Analysis::explore_graph_dfs(NodeList stack, Block &bb, RegisterGen param_ge
     dln("accumulated total params: ", final_accumulated_params);
 
     for(auto next : bb.nextBBs()){
-        if(next.get().visited){
+        if(next.get().outputs_aligned){
             if(final_accumulated_params != next.get().initial_accumulated_params){
                 println("[FATAL] input size mismatch on edge from " , bb.name() , " to " , next.get().name());
                 println("Past input num: " , next.get().initial_accumulated_params , " current: " , bb.initial_accumulated_params);
@@ -52,17 +52,12 @@ void Analysis::explore_graph_dfs(NodeList stack, Block &bb, RegisterGen param_ge
 
         // aka align registers between control flow edges
         Block::align_registers(bb, next);
+    }
 
-        // need to set this after align_registers but before
-        // calling explore_graph_dfs
-        bb.visited = true;
-
+    for(auto next : bb.nextBBs())
         // param gen is passed by value becasue each control flow
         // edge tracks the accumulated params at that point
         explore_graph_dfs(transformed_stack, next, param_gen);
-    }
-
-    bb.visited = true; // need it again; what if bb.nextBBs() is empty?
 }
 
 /**

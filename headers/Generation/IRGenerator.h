@@ -30,10 +30,11 @@ namespace mov {
 
         Function* get_function(sWordptr word);
 
+        bool do_optimize = true;
     public:
         IRGenerator();
 
-        static void exec_module(std::shared_ptr<Module> module);
+        void exec_module();
 
         int hello_world();
         void hello_world2();

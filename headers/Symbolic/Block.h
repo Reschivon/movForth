@@ -46,7 +46,9 @@ namespace mov{
         std::string name();
 
         // cyclic pass use only (*sigh* there was no other way)
-        bool visited = false; // whether the graph has been generated yet
+        bool inputs_aligned = false;
+        bool outputs_aligned = false;
+
         RegisterGen register_gen; // to track registers for this BB
         std::vector<Register> initial_registers; // temporary store
 

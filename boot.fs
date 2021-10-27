@@ -130,7 +130,8 @@
 : main
     12 while
         dup .
-    until0
+    1 - dup
+    repeatif
     drop
 ;
 

@@ -64,7 +64,6 @@ public:
     void createBBs(){
         for(int index = 0; index < bbe_lookup_size; index++){
             if(bbe_lookup[index] != -1) {
-                dln("reserve slot for BB at index ", index);
                 new_word->blocks.emplace_back(gen);
                 println("bbe table index ", index, " has bb#", new_word->blocks.size());
                 bbe_lookup[index] = new_word->blocks.size();
@@ -81,6 +80,8 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
     // cache this word for the future
     visited_words[template_word] = new_word;
 
+    println("\nPopulating Basic Blocks");
+    indent();
     BasicBlockBuilder bb_builder(new_word, (short) template_word->def().size());
 
     // precompute BB entry points
@@ -103,6 +104,7 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
     }
 
     bb_builder.createBBs();
+    println();
 
     // fill BBs with instructions derived from template word
     auto curr_bb = bb_builder.get_bb_at_index(0);
@@ -143,6 +145,7 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
 
         // reached the end of a BB, go to next
         if(bb_builder.is_index_bb(i + 1)){
+            println();
             println("switch to bb#", bb_builder.index_of_bb_at(i+1));
             auto next_bb = bb_builder.get_bb_at_index(i + 1);
 
@@ -152,6 +155,8 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
             curr_bb = next_bb;
         }
     }
+    unindent();
+    println();
 
     // ensure last instr of last BB is `return`
     auto &last_bb = new_word->blocks.back();

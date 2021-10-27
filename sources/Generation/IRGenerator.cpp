@@ -33,18 +33,25 @@ IRGenerator::IRGenerator()
     // Promote allocas to registers.
 //    fpm->add(createPromoteMemoryToRegisterPass()); //SSA conversion
 //    fpm->add(createCFGSimplificationPass()); //Dead code elimination
-    fpm->add(createSROAPass());
+//    fpm->add(createSROAPass());
 //    fpm->add(new InlinerPass()); // TODO not sure what threshold means
 //    fpm->add(createFunctionInliningPass());
 //    fpm->add(createLoopSimplifyCFGPass());
-    fpm->add(createConstantPropagationPass());
+//    fpm->add(createConstantPropagationPass());
 //    fpm->add(createNewGVNPass());//Global value numbering
-    fpm->add(createReassociatePass());
+//    fpm->add(createReassociatePass());
 //    fpm->add(createPartiallyInlineLibCallsPass()); //Inline standard calls
 //    fpm->add(createDeadCodeEliminationPass());
-    fpm->add(createCFGSimplificationPass()); //Cleanup
+//    fpm->add(createCFGSimplificationPass()); //Cleanup
 //    fpm->add(createInstructionCombiningPass());
 //    fpm->add(createFlattenCFGPass()); //Flatten the control flow graph.
+
+// constant folding pass
+//    fpm->add(createSROAPass());
+//    fpm->add(createConstantPropagationPass());
+//    fpm->add(createReassociatePass());
+//    fpm->add(createCFGSimplificationPass());
+
 
     fpm->doInitialization();
 }
@@ -75,6 +82,10 @@ Function *IRGenerator::get_function(sWordptr fword) {
 }
 
 Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
+
+    dln();
+    dln("=========[IR Generation]=========");
+
     if(is_root && fword->effects.num_popped != 0) {
         print("Word ", fword->name, " must not pop from stack to be compiled");
         return nullptr;
@@ -316,6 +327,28 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     break;
                 }
 
+                case DUP: {
+                    Register one = instr->pop_nodes[0]->backward_edge_register;
+
+                    Value *one_v = builder.build_load_register(one);
+
+                    Register out_one = instr->push_nodes[0]->forward_edge_register;
+                    Register out_two = instr->push_nodes[1]->forward_edge_register;
+
+                    builder.build_store_register(one_v, out_one);
+                    builder.build_store_register(one_v, out_two);
+
+                    break;
+                }
+
+                case DROP: // becasue it actually does nothing in terms
+                           // of new register values
+                    break;
+
+                case EXIT: // do nothing; IR gen has its own way of inserting returns
+                    break;
+
+
                 default:
                     println("Word ", instr->name(), " is not a word supported at runtime");
             }
@@ -330,8 +363,12 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
     builder.CreateRetVoid();
 
     // do optimizations
-    println("Running optimization passes");
-    // fpm->run(*the_function);
+    if(do_optimize) {
+        println("Running optimization passes");
+        fpm->run(*the_function);
+    }else{
+        println("Optimization disabled");
+    }
 
     // see if it's all right?
     if (verifyFunction(*the_function, &outs()))
@@ -361,10 +398,10 @@ void IRGenerator::print_module() {
 
 
 
-void IRGenerator::exec_module(std::shared_ptr<Module> module) {
+void IRGenerator::exec_module() {
     println();
     println("==========[Execution]===========");
-    auto command = "lli ../" + module->getName() + ".ll";
+    auto command = "lli ../" + the_module->getName() + ".ll";
     auto command2 = command.str();
 
     println("Run command ", command2);

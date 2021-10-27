@@ -50,25 +50,46 @@ bool Block::is_exit() {
  * @param post
  */
 void Block::align_registers(Block &prev, Block &post) {
-    if(!prev.visited && post.visited){
-        for(int i = 0; i< prev.outputs.size(); i++)
+    dln("Align registers from #", prev.index, " to #", post.index);
+    if(!prev.outputs_aligned && post.inputs_aligned){
+        println("Gen nodes for prev");
+        indent();
+        for(int i = 0; i< prev.outputs.size(); i++) {
+            print(post.initial_registers[i].to_string());
             Node::redefine_preceding_edge(
                     prev.outputs[i],
                     post.initial_registers[i]);
+        }
+        unindent();
+        prev.outputs_aligned = true;
     }
-    if(prev.visited && !post.visited){
-        for(Node *thing : prev.outputs)
+
+    if(prev.outputs_aligned && !post.inputs_aligned){
+        print("Gen nodes for post");
+        indent();
+        for(Node *thing : prev.outputs) {
+            println(thing->forward_edge_register.to_string());
             post.initial_registers.push_back(thing->forward_edge_register);
+        }
+        unindent();
+        post.inputs_aligned = true;
     }
-    if(!prev.visited && !post.visited){
+
+    if(!prev.outputs_aligned && !post.inputs_aligned){
+        println("Gen nodes for both");
+        indent();
         for(Node *prev_node : prev.outputs){
             // new common register for the new edge
             auto new_reg = post.register_gen.get();
+            print(new_reg.to_string());
             // modify forward edge of preceding node to be the new register
             Node::redefine_preceding_edge(prev_node, new_reg);
             // note new register in a field of the next BB
             post.initial_registers.push_back(new_reg);
         }
+        unindent();
+        prev.outputs_aligned = true;
+        post.inputs_aligned = true;
     }
 }
 

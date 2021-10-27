@@ -20,6 +20,7 @@ namespace mov {
         std::unordered_map<uint, BasicBlock *> blocks;
 
         Value* emit_string_ptr = nullptr;
+
     public:
         explicit FBuilder(LLVMContext &context, Function *the_function);
 
@@ -45,8 +46,8 @@ namespace mov {
 
         Value *CreateForthConstant(int val) {
             return CreateAdd(
-                    ConstantInt::get(Context, APInt(32, val)),
-                    ConstantInt::get(Context, APInt(1, 0))
+                    ConstantInt::get(Context, APInt(32, val, true)),
+                    ConstantInt::get(Context, APInt(1, 0, true))
             );
         }
 
