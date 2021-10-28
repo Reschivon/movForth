@@ -51,12 +51,12 @@ int main(int argc, char* argv[]) {
 
     ir_generator.exec_module();
 
-    mov::ObjectGenerator::generate("../" + program_name + ".S", *module);
+    mov::ObjectGenerator::generate(program_name + ".S", *module);
 
     // Link the assembly file provided
     // Note: invokes `clang++` command in a new shell instance
     // May not work on every system
-    mov::ObjectGenerator::link("../" + program_name + ".S", program_name);
+    mov::ObjectGenerator::link(program_name + ".S", program_name);
 
 }
 
