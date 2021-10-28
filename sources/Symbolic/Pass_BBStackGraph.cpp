@@ -7,6 +7,7 @@ void Analysis::propagate_stack(NodeList &stack, Instruction *instruction, NodeLi
                                RegisterGen &param_gen) {
 
     const auto effects = instruction->linked_word->effects;
+    instruction->pop_nodes.clear(); // not sure why it sometimes already has stuff
 
     // if the stack does not have at least (effects_without_push_pop.num_popped) items for us,
     // then we will create param nodes until there are enough items
