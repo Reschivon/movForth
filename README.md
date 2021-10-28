@@ -2,11 +2,9 @@
 
 A Forth to binary compiler made with LLVM.
 
-MovForth was created to see if Forth can be compiled, optimized, and executed like modern languages. No longer is Forth confined to the interpreter! No longer must Forthers contend with cycles spent purely on interpretation! No longer must Forth "compilers" be tangled monoliths that target only one architecture!
+MovForth was created to see if Forth can be compiled and run with modern technology, at the speeds of modern technology. No longer is Forth confined to the interpreter! No longer must Forthers contend with cycles spent purely on interpretation!
 
-MovForth translates Forth source into LLVM IR, an intermediate language used by modern compilers such as Clang, Rust, Swift, and GHC. This means Forth can be optimized to the same efficiency and target the same variety of architectures as popular "performant" lanaguages.
-
-You can find Forth source and its corresponding IR file in `Examples/.`
+You can find Forth source and its corresponding compiled forms in `Examples/.`
 
 ## Installation
 - Clone the repository
@@ -18,6 +16,8 @@ Alternatively, you can check `Releases` for precompiled binaries.
 In the likely scenario that you encounter a bug or crash, feel free to create an issue.
 
 ## Concept
+MovForth translates Forth source into LLVM IR, an intermediate language used by modern compilers such as Clang, Rust, Swift, and GHC. This means Forth can be optimized to the same efficiency and target the same variety of architectures as popular "performant" lanaguages.
+
 MovForth achieves LLVM IR generation in three steps
 1. The immediate (compile-time) portion of Forth source is run, and a dictionary is generated
 2. Data flow and control flow graphs are built for the words in the dictionary. This process computes the number of parameters and returns for each word, and allocates unique registers for each element passed on the stack.
