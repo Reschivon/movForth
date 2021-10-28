@@ -33,6 +33,8 @@ namespace mov {
          * @param path relative or absolute path to the Forth file
          */
         explicit Interpreter(const std::string& path);
+
+        bool interpret();
     };
 }
 

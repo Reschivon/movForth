@@ -89,6 +89,11 @@ namespace mov {
 
 
     public:
+        /**
+         *
+         * @param original_word
+         * @return nullptr if failure
+         */
         sWordptr static_analysis(iWordptr original_word);
         static sWordptr show_word_info(sWordptr wordptr);
     };

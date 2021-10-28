@@ -56,17 +56,18 @@ IRGenerator::IRGenerator()
     fpm->doInitialization();
 }
 
-std::shared_ptr<Module> IRGenerator::generate(mov::sWord *root) {
+std::pair<IRModule, bool> IRGenerator::generate(mov::sWord *root) {
 
     declare_printf();
 
-    generate_function(root, true);
+    Function *func = generate_function(root, true);
+    if(!func)
+        return std::make_pair(IRModule(nullptr), true);
 
     // optimize_module_becasue_for_some_reason_FPM_isnt_doing_anything();
     fpm->doFinalization();
 
-    return the_module;
-
+    return std::make_pair(IRModule(the_module), false);
 }
 
 Function *IRGenerator::get_function(sWordptr fword) {
@@ -85,12 +86,12 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
     dln("=========[IR Generation]=========");
 
     if(is_root && fword->effects.num_popped != 0) {
-        print("Word ", fword->name, " must not pop from stack to be compiled");
+        println("Word ", fword->name, " must not pop from stack to be compiled");
         return nullptr;
     }
 
     if(is_root && fword->effects.num_pushed != 0) {
-        print("Word ", fword->name, " must not push to stack to be compiled");
+        println("Word ", fword->name, " must not push to stack to be compiled");
         return nullptr;
     }
 
@@ -186,6 +187,8 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     }
                     sWordptr werd = instr->linked_word;
                     Function *funk = get_function(werd);
+                    if(!funk)
+                        return nullptr;
 
                     builder.CreateCall(funk, arg_values);
                     break;
@@ -368,30 +371,47 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
     }
 
     // see if it's all right?
-    if (verifyFunction(*the_function, &outs()))
-        println("there is a fucking error");
-    else
-        println("there is no error ... for now");
+    if (verifyFunction(*the_function, &outs())) {
+        println("Error encountered in generation of ", fword->name);
+        return nullptr;
+    }
 
     // yay
-    println("Done building IR");
+    dln("Done building IR");
 
     return the_function;
 }
 
+class stdout_stream : public raw_ostream {
+    uint64_t pos = 0;
+
+    void write_impl(const char *Ptr, size_t Size) override {
+        pos += Size;
+        std::cout << Ptr;
+    }
+
+    void handle() override {
+
+    }
+
+    uint64_t current_pos() const override {
+        return pos;
+    }
+};
 
 void IRGenerator::print_module(const std::string &program_name, bool to_file) {
-
     println();
     println("==========[LLVM IR]===========");
 
-    the_module->print(outs(), nullptr);
+    stdout_stream stdout;
+    the_module->print(stdout, nullptr);
+    outs().flush();
 
     // print to file
     if (to_file) {
-        std::error_code EC;
-        raw_fd_ostream out_stream(program_name + ".ll", EC, sys::fs::OpenFlags::F_None);
-        the_module->print(out_stream, nullptr, true, true);
+        std::error_code ec;
+        raw_fd_ostream file_out_stream(program_name + ".ll", ec, sys::fs::OpenFlags::F_None);
+        the_module->print(file_out_stream, nullptr, true, true);
     }
 }
 
@@ -484,3 +504,10 @@ int IRGenerator::hello_world() {
 }
 
 
+IRModule::IRModule(std::shared_ptr<Module> m)
+    : module(m)
+{}
+
+std::shared_ptr<Module> IRModule::get_module() {
+    return module;
+}

@@ -1,3 +1,5 @@
+: negative -1 * ;
+
 : jump>
  literal branch ,
  here

@@ -6,10 +6,12 @@
 
 using namespace mov;
 
-Interpreter::Interpreter(const std::string& path) : input(path){
+Interpreter::Interpreter(const std::string& path) : input(path) {
     init_words();
+}
 
-    println("========[Interpretation]======");
+bool Interpreter::interpret() {
+    dln("========[Interpretation]======");
 
     std::string token;
     while (true){
@@ -34,14 +36,13 @@ Interpreter::Interpreter(const std::string& path) : input(path){
                         dictionary.back().as_forth_word()->add(iData(num));
                     }else{
                         println("attempted to compile LITERAL to a primitive word");
+                        return true;
                     }
-
                 }
-
             } catch (...) {
                 // not a number or word
-                std::cerr << "word " << token << " not found and not number"
-                << std::endl;
+                println("word ", token, " not found and not number");
+                return true;
             }
         }else{
             // it's a word
@@ -53,14 +54,18 @@ Interpreter::Interpreter(const std::string& path) : input(path){
                 if(dictionary.back().is_forth_word()){
                     //dln("compile FW ", Wordptr->_name());
                     dictionary.back().as_forth_word()->add(iData(iWordptr));
-                }else
+                }else {
                     println("attempted to compile xts to a primitive word");
+                    return true;
+                }
             }
         }
 
     }
 
-    println("======[End Interpretation]======");
+    dln("======[End Interpretation]======");
+    println();
+    return false;
 }
 
 iWordptr Interpreter::find(const std::string& name) {
@@ -129,6 +134,7 @@ void Interpreter::init_words(){
 
     word_generator.register_primitive(".", primitive_words::EMIT, [&](IP &ip) {
         println(stack.pop_number());
+        println();
     });
 
     word_generator.register_primitive(".S", primitive_words::SHOW, [&](IP &ip) {
@@ -146,18 +152,21 @@ void Interpreter::init_words(){
     });
 
     word_generator.register_primitive(",", primitive_words::COMMA, [&](IP &ip) {
-        if(immediate)
-            if(stack.top().is_number())
-                 dictionary.emplace_back(stack.top().as_number());
-            else println("COMMA pops a number from stack, but only XT was available");
-        else
-            if (dictionary.back().is_forth_word())
-                 dictionary.back().as_forth_word()->add(stack.pop());
-            else println("attempted to compile to a primitive");
+        if (immediate) {
+            if (stack.top().is_number())
+                dictionary.emplace_back(stack.top().as_number());
+            else {
+                println("COMMA pops a number from stack, but only XT was available");
+            }
+        } else if (dictionary.back().is_forth_word())
+            dictionary.back().as_forth_word()->add(stack.pop());
+        else {
+            println("attempted to compile to a primitive");
+        }
     });
 
     word_generator.register_primitive("see", primitive_words::SEE, [&](IP &ip) {
-        println("\n\tDefinitions:");
+        std::cout << "\n\tDefinitions:\n";
 
         for (iData dict_data : dictionary) {
             if(!dict_data.is_forth_word()) continue;
@@ -165,13 +174,13 @@ void Interpreter::init_words(){
 
             std::cout << std::setfill(' ') << std::setw(15) <<
                       word_pointer->name() + "  ";
-            print((word_pointer->immediate) ? "IMM  " : "     ");
+            std::cout <<((word_pointer->immediate) ? "IMM  " : "     ");
 
             if (dict_data.is_forth_word())
                 dict_data.as_forth_word()->definition_to_string();
-            println();
+            std::cout << std::endl;
         }
-        println();
+        std::cout << std::endl;
     });
 
     word_generator.register_lambda_word("[", primitive_words::TOIMMEDIATE, [&](IP &ip) {

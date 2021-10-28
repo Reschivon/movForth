@@ -65,7 +65,7 @@ public:
         for(int index = 0; index < bbe_lookup_size; index++){
             if(bbe_lookup[index] != -1) {
                 new_word->blocks.emplace_back(gen);
-                println("bbe table index ", index, " has bb#", new_word->blocks.size());
+                dln("bbe table index ", index, " has bb#", new_word->blocks.size());
                 bbe_lookup[index] = new_word->blocks.size();
             }
         }
@@ -80,7 +80,7 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
     // cache this word for the future
     visited_words[template_word] = new_word;
 
-    println("\nPopulating Basic Blocks");
+    dln("Populating Basic Blocks");
     indent();
     BasicBlockBuilder bb_builder(new_word, (short) template_word->def().size());
 

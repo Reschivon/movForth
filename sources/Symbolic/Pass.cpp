@@ -50,7 +50,7 @@ sWordptr Analysis::static_analysis(iWordptr original_word) {
         return converted;
     }
 
-    dln("word is null");
+    println("Word provided for static analysis is null");
 
     return nullptr;
 }

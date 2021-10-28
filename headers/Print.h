@@ -27,29 +27,29 @@ void print_single(std::basic_string<char> arg);
 void print_single(int arg);
 
 template <typename... Args>
-inline void print(Args&&... args)
-{
+inline void print(Args&&... args) {
     (print_single(std::forward<Args>(args)), ...);
 }
 
 template <typename... Args>
-inline void println(Args&&... args){
+inline void println0(Args&&... args){
     print(args..., "\n");
+}
+
+template <typename... Args>
+inline void println(Args&&... args){
+    println0(args...);
 }
 template <typename... Args>
 inline void dln(Args&&... args){
     if(debug)
-    {
         println(args...);
-    }
 }
 
 template <typename... Args>
 inline void d(Args&&... args){
     if(debug)
-    {
         print(args...);
-    }
 }
 
 #endif

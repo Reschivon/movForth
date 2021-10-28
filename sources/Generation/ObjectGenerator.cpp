@@ -11,11 +11,14 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "../../headers/SystemExec.h"
 #include "../../headers/Print.h"
+#include "../../headers/Generation/IRGenerator.h"
 
 using namespace mov;
 using namespace llvm;
 
-void ObjectGenerator::generate(const std::string &filename, Module &module) {
+bool ObjectGenerator::generate(const std::string &filename, IRModule mod) {
+    Module &module = *mod.get_module().get();
+
     auto TargetTriple = sys::getDefaultTargetTriple();
 
     InitializeAllTargetInfos();
@@ -31,8 +34,8 @@ void ObjectGenerator::generate(const std::string &filename, Module &module) {
     // This generally occurs if we've forgotten to initialise the
     // TargetRegistry or we have a bogus target triple.
     if (!Target) {
-        errs() << Error;
-        return;
+        println(Error);
+        return true;
     }
 
     auto CPU = "generic";
@@ -49,8 +52,8 @@ void ObjectGenerator::generate(const std::string &filename, Module &module) {
     raw_fd_ostream dest(filename, EC, sys::fs::OpenFlags::F_None);
 
     if (EC) {
-        errs() << "Could not open file: " << EC.message();
-        return;
+       println("Could not open file: ", EC.message());
+        return true;
     }
 
     legacy::PassManager pass;
@@ -58,12 +61,14 @@ void ObjectGenerator::generate(const std::string &filename, Module &module) {
     auto FileType = TargetMachine::CGFT_AssemblyFile;
 
     if (TargetMachine->addPassesToEmitFile(pass, dest, FileType)) {
-        errs() << "TargetMachine can't emit a file of this type";
-        return;
+        println("TargetMachine can't emit a file of this type");
+        return true;
     }
 
     pass.run(module);
     dest.flush();
+
+    return false;
 }
 
 void ObjectGenerator::link(const std::string &assembly_name, const std::string &executable_name) {

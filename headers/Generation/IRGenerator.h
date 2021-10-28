@@ -13,6 +13,14 @@
 using namespace llvm;
 namespace mov {
 
+    class IRModule {
+        std::shared_ptr<Module> module;
+    public:
+        IRModule(std::shared_ptr<Module> m);
+        std::shared_ptr<Module> get_module();
+    };
+
+
     class IRGenerator {
     private:
         std::unordered_map<sWordptr, Function*> visited_words{};
@@ -32,7 +40,7 @@ namespace mov {
     public:
         IRGenerator();
 
-        std::shared_ptr<Module> generate(sWord *root);
+        std::pair<IRModule, bool> generate(sWord *root);
 
         void print_module(const std::string &program_name, bool to_file = false);
 
