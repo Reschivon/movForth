@@ -351,6 +351,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
                 default:
                     println("Word ", instr->name(), " is not a word supported at runtime");
+                    return nullptr;
             }
         }
 
