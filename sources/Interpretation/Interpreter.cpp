@@ -11,7 +11,8 @@ Interpreter::Interpreter(const std::string& path) : input(path) {
 }
 
 bool Interpreter::interpret() {
-    dln("========[Interpretation]======", "");
+    dln("========[Interpretation]======");
+    std::cout << std::endl;
 
     std::string token;
     while (true){
@@ -63,7 +64,8 @@ bool Interpreter::interpret() {
 
     }
 
-    dln("======[End Interpretation]======", "");
+    dln("======[End Interpretation]======");
+    std::cout << std::endl;
     println();
     return false;
 }
@@ -134,7 +136,7 @@ void Interpreter::init_words(){
 
     word_generator.register_primitive(".", primitive_words::EMIT, [&](IP &ip) {
         println(stack.pop_number());
-        println();
+        std::cout << std::endl;
     });
 
     word_generator.register_primitive(".S", primitive_words::SHOW, [&](IP &ip) {
