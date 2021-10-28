@@ -2,7 +2,7 @@
 #include "headers/Interpretation/Interpreter.h"
 #include "headers/Symbolic/Pass.h"
 #include "headers/Generation/IRGenerator.h"
-
+#include "headers/Generation/ObjectGenerator.h"
 
 int main() {
 
@@ -37,6 +37,13 @@ int main() {
     // May not work on every system
 
     ir_generator.exec_module();
+
+    mov::ObjectGenerator::generate("../Out.S", *module);
+
+    // Link the assembly file provided
+    // Note: invokes `clang++` command in a new shell instance
+    // May not work on every system
+    mov::ObjectGenerator::link("../Out.S", "LinkedOut");
 
 }
 

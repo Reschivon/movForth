@@ -43,14 +43,17 @@ IRGenerator::IRGenerator()
 //    fpm->add(createPartiallyInlineLibCallsPass()); //Inline standard calls
 //    fpm->add(createDeadCodeEliminationPass());
 //    fpm->add(createCFGSimplificationPass()); //Cleanup
-//    fpm->add(createInstructionCombiningPass());
+
+// merge successive `icmp %x, 0` which can happen becasue branchif compiles
+// an icmp, which must be undone by another icmp
+    fpm->add(createInstructionCombiningPass());
 //    fpm->add(createFlattenCFGPass()); //Flatten the control flow graph.
 
 // constant folding pass
-//    fpm->add(createSROAPass());
-//    fpm->add(createConstantPropagationPass());
-//    fpm->add(createReassociatePass());
-//    fpm->add(createCFGSimplificationPass());
+    fpm->add(createSROAPass());
+    fpm->add(createConstantPropagationPass());
+    fpm->add(createReassociatePass());
+    fpm->add(createCFGSimplificationPass());
 
 
     fpm->doInitialization();
