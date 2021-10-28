@@ -341,6 +341,45 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     break;
                 }
 
+                case SWAP: {
+                    println("Swap");
+
+                    Register one = instr->pop_nodes[0]->backward_edge_register;
+                    Register two = instr->pop_nodes[1]->backward_edge_register;
+
+                    Value *one_v = builder.build_load_register(one);
+                    Value *two_v = builder.build_load_register(two);
+
+                    Register one_out = instr->push_nodes[0]->forward_edge_register;
+                    Register two_out = instr->push_nodes[1]->forward_edge_register;
+
+                    builder.build_store_register(one_v, two_out);
+                    builder.build_store_register(two_v, one_out);
+                    break;
+                }
+
+                case ROT: {
+                    println("Rot");
+
+                    Register one = instr->pop_nodes[0]->backward_edge_register;
+                    Register two = instr->pop_nodes[1]->backward_edge_register;
+                    Register three = instr->pop_nodes[2]->backward_edge_register;
+
+                    Value *one_v = builder.build_load_register(one);
+                    Value *two_v = builder.build_load_register(two);
+                    Value *three_v = builder.build_load_register(three);
+
+                    Register one_out = instr->push_nodes[0]->forward_edge_register;
+                    Register two_out = instr->push_nodes[1]->forward_edge_register;
+                    Register three_out = instr->push_nodes[2]->forward_edge_register;
+
+                    builder.build_store_register(two_v, three_out);
+                    builder.build_store_register(three_v, two_out);
+                    builder.build_store_register(one_v, one_out);
+
+                    break;
+                }
+
                 case DROP: // becasue it actually does nothing in terms
                            // of new register values
                     break;

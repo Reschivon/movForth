@@ -192,8 +192,10 @@ namespace mov {
         }
 
         static void move_top_elements(NodeList &from, NodeList &to, int num){
-            to.insert(to.end(), std::make_move_iterator(from.end() - num),
-                      std::make_move_iterator(from.end()));
+            for(uint i = 1; i <= num; i++){
+                Node *stack_top = from[from.size() - i];
+                to.push_back(stack_top);
+            }
             from.erase(from.end() - num, from.end());
         }
     };
