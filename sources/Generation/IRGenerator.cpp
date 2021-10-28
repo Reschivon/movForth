@@ -65,8 +65,6 @@ std::shared_ptr<Module> IRGenerator::generate(mov::sWord *root) {
 
     generate_function(root, true);
 
-    print_module();
-
     // optimize_module_becasue_for_some_reason_FPM_isnt_doing_anything();
     fpm->doFinalization();
 
@@ -386,7 +384,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 }
 
 
-void IRGenerator::print_module() {
+void IRGenerator::print_module(const std::string &program_name, bool to_file) {
 
     println();
     println("==========[LLVM IR]===========");
@@ -394,18 +392,11 @@ void IRGenerator::print_module() {
     the_module->print(outs(), nullptr);
 
     // print to file
-    std::error_code EC;
-    raw_fd_ostream out_stream("../MovForth.ll", EC, sys::fs::OpenFlags::F_None);
-    the_module->print(out_stream, nullptr, true, true);
-}
-
-
-
-void IRGenerator::exec_module() {
-    println();
-    println("==========[JIT Execution]===========");
-    auto command = "lli ../" + the_module->getName().str() + ".ll";
-    println(exec(command));
+    if (to_file) {
+        std::error_code EC;
+        raw_fd_ostream out_stream(program_name + ".ll", EC, sys::fs::OpenFlags::F_None);
+        the_module->print(out_stream, nullptr, true, true);
+    }
 }
 
 
@@ -442,7 +433,7 @@ Function* IRGenerator::make_main(){
 void IRGenerator::hello_world2() {
     declare_printf();
     make_main();
-    print_module();
+    print_module("hello world");
 }
 
 

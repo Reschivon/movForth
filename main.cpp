@@ -6,7 +6,7 @@
 
 int main(int argc, char* argv[]) {
 
-    std::string forth_path = "../boot.fs";
+    std::string forth_path = "../CompilationSpace/boot.fs";
 
     if(argc != 1) { // something passed! A .fs filename?
         if(argc != 2) {
@@ -37,13 +37,14 @@ int main(int argc, char* argv[]) {
     auto converted_word = analysis.static_analysis(word_to_compile);
 
     // Show the fruits of labor from static analysis
-    println();
-    println();
     mov::Analysis::show_word_info(converted_word);
 
     // Generate IR from the symbolic object
     mov::IRGenerator ir_generator;
+
     auto module = ir_generator.generate(converted_word);
+
+    ir_generator.print_module(program_name, true);
 
     // Run the new module
     // Note: invokes `lli` command in a new shell instance

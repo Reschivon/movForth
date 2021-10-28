@@ -24,21 +24,21 @@ namespace mov {
         void declare_printf();
         Function* make_main();
 
-        void print_module();
         Function* generate_function(sWord *fword, bool is_root);
-
         Function* get_function(sWordptr word);
 
         bool do_optimize = true;
+
     public:
         IRGenerator();
 
-        void exec_module();
+        std::shared_ptr<Module> generate(sWord *root);
+
+        void print_module(const std::string &program_name, bool to_file = false);
 
         int hello_world();
-        void hello_world2();
 
-        std::shared_ptr<Module> generate(sWord *root);
+        void hello_world2();
 
     };
 }
