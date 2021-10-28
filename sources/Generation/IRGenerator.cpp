@@ -16,6 +16,7 @@
 
 #include "../../headers/Generation/IRGenerator.h"
 #include "../../headers/Interpretation/iWord.h"
+#include "../../headers/SystemExec.h"
 
 using namespace llvm;
 using namespace mov;
@@ -79,7 +80,11 @@ Function *IRGenerator::get_function(sWordptr fword) {
         return visited_words.at(fword);
     }
 }
-
+void IRGenerator::exec_module(const std::string& program_name) {
+    dln();
+    dln("=========[Exec]=========");
+    println(exec("lli " + program_name + ".ll"));
+}
 Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
     dln();
@@ -373,9 +378,9 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     Register two_out = instr->push_nodes[1]->forward_edge_register;
                     Register three_out = instr->push_nodes[2]->forward_edge_register;
 
-                    builder.build_store_register(two_v, three_out);
-                    builder.build_store_register(three_v, two_out);
-                    builder.build_store_register(one_v, one_out);
+                    builder.build_store_register(one_v, two_out);
+                    builder.build_store_register(two_v, one_out);
+                    builder.build_store_register(three_v, three_out);
 
                     break;
                 }
@@ -542,6 +547,8 @@ int IRGenerator::hello_world() {
 
     return 0;
 }
+
+
 
 
 IRModule::IRModule(std::shared_ptr<Module> m)

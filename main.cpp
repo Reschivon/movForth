@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
     // Note: invokes `lli` command in a new shell instance
     // May not work on every system
 
-    // ir_generator.exec_module();
+    ir_generator.exec_module(program_name);
 
     bool generate_error = mov::ObjectGenerator::generate(
             program_name + ".S", module_result.first);
