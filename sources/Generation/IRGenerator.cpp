@@ -11,12 +11,9 @@
 #include "llvm/Transforms/Scalar.h" // for some reason some passes live here
 //#include "llvm/Transforms/Scalar/GVN.h"
 
-#include "llvm/Transforms/IPO.h"
+// #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/IPO/Inliner.h"
-//#include "../../DirtyPass/IPO.h"
-//#include "../../DirtyPass/Inliner.h"
 
-#include "../../headers/SystemExec.h"
 #include "../../headers/Generation/IRGenerator.h"
 #include "../../headers/Interpretation/iWord.h"
 
@@ -138,7 +135,6 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
     // set names for all arguments, alloca space for them,
     // store the arg register in the space,
     // and record the AllocaInst in the register map
-    uint word_arg = 0;
     RegisterGen param_name_gen(0);
     for (int i = 0; i < fword->effects.num_popped; i++) {
         auto *arg = the_function->args().begin() + i;

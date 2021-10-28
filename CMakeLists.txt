@@ -54,32 +54,10 @@ add_definitions(${LLVM_DEFINITIONS})
 
 # Find the libraries that correspond to the LLVM components
 # that we wish to use
+include(${CMAKE_CURRENT_SOURCE_DIR}/TargetGenComponents.cmake)
 llvm_map_components_to_libnames(llvm_libs
-        # support core irreader native passes codegen
-        aarch64asmparser aarch64asmprinter aarch64codegen aarch64desc aarch64disassembler aarch64info
-        aarch64utils amdgpuasmparser amdgpuasmprinter amdgpucodegen amdgpudesc
-        amdgpudisassembler amdgpuinfo amdgpuutils analysis armasmparser armasmprinter armcodegen armdesc
-        armdisassembler arminfo armutils asmparser asmprinter  avrasmparser avrasmprinter avrcodegen avrdesc
-        avrdisassembler avrinfo binaryformat bitreader bitwriter bpfasmparser bpfasmprinter bpfcodegen
-        bpfdesc bpfdisassembler bpfinfo codegen core coroutines coverage debuginfocodeview debuginfodwarf
-
-        # executionengine engine
-
-        debuginfomsf debuginfopdb demangle dlltooldriver  fuzzmutate globalisel
-        hexagonasmparser hexagoncodegen hexagondesc hexagondisassembler hexagoninfo instcombine instrumentation
-        interpreter ipo irreader lanaiasmparser lanaiasmprinter lanaicodegen lanaidesc lanaidisassembler
-        lanaiinfo libdriver lineeditor linker lto mc mcdisassembler mcjit mcparser mipsasmparser mipsasmprinter
-        mipscodegen mipsdesc mipsdisassembler mipsinfo mirparser msp430asmprinter msp430codegen msp430desc
-        msp430info native nativecodegen nvptxasmprinter nvptxcodegen nvptxdesc nvptxinfo objcarcopts object
-        objectyaml option orcjit passes powerpcasmparser powerpcasmprinter powerpccodegen powerpcdesc
-        powerpcdisassembler powerpcinfo profiledata runtimedyld scalaropts selectiondag sparcasmparser
-        sparcasmprinter sparccodegen sparcdesc sparcdisassembler sparcinfo support symbolize
-        systemzasmparser systemzasmprinter systemzcodegen systemzdesc systemzdisassembler systemzinfo tablegen
-        target transformutils vectorize webassemblyasmprinter webassemblycodegen webassemblydesc
-        webassemblydisassembler webassemblyinfo windowsmanifest x86asmparser x86asmprinter x86codegen x86desc
-        x86disassembler x86info x86utils xcoreasmprinter xcorecodegen xcoredesc xcoredisassembler xcoreinfo
-
-        # all-targets
+        support core irreader native passes codegen
+        ${TARGET_COMPONENTS}
 )
 
 # execute_process(COMMAND llvm-config --libs all OUTPUT_VARIABLE llvm_libraries)

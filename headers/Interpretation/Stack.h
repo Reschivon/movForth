@@ -53,7 +53,7 @@ namespace mov {
             if(stack.size() == 0) println("tried popping empty stack");
 
             if(stack.back().is_number()) { // int
-                std::cout << "tried popping int expecting cfa" << std::endl;
+                println("tried popping int expecting cfa");
                 return nullptr;
             }
             if(stack.back().is_word()) { // iWord ptr
