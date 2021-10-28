@@ -1,8 +1,15 @@
 # MovForth
 
-A Forth to binary compiler made with LLVM.
+MovForth compiles Forth source code to executable binaries. MovForth compiles to LLVM IR, and is an experiment in adapting Forth for modern compiler libraries and modern architectures.
 
-MovForth was created to see if Forth can be compiled and run with modern technology, at the speeds of modern technology. No longer is Forth confined to the interpreter! No longer must Forthers contend with cycles spent purely on interpretation!
+- Bottom-up compilation; no dictionary or stack remains in final executable
+- Compile time evaluation for immediate words allows programmers to use meta-compilation without fear
+- Imtermediate form LLVM IR allows compilation to pretty much any architecture
+- Modern LLVM optimization passes are run on forth code
+
+Possible features:
+- Dynamic linking so you can have an interactive Forth with certain compiled words
+- Interfacing with libraries that follow the C ABI
 
 You can find Forth source and its corresponding compiled forms in `Examples/.`
 
@@ -16,12 +23,11 @@ Alternatively, you can check `Releases` for precompiled binaries.
 In the likely scenario that you encounter a bug or crash, feel free to create an issue.
 
 ## Concept
-MovForth translates Forth source into LLVM IR, an intermediate language used by modern compilers such as Clang, Rust, Swift, and GHC. This means Forth can be optimized to the same efficiency and target the same variety of architectures as popular "performant" lanaguages.
-
 MovForth achieves LLVM IR generation in three steps
+
 1. The immediate (compile-time) portion of Forth source is run, and a dictionary is generated
 2. Data flow and control flow graphs are built for the words in the dictionary. This process computes the number of parameters and returns for each word, and allocates unique registers for each element passed on the stack.
-3. The graphs from the previous step are trivially converted to LLVM Basic Blocks and registers. Optimization passes are run and machine code for a target of choice is produced.
+3. The graphs from the previous step are used to generate LLVM Basic Blocks and registers. Optimization passes are run and machine code for a target of choice is produced.
 
 ## Supported Primitives
 MovForth is powerful becasue operations that are immediate in a traditional interpreted Forth are run during compile time. Therefore, meta-compilation words like `IF`, `DO`, and `COLON` incur no runtime penalty.
