@@ -1,5 +1,7 @@
 # MovForth
 
+https://img.shields.io/github/v/release/Reschivon/movForth?color=dark%20green&display_name=release&include_prereleases
+
 MovForth compiles Forth source code to executable binaries. MovForth compiles to LLVM IR, and is an experiment in adapting Forth for modern compiler libraries and modern architectures.
 
 - Bottom-up compilation; no dictionary or stack remains in final executable
