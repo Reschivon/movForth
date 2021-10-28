@@ -292,7 +292,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     Value *one_v = builder.build_load_register(one);
                     Value *two_v = builder.build_load_register(two);
 
-                    Value *diff = builder.CreateSub(one_v, two_v);
+                    Value *diff = builder.CreateSub(two_v, one_v);
                     Register diff_register = instr->push_nodes[0]->forward_edge_register;
 
                     builder.build_store_register(diff, diff_register);
@@ -320,7 +320,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     Value *one_v = builder.build_load_register(one);
                     Value *two_v = builder.build_load_register(two);
 
-                    Value *factor = builder.CreateSDiv(one_v, two_v);
+                    Value *factor = builder.CreateSDiv(two_v, one_v);
                     Register factor_register = instr->push_nodes[0]->forward_edge_register;
 
                     builder.build_store_register(factor, factor_register);
