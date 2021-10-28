@@ -36,8 +36,8 @@ add_executable(movForth
         #        DirtyPass/LegacyPassManager.cpp
         )
 
-
 SET(LLVM13 "/home/reschivon/Hard-Drive/clang+llvm-12.0.1-x86_64-linux-gnu-ubuntu-")
+
 # add_library(LLVM "${LLVM13}")
 find_package(LLVM REQUIRED CONFIG PATHS)
 
@@ -89,3 +89,4 @@ message(STATUS "Linking LLVM libraries ${llvm_libs}")
 target_link_libraries(movForth ${llvm_libs})
 
 SET(LLVM_ENABLE_DUMP ON)
+

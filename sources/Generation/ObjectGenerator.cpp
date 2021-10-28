@@ -7,7 +7,8 @@
 
 
 #include "../../headers/Generation/ObjectGenerator.h"
-#include "../../DirtyPass/LegacyPassManager.h"
+// #include "../../DirtyPass/LegacyPassManager.h"
+#include "llvm/IR/LegacyPassManager.h"
 #include "../../headers/SystemExec.h"
 #include "../../headers/Print.h"
 

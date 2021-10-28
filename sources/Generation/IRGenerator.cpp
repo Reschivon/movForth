@@ -409,12 +409,6 @@ void IRGenerator::exec_module() {
 }
 
 
-void IRGenerator::optimize_module_becasue_for_some_reason_FPM_isnt_doing_anything() {
-    println();
-    println("==========[Optimize]===========");
-    println(exec("opt ../MovForth.ll -O3 -S"));
-}
-
 void IRGenerator::declare_printf(){
     // declare printf
     std::vector<Type*> printf_arg_types {Type::getInt8PtrTy(the_context)};

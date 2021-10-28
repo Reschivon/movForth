@@ -6,8 +6,7 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
-//#include "llvm/IR/LegacyPassManager.h"
-#include "../../DirtyPass/LegacyPassManager.h"
+#include "llvm/IR/LegacyPassManager.h"
 #include "../Symbolic/sWord.h"
 #include "FBuilder.h"
 
@@ -41,7 +40,6 @@ namespace mov {
 
         std::shared_ptr<Module> generate(sWord *root);
 
-        void optimize_module_becasue_for_some_reason_FPM_isnt_doing_anything();
     };
 }
 
