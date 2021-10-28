@@ -358,8 +358,8 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     Register one_out = instr->push_nodes[0]->forward_edge_register;
                     Register two_out = instr->push_nodes[1]->forward_edge_register;
 
-                    builder.build_store_register(one_v, two_out);
-                    builder.build_store_register(two_v, one_out);
+                    builder.build_store_register(one_v, one_out);
+                    builder.build_store_register(two_v, two_out);
                     break;
                 }
 
