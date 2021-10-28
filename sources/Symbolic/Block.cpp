@@ -87,7 +87,7 @@ static void align_register_edge(Block &prev, Block &post) {
     }
 
     if(prev.outputs_aligned && !post.inputs_aligned){
-        print("Gen nodes for post");
+        println("Gen nodes for post");
         indent();
         for(Node *thing : prev.outputs) {
             println(thing->backward_edge_register.to_string());

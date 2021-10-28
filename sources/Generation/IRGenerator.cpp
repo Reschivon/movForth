@@ -404,13 +404,11 @@ void IRGenerator::print_module() {
 void IRGenerator::exec_module() {
     println();
     println("==========[Execution]===========");
-    auto command = "lli ../" + the_module->getName() + ".ll";
-    auto command2 = command.str();
+    auto command = "lli ../" + the_module->getName().str() + ".ll";
 
-    println("Run command ", command2);
-    char arr[command2.size() + 1];
-    strcpy(arr, command2.c_str());
-    println(exec(arr));
+    println("Run command ", command);
+
+    println(exec(command.c_str()));
 }
 
 
