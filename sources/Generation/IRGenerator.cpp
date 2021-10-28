@@ -403,12 +403,9 @@ void IRGenerator::print_module() {
 
 void IRGenerator::exec_module() {
     println();
-    println("==========[Execution]===========");
+    println("==========[JIT Execution]===========");
     auto command = "lli ../" + the_module->getName().str() + ".ll";
-
-    println("Run command ", command);
-
-    println(exec(command.c_str()));
+    println(exec(command));
 }
 
 

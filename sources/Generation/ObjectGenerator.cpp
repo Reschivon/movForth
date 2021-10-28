@@ -69,7 +69,5 @@ void ObjectGenerator::link(const std::string &assembly_name, const std::string &
     println();
     println("==========[Linking]===========");
     auto command = "clang++ " + assembly_name + " -stdlib=libstdc++ -o " + executable_name;
-    println(exec(command.c_str()));
-    println("Linked to libstdc++");
-
+    println(exec(command));
 }
