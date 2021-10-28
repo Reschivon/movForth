@@ -11,7 +11,7 @@ Interpreter::Interpreter(const std::string& path) : input(path) {
 }
 
 bool Interpreter::interpret() {
-    dln("========[Interpretation]======");
+    dln("========[Interpretation]======", "");
 
     std::string token;
     while (true){
@@ -63,7 +63,7 @@ bool Interpreter::interpret() {
 
     }
 
-    dln("======[End Interpretation]======");
+    dln("======[End Interpretation]======", "");
     println();
     return false;
 }

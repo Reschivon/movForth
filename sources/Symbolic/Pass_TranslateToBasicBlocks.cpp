@@ -80,7 +80,7 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
     // cache this word for the future
     visited_words[template_word] = new_word;
 
-    dln("Populating Basic Blocks");
+    dln("Populating Basic Blocks", "");
     indent();
     BasicBlockBuilder bb_builder(new_word, (short) template_word->def().size());
 
