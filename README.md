@@ -1,6 +1,6 @@
 # MovForth
 
-![Logo](/MovForthLogo.png)
+![Logo](/MovForth%20Logo.png)
 
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/Reschivon/movForth?display_name=release&include_prereleases&label=release)   ![GitHub](https://img.shields.io/github/license/Reschivon/movForth?label=license)
 
