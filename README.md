@@ -1,5 +1,7 @@
 # MovForth
 
+![Logo](movForth Logo.png)
+
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/Reschivon/movForth?display_name=release&include_prereleases&label=release)   ![GitHub](https://img.shields.io/github/license/Reschivon/movForth?label=license)
 
 MovForth compiles Forth source code to executable binaries. Using LLVM IR as an intermediate target, it is an experiment in adapting Forth for modern compiler libraries and modern architectures.
