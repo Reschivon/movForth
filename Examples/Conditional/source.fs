@@ -32,6 +32,6 @@
 
 : print . ;
 
-: conditional if gen32 else gen42 then print print ;
+: conditional if 32 32 else 42 42 then . . ;
 
 : main 1 conditional ;

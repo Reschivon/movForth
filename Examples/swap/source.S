@@ -8,11 +8,11 @@ main:
 	pushq	%rax
 	.cfi_def_cfa_offset 16
 	movl	$.L__unnamed_1, %edi
-	movl	$1, %esi
+	movl	$2, %esi
 	xorl	%eax, %eax
 	callq	printf
 	movl	$.L__unnamed_1, %edi
-	movl	$2, %esi
+	movl	$1, %esi
 	xorl	%eax, %eax
 	callq	printf
 	popq	%rax
