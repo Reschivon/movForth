@@ -9,12 +9,27 @@ MovForth compiles Forth source code to executable binaries. Using LLVM IR as an 
 - Imtermediate form LLVM IR allows compilation to pretty much any architecture
 - Modern LLVM optimization passes are run on forth code
 
-You can find Forth source and its corresponding compiled forms in `Examples/.`
+You can find Forth source and its corresponding compiled forms in `Examples/`
 
 ## Installation
 - Clone the repository
-- Have LLVM findable in your include paths (tested with llvm-10)
+
+```git clone https://github.com/Reschivon/movForth```
+
+- Have LLVM findable in your include paths (tested with llvm-10). 
+On Ubuntu, you can simply get the apt package:
+
+```sudo apt install llvm```
+
+I have not been able to get this working on Windows.
+
 - Build as CMake project (version 3 or above should do)
+```
+cd movForth
+mkdir build && cd build
+cmake ..
+make -j4
+```
 
 Alternatively, you can check `Releases` for precompiled binaries.
 
