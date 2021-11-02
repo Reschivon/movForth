@@ -19,7 +19,6 @@ sData Analysis::symbolize_data(iData data) {
 }
 
 sWordptr Analysis::static_analysis(iWordptr original_word) {
-    println("static analysis: ", original_word->name(), "\n");
 
     // check to see if we have passed over this word already
     // if so, return a pointer to it
@@ -113,5 +112,49 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
     }
 
     return wordptr;
+}
+
+std::list<iData>::iterator insert_into(std::list<iData> host, std::list<iData>::const_iterator it, std::list<iData> to_insert){
+    // inline it
+    for(const auto& sub_word : to_insert)
+        host.insert(it, sub_word);
+    return host.erase(it);
+}
+
+const static uint INLINE_WORD_MAX_XTS = 50;
+void dfs(iWordptr word, std::set<iWordptr>& visited){
+
+    if(visited.find(word) != visited.end()) {
+        visited.insert(word);
+        return;
+    }
+
+    if(dynamic_cast<Primitive*>(word)){
+        return;
+    }
+
+
+    if(auto *fw = dynamic_cast<ForthWord*>(word)){
+        auto &definition = fw->def();
+        for(auto it = definition.begin(); it != definition.end(); it++){
+            if(it->is_word()) {
+                dfs(it->as_word(), visited);
+            }
+
+            if(it->is_word() && dynamic_cast<ForthWord*>(it->as_word()) != nullptr){
+                ForthWord *sub_fw = dynamic_cast<ForthWord*>(it->as_word());
+                auto &sub_def = sub_fw->def();
+                if(definition.size() + sub_def.size() < INLINE_WORD_MAX_XTS){
+                    dln("Inlining word ", sub_fw->name(), " into ", word->name());
+                    it = insert_into(definition, it, sub_def);
+                }
+            }
+        }
+    }
+}
+
+void Analysis::inlining(iWordptr root) {
+    std::set<iWordptr> visited;
+    dfs(root, visited);
 }
 

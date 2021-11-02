@@ -18,7 +18,7 @@ iWord* iData::as_word()
     }
     return std::get<iWord*>(*this); // assume word if not FW
 }
-ForthWord* iData::as_forth_word()  { return std::get<ForthWord*>(*this);}
+ForthWord* iData::as_forth_word() const  { return std::get<ForthWord*>(*this);}
 Primitive* iData::as_primitive()   { return std::get<Primitive*>(*this);}
 
 iData::iData(iData::dict_data_var_type data) : dict_data_var_type(data) {}

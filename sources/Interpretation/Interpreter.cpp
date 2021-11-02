@@ -136,7 +136,6 @@ void Interpreter::init_words(){
 
     word_generator.register_primitive(".", primitive_words::EMIT, [&](IP &ip) {
         println(stack.pop_number());
-        std::cout << std::endl;
     });
 
     word_generator.register_primitive(".S", primitive_words::SHOW, [&](IP &ip) {

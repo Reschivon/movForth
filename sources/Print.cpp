@@ -22,6 +22,8 @@ void regen_tab() {
 
 void unindent() {
     indents--;
+    if(indents < 0)
+        indents = 0;
     regen_tab();
     std::cout << tab_string;
 }

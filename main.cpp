@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
     std::string program_name = forth_path.substr(0, forth_path.find_last_of('.'));
 
 
+    indent();
     // Create a plain old interpreter that interprets
     // the contents of the Forth file boot.fs
     mov::Interpreter interpreter(forth_path);
@@ -41,10 +42,10 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-
     // Do static analysis on "main," and return symbolic information
     // computed from "main" in the form of a mov::sWord
     mov::Analysis analysis;
+    analysis.inlining(word_to_compile);
     auto converted_word = analysis.static_analysis(word_to_compile);
 
 
