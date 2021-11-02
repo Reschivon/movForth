@@ -19,6 +19,8 @@ sData Analysis::symbolize_data(iData data) {
 }
 
 sWordptr Analysis::static_analysis(iWordptr original_word) {
+    println("static analysis: ", original_word->name(), "\n");
+
     // check to see if we have passed over this word already
     // if so, return a pointer to it
     auto cached = visited_words.find(original_word);
@@ -34,10 +36,12 @@ sWordptr Analysis::static_analysis(iWordptr original_word) {
     if (auto forth_word = dynamic_cast<ForthWord *>(original_word))
     {
 
+        dln();
+        dln("Translate ", original_word->name(), " to basic blocks");
+
         auto converted = translate_to_basic_blocks(forth_word);
 
-        dln();
-        d("[", original_word->name(), "] START graphing all BBs");
+        dln("[", original_word->name(), "] START graphing all BBs");
         indent();
 
         word_stack_graph(converted);

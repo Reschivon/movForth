@@ -17,12 +17,13 @@ void print_single(std::basic_string<char> arg) {
 void regen_tab() {
     tab_string = "\n";
     for(int i = 0; i < indents; i++)
-        tab_string += "\t";
+        tab_string += "    ";
 }
 
 void unindent() {
     indents--;
     regen_tab();
+    std::cout << tab_string;
 }
 
 void indent() {

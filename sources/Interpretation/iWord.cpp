@@ -18,7 +18,7 @@ ForthWord::ForthWord(std::string name, bool immediate)
     : iWord(std::move(name), immediate, false) {}
 
 void ForthWord::execute(IP &ip) {
-    for(auto it = definition.begin(); it < definition.end(); it++) {
+    for(auto it = definition.begin(); it != definition.end(); it++) {
 
         //println("       [exec] ", (it->is_word()?it->as_word()->to_string():std::_name(it->as_number())), " ");
 
@@ -39,7 +39,9 @@ void ForthWord::definition_to_string() {
 }
 
 void ForthWord::set(int index, iData value) {
-    definition.at(index) = value;
+    auto front = definition.begin();
+    std::advance(front, index);
+    *front = value;
 }
 
 Primitive::Primitive(std::string name, primitive_words id, bool immediate, std::function<void(IP&)> action, bool stateful)

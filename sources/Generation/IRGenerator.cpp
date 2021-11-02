@@ -88,7 +88,7 @@ void IRGenerator::exec_module(const std::string& program_name) {
 Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
     dln();
-    dln("=========[IR Generation]=========");
+    dln("=========[IR for " + fword->name + "]=========");
 
     if(is_root && fword->effects.num_popped != 0) {
         println("Word ", fword->name, " must not pop from stack to be compiled");

@@ -6,6 +6,7 @@
 #include <variant>
 #include <iostream>
 #include <string>
+#include <list>
 #include "../PrimitiveEffects.h"
 
 namespace mov{
@@ -18,7 +19,7 @@ namespace mov{
     /**
      * Iterator over a word's definition
      */
-    typedef std::vector<iData>::iterator IP;
+    typedef std::list<iData>::iterator IP;
 
     /**
      * A word in the interpreter's dictionary
@@ -51,7 +52,7 @@ namespace mov{
      * Defined word, holds a definition
      */
     class ForthWord : public iWord {
-        std::vector<iData> definition;
+        std::list<iData> definition;
 
     public:
         ForthWord(std::string name, bool immediate);
@@ -74,7 +75,7 @@ namespace mov{
         /**
          * @return reference to definition
          */
-        std::vector<iData>& def() {
+        std::list<iData>& def() {
             return definition;
         }
     };

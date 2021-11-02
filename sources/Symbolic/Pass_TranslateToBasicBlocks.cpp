@@ -65,7 +65,7 @@ public:
         for(int index = 0; index < bbe_lookup_size; index++){
             if(bbe_lookup[index] != -1) {
                 new_word->blocks.emplace_back(gen);
-                dln("bbe table index ", index, " has bb#", new_word->blocks.size());
+                //dln("bbe table index ", index, " has bb#", new_word->blocks.size());
                 bbe_lookup[index] = new_word->blocks.size();
             }
         }
@@ -75,30 +75,33 @@ public:
 sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
     auto new_word = new sWord(template_word->name(), primitive_words::OTHER);
 
-    dln("compute basic blocks for [" , template_word->name() , "]");
+    //dln("compute basic blocks for [" , template_word->name() , "]");
 
     // cache this word for the future
     visited_words[template_word] = new_word;
 
-    dln("Populating Basic Blocks\n");
+    //dln("Populating Basic Blocks\n");
     indent();
     BasicBlockBuilder bb_builder(new_word, (short) template_word->def().size());
 
     // precompute BB entry points
-    for(int i = 0; i < template_word->def().size(); i++){
-        auto &template_sub_def = template_word->def().at(i);
-        if(!template_sub_def.is_word())
+    int i = 0;
+    std::list<iData> template_def = template_word->def();
+    for(auto it = template_def.begin(); it != template_def.end(); it++, i++){
+        auto template_sub_def = it;
+
+        if(!template_sub_def->is_word())
             continue;
 
-        if(template_sub_def.as_word()->id == primitive_words::BRANCH){
-            auto next_number = template_word->def()[i + 1].as_number();
+        if(template_sub_def->as_word()->id == primitive_words::BRANCH){
+            auto next_number = std::next(it)->as_number();
             bb_builder.make_bb_for_jump(i, next_number);
         }
 
-        if(template_sub_def.as_word()->id == primitive_words::BRANCHIF){
+        if(template_sub_def->as_word()->id == primitive_words::BRANCHIF){
             bb_builder.make_bb_for_jump(i, 1);
             // must come after //TODO
-            auto next_number = template_word->def()[i + 1].as_number();
+            auto next_number = std::next(it)->as_number();
             bb_builder.make_bb_for_jump(i, next_number);
         }
     }
@@ -108,29 +111,27 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
 
     // fill BBs with instructions derived from template word
     auto curr_bb = bb_builder.get_bb_at_index(0);
-    println("switch to bb#", bb_builder.index_of_bb_at(0));
-    for(int i = 0; i < template_word->def().size(); i++){
+    //println("switch to bb#", bb_builder.index_of_bb_at(0));
+    i = 0;
+    template_def = template_word->def();
+    for(auto it = template_def.begin(); it != template_def.end(); it++, i++){
 
-        auto template_sub_def = template_word->def()[i].as_word();
+        auto template_sub_def = it->as_word();
         auto new_sub_def = static_analysis(template_sub_def);
 
         sData next_data = sData(nullptr);
         if(template_sub_def->stateful){
-            next_data = symbolize_data(template_word->def()[i + 1]);
+            next_data = symbolize_data(*std::next(it));
         }
 
-        println("Adding word ", template_sub_def->name(), " to bb#", curr_bb->index);
+        //println("Adding word ", template_sub_def->name(), " to bb#", curr_bb->index);
 
         if(template_sub_def->id == primitive_words::BRANCH) {
-            println("Branch instruction branches to #", bb_builder.index_of_bb_at(i));
             curr_bb->instructions.push_back(new BranchInstruction(
                     new_sub_def, next_data,
                     bb_builder.get_bb_for_branch_at(i).base()));
 
         } else if(template_sub_def->id == primitive_words::BRANCHIF) {
-            println("Branch instruction branches to #",
-                    bb_builder.index_of_bb_at(i+2), " and #",
-                    bb_builder.get_bb_index_for_branch_at(i));
             curr_bb->instructions.push_back(new BranchIfInstruction(
                     new_sub_def, next_data,
                     bb_builder.get_bb_at_index(i + 2).base(),
@@ -140,13 +141,13 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
         }
 
         // the next word will be consumed, so skip
-        if(template_sub_def->stateful)
+        if(template_sub_def->stateful) {
+            it++;
             i++;
+        }
 
         // reached the end of a BB, go to next
         if(bb_builder.is_index_bb(i + 1)){
-            println();
-            println("switch to bb#", bb_builder.index_of_bb_at(i+1));
             auto next_bb = bb_builder.get_bb_at_index(i + 1);
 
             if(!curr_bb->instructions.back()->branchy())
@@ -156,7 +157,6 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
         }
     }
     unindent();
-    println();
 
     // ensure last instr of last BB is `return`
     auto &last_bb = new_word->blocks.back();
