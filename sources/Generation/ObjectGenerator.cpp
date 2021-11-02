@@ -5,9 +5,7 @@
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/Target/TargetMachine.h"
 
-
 #include "../../headers/Generation/ObjectGenerator.h"
-// #include "../../DirtyPass/LegacyPassManager.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "../../headers/SystemExec.h"
 #include "../../headers/Print.h"
@@ -17,15 +15,27 @@ using namespace mov;
 using namespace llvm;
 
 bool ObjectGenerator::generate(const std::string &filename, IRModule mod) {
-    Module &module = *mod.get_module().get();
+    Module &module = *mod.get_module();
 
     auto TargetTriple = sys::getDefaultTargetTriple();
+    println("Target Triple Detected as ", TargetTriple);
 
-    InitializeAllTargetInfos();
-    InitializeAllTargets();
-    InitializeAllTargetMCs();
-    InitializeAllAsmParsers();
-    InitializeAllAsmPrinters();
+    // Don't need
+//    InitializeAllTargets();
+//    InitializeAllTargetInfos();
+//    InitializeAllTargetMCs();
+//    InitializeAllAsmParsers();
+//    InitializeAllAsmPrinters();
+
+// really only need this one
+//    LLVMInitializeX86TargetInfo();
+//    LLVMInitializeX86TargetMC();
+//    LLVMInitializeX86AsmParser();
+//    LLVMInitializeX86AsmPrinter();
+
+    InitializeNativeTarget();
+    InitializeNativeTargetAsmParser();
+    InitializeNativeTargetAsmPrinter();
 
     std::string Error;
     auto Target = TargetRegistry::lookupTarget(TargetTriple, Error);
@@ -38,7 +48,7 @@ bool ObjectGenerator::generate(const std::string &filename, IRModule mod) {
         return true;
     }
 
-    auto CPU = "generic";
+    auto CPU = "skylake";
     auto Features = "";
 
     TargetOptions opt;

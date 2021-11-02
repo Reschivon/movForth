@@ -164,7 +164,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
     // now lets iterate over every instruction in every Block
     for(const auto& block : fword->blocks) {
-        println("IR for Basic Block #", block.index);
+        //println("IR for Basic Block #", block.index);
         indent();
 
         BasicBlock *bb = builder.get_block(block.index);
@@ -173,21 +173,21 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
         builder.SetInsertPoint(bb);
 
         for(auto instr : block.instructions) {
-            println();
+            //println();
 
             switch (instr->id()) {
                 case OTHER: {
-                    println("other");
+                    //println("other");
 
                     std::vector<Value *> arg_values;
 
                     for (auto pop: instr->pop_nodes) {
-                        println("push value to arg");
+                        //println("push value to arg");
                         arg_values.push_back(builder.build_load_register(pop->backward_edge_register));
                     }
                     for (auto push: instr->push_nodes) {
                         // alloca instruction (pointer) hidden as value
-                        println("push AllocaInstr to arg");
+                        //println("push AllocaInstr to arg");
                         arg_values.push_back(builder.create_ptr_to_val(push->forward_edge_register));
                     }
                     sWordptr werd = instr->linked_word;
@@ -200,7 +200,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                 }
 
                 case LITERAL: {
-                    println("Literal(", instr->data.as_num(), ")");
+                    //println("Literal(", instr->data.as_num(), ")");
 
                     Value *constant = builder.CreateForthConstant(instr->data.as_num());
 
@@ -211,7 +211,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                 }
 
                 case BRANCH: {
-                    println("Branch");
+                    //println("Branch");
 
                     Block *jump_to = instr->as_branch()->jump_to;
                     BasicBlock *dest = builder.get_block(jump_to->index);
@@ -221,7 +221,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                 }
 
                 case BRANCHIF: {
-                    println("Branchif");
+                    //println("Branchif");
 
                     Register condition = instr->pop_nodes[0]->backward_edge_register;
 
@@ -244,7 +244,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                 }
 
                 case EQUALS: {
-                    println("Equals");
+                    //println("Equals");
 
                     Register one = instr->pop_nodes[0]->backward_edge_register;
                     Register two = instr->pop_nodes[1]->backward_edge_register;
@@ -261,7 +261,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                 }
 
                 case EMIT: {
-                    println("Emit");
+                    //println("Emit");
 
                     Register num = instr->pop_nodes[0]->backward_edge_register;
 
@@ -347,7 +347,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                 }
 
                 case SWAP: {
-                    println("Swap");
+                    //println("Swap");
 
                     Register one = instr->pop_nodes[0]->backward_edge_register;
                     Register two = instr->pop_nodes[1]->backward_edge_register;
@@ -364,7 +364,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                 }
 
                 case ROT: {
-                    println("Rot");
+                    //println("Rot");
 
                     Register one = instr->pop_nodes[0]->backward_edge_register;
                     Register two = instr->pop_nodes[1]->backward_edge_register;
@@ -400,7 +400,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
         }
 
         unindent();
-        println();
+        //println();
     }
 
     // insert return at end

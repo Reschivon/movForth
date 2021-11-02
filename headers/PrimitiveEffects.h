@@ -8,7 +8,7 @@
 
 namespace mov{
     static const std::vector<std::pair<int, int>> swap_oi_pairs = {{1, 0}, {0, 1}};
-    static const std::vector<std::pair<int, int>> rot_oi_pairs = {{1, 1}, {0, 0}, {2, 2}};
+    static const std::vector<std::pair<int, int>> rot_oi_pairs = {{1, 0}, {0, 1}, {2, 2}}; // original:  {{1, 1}, {0, 0}, {2, 2}};
     static const std::vector<std::pair<int, int>> dup_oi_pairs = {{1, 0}, {0, 0}};
 
     // primitives (static instances)

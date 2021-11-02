@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
 
 
     // Show the fruits of labor from static analysis
-    mov::Analysis::show_word_info(converted_word);
+    // mov::Analysis::show_word_info(converted_word);
 
 
     // Generate IR from the symbolic object
