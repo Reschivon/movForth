@@ -85,6 +85,11 @@ void IRGenerator::exec_module(const std::string& program_name) {
     dln("=========[Exec]=========");
     println(exec("lli " + program_name + ".ll"));
 }
+void IRGenerator::exec_module2(const std::string& program_name) {
+    dln();
+    dln("=========[Exec]=========");
+    println(exec("./" + program_name));
+}
 Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
     dln();

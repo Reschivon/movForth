@@ -136,17 +136,27 @@ void dfs(iWordptr word, std::set<iWordptr>& visited){
 
     if(auto *fw = dynamic_cast<ForthWord*>(word)){
         auto &definition = fw->def();
+        int branch_offset = 0;
         for(auto it = definition.begin(); it != definition.end(); it++){
             if(it->is_word()) {
                 dfs(it->as_word(), visited);
-            }
 
-            if(it->is_word() && dynamic_cast<ForthWord*>(it->as_word()) != nullptr){
-                ForthWord *sub_fw = dynamic_cast<ForthWord*>(it->as_word());
-                auto &sub_def = sub_fw->def();
-                if(definition.size() + sub_def.size() < INLINE_WORD_MAX_XTS){
-                    dln("Inlining word ", sub_fw->name(), " into ", word->name());
-                    it = insert_into(definition, it, sub_def);
+                if (it->as_word()->id == primitive_words::OTHER) {
+                    ForthWord *sub_fw = dynamic_cast<ForthWord *>(it->as_word());
+                    auto &sub_def = sub_fw->def();
+                    if (definition.size() + sub_def.size() < INLINE_WORD_MAX_XTS) {
+                        dln("Inlining word ", sub_fw->name(), " into ", word->name());
+                        it = insert_into(definition, it, sub_def);
+
+                        branch_offset += sub_def.size() - 1;
+                    }
+                }
+
+                auto curr_word_id = it->as_word()->id;
+                auto next_slot = std::next(it);
+                if((curr_word_id == primitive_words::BRANCH || curr_word_id == primitive_words::BRANCHIF)
+                    && next_slot->as_number() < 0){
+                    *next_slot = iData(next_slot->as_number() - branch_offset);
                 }
             }
         }

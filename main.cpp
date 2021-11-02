@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
     // computed from "main" in the form of a mov::sWord
     mov::Analysis analysis;
     analysis.inlining(word_to_compile);
+    dynamic_cast<mov::ForthWord*>(word_to_compile)->definition_to_string();
     auto converted_word = analysis.static_analysis(word_to_compile);
 
 
@@ -67,8 +68,7 @@ int main(int argc, char* argv[]) {
     // Run the new module_result
     // Note: invokes `lli` command in a new shell instance
     // May not work on every system
-
-    ir_generator.exec_module(program_name);
+    //ir_generator.exec_module(program_name);
 
     bool generate_error = mov::ObjectGenerator::generate(
             program_name + ".S", module_result.first);
@@ -82,5 +82,7 @@ int main(int argc, char* argv[]) {
     // May not work on every system
     mov::ObjectGenerator::link(program_name + ".S", program_name);
 
+
+    ir_generator.exec_module2(program_name);
 }
 

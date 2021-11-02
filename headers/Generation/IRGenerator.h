@@ -49,6 +49,8 @@ namespace mov {
         void hello_world2();
 
         void exec_module(const std::string& program_name);
+
+        void exec_module2(const std::string &program_name);
     };
 }
 
