@@ -1,6 +1,7 @@
 
 #include <set>
 #include <stack>
+#include <list>
 #include "../../headers/Symbolic/Pass.h"
 #include "../../headers/Print.h"
 #include "../../headers/Interpretation/iData.h"
