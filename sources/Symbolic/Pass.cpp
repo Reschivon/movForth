@@ -19,6 +19,7 @@ sData Analysis::symbolize_data(iData data) {
 }
 
 sWordptr Analysis::static_analysis(iWordptr original_word) {
+
     // check to see if we have passed over this word already
     // if so, return a pointer to it
     auto cached = visited_words.find(original_word);
@@ -34,10 +35,12 @@ sWordptr Analysis::static_analysis(iWordptr original_word) {
     if (auto forth_word = dynamic_cast<ForthWord *>(original_word))
     {
 
+        dln();
+        dln("Translate ", original_word->name(), " to basic blocks");
+
         auto converted = translate_to_basic_blocks(forth_word);
 
-        dln();
-        d("[", original_word->name(), "] START graphing all BBs");
+        dln("[", original_word->name(), "] START graphing all BBs");
         indent();
 
         word_stack_graph(converted);
@@ -109,5 +112,59 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
     }
 
     return wordptr;
+}
+
+std::list<iData>::iterator insert_into(std::list<iData> host, std::list<iData>::const_iterator it, std::list<iData> to_insert){
+    // inline it
+    for(const auto& sub_word : to_insert)
+        host.insert(it, sub_word);
+    return host.erase(it);
+}
+
+const static uint INLINE_WORD_MAX_XTS = 50;
+void dfs(iWordptr word, std::set<iWordptr>& visited){
+
+    if(visited.find(word) != visited.end()) {
+        visited.insert(word);
+        return;
+    }
+
+    if(dynamic_cast<Primitive*>(word)){
+        return;
+    }
+
+
+    if(auto *fw = dynamic_cast<ForthWord*>(word)){
+        auto &definition = fw->def();
+        int branch_offset = 0;
+        for(auto it = definition.begin(); it != definition.end(); it++){
+            if(it->is_word()) {
+                dfs(it->as_word(), visited);
+
+                if (it->as_word()->id == primitive_words::OTHER) {
+                    ForthWord *sub_fw = dynamic_cast<ForthWord *>(it->as_word());
+                    auto &sub_def = sub_fw->def();
+                    if (definition.size() + sub_def.size() < INLINE_WORD_MAX_XTS) {
+                        dln("Inlining word ", sub_fw->name(), " into ", word->name());
+                        it = insert_into(definition, it, sub_def);
+
+                        branch_offset += sub_def.size() - 1;
+                    }
+                }
+
+                auto curr_word_id = it->as_word()->id;
+                auto next_slot = std::next(it);
+                if((curr_word_id == primitive_words::BRANCH || curr_word_id == primitive_words::BRANCHIF)
+                    && next_slot->as_number() < 0){
+                    *next_slot = iData(next_slot->as_number() - branch_offset);
+                }
+            }
+        }
+    }
+}
+
+void Analysis::inlining(iWordptr root) {
+    std::set<iWordptr> visited;
+    dfs(root, visited);
 }
 

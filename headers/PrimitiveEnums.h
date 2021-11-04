@@ -31,7 +31,7 @@ namespace mov{
         CREATE      =23,
         EXIT        =24,
         OTHER       =25,
-    EQUALS          =26
+       EQUALS       =26
     };
 }
 #endif //MOVFORTH_PRIMITIVEENUMS_H
