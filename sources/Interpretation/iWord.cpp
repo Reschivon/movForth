@@ -12,6 +12,9 @@ iWord::iWord(std::string name, primitive_words id, bool immediate, bool stateful
 std::string iWord::name() {
     return _name;
 }
+bool iWord::branchy() {
+    return id == primitive_words::BRANCH || id == primitive_words::BRANCHIF;
+}
 
 
 ForthWord::ForthWord(std::string name, bool immediate)

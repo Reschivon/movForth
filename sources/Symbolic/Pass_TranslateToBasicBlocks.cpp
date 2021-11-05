@@ -126,7 +126,6 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
     for(auto it = template_def.begin(); it != template_def.end(); it++, i++){
 
         auto template_sub_def = it->as_word();
-        println("curre word sub ", template_sub_def->name());
 
         auto new_sub_def = static_analysis(template_sub_def);
 

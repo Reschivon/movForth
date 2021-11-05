@@ -10,7 +10,7 @@ static std::string color_end = "\\033[0m\\n";
 
 static int indents;
 
-static std::string tab_string;
+static std::string tab_string = "\n";
 
 // Debug toggle - not the best, but works for now
 static const bool debug = true;

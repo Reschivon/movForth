@@ -46,6 +46,9 @@ namespace mov{
         virtual void execute(IP &ip) = 0;
 
         std::string name();
+
+        bool branchy();
+
     };
 
     /**
