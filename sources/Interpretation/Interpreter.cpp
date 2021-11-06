@@ -135,7 +135,8 @@ void Interpreter::init_words(){
     });
 
     word_generator.register_primitive(".", primitive_words::EMIT, [&](IP &ip) {
-        println(stack.pop_number());
+        char str[] = {(char) stack.pop_number(), '\0'};
+        println(str);
     });
 
     word_generator.register_primitive(".S", primitive_words::SHOW, [&](IP &ip) {
