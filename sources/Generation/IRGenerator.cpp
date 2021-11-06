@@ -451,7 +451,7 @@ class stdout_stream : public raw_ostream {
 
 void IRGenerator::print_module(const std::string &program_name, bool to_file) {
     println();
-    println("==========[LLVM IR]===========");
+    println("==========[LLVM IR]===========\n");
 
     stdout_stream stdout;
     the_module->print(stdout, nullptr);

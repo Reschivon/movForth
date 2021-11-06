@@ -33,7 +33,7 @@ inline void print(Args&&... args) {
 
 template <typename... Args>
 inline void println0(Args&&... args){
-    print(args..., "\n");
+    print("\n", args...);
 }
 
 template <typename... Args>

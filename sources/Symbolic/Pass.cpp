@@ -124,7 +124,7 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
  * @param to_insert
  * @return iterator pointing to the first element after the insertion
  */
-std::list<iData>::iterator replace_with(std::list<iData> host, std::list<iData>::const_iterator it, std::list<iData> to_insert){
+std::list<iData>::iterator replace_with(std::list<iData> host, std::list<iData>::const_iterator it, const std::list<iData>& to_insert){
     // inline it
     for(const auto& sub_word : to_insert)
         host.insert(it, sub_word);

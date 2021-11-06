@@ -43,15 +43,13 @@ void Analysis::propagate_stack(NodeList &stack, Instruction *instruction, NodeLi
         else
             Node::link_bidirection(push_node, stack.new_top(), register_gen.get());
 
-    d("pops: first -> ");
+    dln("pops: first -> ");
     for (auto node : instruction->pop_nodes)
         d(" ", node->backward_edge_register.to_string());
-    dln();
 
-    d("pushes: first -> ");
+    dln("pushes: first -> ");
     for (auto thing : instruction->push_nodes)
         d(" ", thing->forward_edge_register.to_string());
-    dln();
 }
 
 
