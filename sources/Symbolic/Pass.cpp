@@ -1,6 +1,7 @@
 
 #include <set>
 #include <stack>
+#include <list>
 #include "../../headers/Symbolic/Pass.h"
 #include "../../headers/Print.h"
 #include "../../headers/Interpretation/iData.h"
@@ -114,11 +115,41 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
     return wordptr;
 }
 
-std::list<iData>::iterator insert_into(std::list<iData> host, std::list<iData>::const_iterator it, std::list<iData> to_insert){
+
+/**
+ * Replace the element @it of the host list with the provided list
+ * Side effect of linked lists: this function modifies the iterator
+ * since the provided iterator is no longer valid
+ * @param host
+ * @param it
+ * @param to_insert
+ * @return iterator pointing to the first element after the insertion
+ */
+std::list<iData>::iterator replace_with(std::list<iData> host, std::list<iData>::const_iterator it, const std::list<iData>& to_insert){
     // inline it
     for(const auto& sub_word : to_insert)
         host.insert(it, sub_word);
     return host.erase(it);
+}
+
+bool can_inline(std::list<iData>::iterator it, ForthWord *host, int maximum_definition_size){
+    //dln("Consider the inlining of ", it->as_word()->name());
+
+    if (it->as_word()->id == primitive_words::OTHER) {
+
+        auto *sub_fw = dynamic_cast<ForthWord *>(it->as_word());
+        auto &sub_def = sub_fw->def();
+
+        if (host->def().size() + sub_def.size() < maximum_definition_size) {
+            dln("Inlining word ", sub_fw->name(), " into ", host->name());
+            return true;
+        } else {
+            dln("Not inlining word ", sub_fw->name(), " into ", host->name());
+            return false;
+        }
+    }
+
+    return false;
 }
 
 const static uint INLINE_WORD_MAX_XTS = 50;
@@ -135,36 +166,42 @@ void dfs(iWordptr word, std::set<iWordptr>& visited){
 
 
     if(auto *fw = dynamic_cast<ForthWord*>(word)){
+        dln();
+        dln("[", word->name(), "] looking to inline words in definition");
+        indent();
+
         auto &definition = fw->def();
         int branch_offset = 0;
         for(auto it = definition.begin(); it != definition.end(); it++){
-            if(it->is_word()) {
-                dfs(it->as_word(), visited);
 
-                if (it->as_word()->id == primitive_words::OTHER) {
-                    ForthWord *sub_fw = dynamic_cast<ForthWord *>(it->as_word());
-                    auto &sub_def = sub_fw->def();
-                    if (definition.size() + sub_def.size() < INLINE_WORD_MAX_XTS) {
-                        dln("Inlining word ", sub_fw->name(), " into ", word->name());
-                        it = insert_into(definition, it, sub_def);
+            if(!it->is_word())
+                continue;
 
-                        branch_offset += sub_def.size() - 1;
-                    }
-                }
+            dfs(it->as_word(), visited);
 
-                auto curr_word_id = it->as_word()->id;
+            if(can_inline(it, fw, INLINE_WORD_MAX_XTS)) {
+                auto *iterator_forthword = dynamic_cast<ForthWord *>(it->as_word());
+                it = replace_with(definition, it, iterator_forthword->def());
+                branch_offset += (short) iterator_forthword->def().size() - 1;
+            }else{
+                // fix branch jumps
+                auto iterator_word = it->as_word();
                 auto next_slot = std::next(it);
-                if((curr_word_id == primitive_words::BRANCH || curr_word_id == primitive_words::BRANCHIF)
-                    && next_slot->as_number() < 0){
+
+                if(iterator_word->branchy() && next_slot->as_number() < 0){
                     *next_slot = iData(next_slot->as_number() - branch_offset);
                 }
             }
         }
+
+        unindent();
+
     }
 }
 
 void Analysis::inlining(iWordptr root) {
     std::set<iWordptr> visited;
+
     dfs(root, visited);
 }
 

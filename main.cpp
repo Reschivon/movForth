@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
     std::string program_name = forth_path.substr(0, forth_path.find_last_of('.'));
 
 
+    indent();
     // Create a plain old interpreter that interprets
     // the contents of the Forth file boot.fs
     mov::Interpreter interpreter(forth_path);
@@ -41,15 +42,16 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-
     // Do static analysis on "main," and return symbolic information
     // computed from "main" in the form of a mov::sWord
     mov::Analysis analysis;
+    analysis.inlining(word_to_compile);
+    dynamic_cast<mov::ForthWord*>(word_to_compile)->definition_to_string();
     auto converted_word = analysis.static_analysis(word_to_compile);
 
 
     // Show the fruits of labor from static analysis
-    mov::Analysis::show_word_info(converted_word);
+    // mov::Analysis::show_word_info(converted_word);
 
 
     // Generate IR from the symbolic object
@@ -66,8 +68,7 @@ int main(int argc, char* argv[]) {
     // Run the new module_result
     // Note: invokes `lli` command in a new shell instance
     // May not work on every system
-
-    ir_generator.exec_module(program_name);
+    //ir_generator.exec_module(program_name);
 
     bool generate_error = mov::ObjectGenerator::generate(
             program_name + ".S", module_result.first);
@@ -81,5 +82,7 @@ int main(int argc, char* argv[]) {
     // May not work on every system
     mov::ObjectGenerator::link(program_name + ".S", program_name);
 
+
+    ir_generator.exec_module2(program_name);
 }
 

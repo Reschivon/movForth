@@ -19,7 +19,7 @@ namespace mov{
 
         int as_number();
         iWord* as_word();
-        ForthWord* as_forth_word();
+        ForthWord* as_forth_word() const;
         Primitive* as_primitive();
 
         explicit iData(dict_data_var_type data);

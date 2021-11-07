@@ -95,6 +95,7 @@ namespace mov {
          * @return nullptr if failure
          */
         sWordptr static_analysis(iWordptr original_word);
+        void inlining(iWordptr root);
         static sWordptr show_word_info(sWordptr wordptr);
     };
 }

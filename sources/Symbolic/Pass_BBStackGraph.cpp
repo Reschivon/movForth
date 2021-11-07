@@ -43,15 +43,13 @@ void Analysis::propagate_stack(NodeList &stack, Instruction *instruction, NodeLi
         else
             Node::link_bidirection(push_node, stack.new_top(), register_gen.get());
 
-    d("pops:");
+    dln("pops: first -> ");
     for (auto node : instruction->pop_nodes)
         d(" ", node->backward_edge_register.to_string());
-    dln();
 
-    d("pushes:");
+    dln("pushes: first -> ");
     for (auto thing : instruction->push_nodes)
         d(" ", thing->forward_edge_register.to_string());
-    dln();
 }
 
 
@@ -90,6 +88,7 @@ NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb, N
         dln("[stack:]");
         for (auto thing : running_stack)
             dln( thing->backward_edge_register.to_string());
+        dln("^ top ^");
     }
 
     // a copy of the stack

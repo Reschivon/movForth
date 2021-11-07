@@ -27,12 +27,12 @@ void FBuilder::build_store_register(Value *value, Register reg) {
 Value* FBuilder::create_ptr_to_val(Register reg) {
     bool already_has = val_ptrs.find(reg) != val_ptrs.end();
     if(!already_has) {
-        println("inserted new alloca: ", reg.to_string_allowed_chars());
+        //println("inserted new alloca: ", reg.to_string_allowed_chars());
         AllocaInst* new_alloc = create_entry_block_alloca(the_function, reg.to_string_allowed_chars());
         val_ptrs.insert(std::make_pair(reg, new_alloc));
         return new_alloc;
     } else {
-        println("already have alloca: ", reg.to_string_allowed_chars());
+        //println("already have alloca: ", reg.to_string_allowed_chars());
         return val_ptrs.at(reg);
     }
 }
@@ -45,7 +45,7 @@ Value* FBuilder::get_ptr_to_val(Register reg) {
         println("register " + reg.to_string_allowed_chars(), " does not exist");
         return nullptr;
     }
-    println("retrived register " + reg.to_string_allowed_chars());
+    //println("retrived register " + reg.to_string_allowed_chars());
     return ptr_to_val;
 }
 

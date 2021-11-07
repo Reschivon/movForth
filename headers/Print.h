@@ -10,7 +10,7 @@ static std::string color_end = "\\033[0m\\n";
 
 static int indents;
 
-static std::string tab_string;
+static std::string tab_string = "\n";
 
 // Debug toggle - not the best, but works for now
 static const bool debug = true;
@@ -33,7 +33,7 @@ inline void print(Args&&... args) {
 
 template <typename... Args>
 inline void println0(Args&&... args){
-    print(args..., "\n");
+    print("\n", args...);
 }
 
 template <typename... Args>

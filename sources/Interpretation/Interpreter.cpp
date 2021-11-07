@@ -135,8 +135,8 @@ void Interpreter::init_words(){
     });
 
     word_generator.register_primitive(".", primitive_words::EMIT, [&](IP &ip) {
-        println(stack.pop_number());
-        std::cout << std::endl;
+        char str[] = {(char) stack.pop_number(), '\0'};
+        println(str);
     });
 
     word_generator.register_primitive(".S", primitive_words::SHOW, [&](IP &ip) {
@@ -234,13 +234,13 @@ void Interpreter::init_words(){
     });
 
     word_generator.register_primitive("branch", primitive_words::BRANCH, [&](IP &ip) {
-        ip += (ip+1)->as_number();
+        std::advance(ip, std::next(ip)->as_number());
     }, true);
 
     word_generator.register_primitive("branchif", primitive_words::BRANCHIF, [&](IP &ip) {
-        auto next_data = ip+1;
+        auto next_data = std::next(ip);
         if (stack.pop_number() == 0)
-            ip += next_data->as_number();
+            std::advance(ip, next_data->as_number());
         else
             ip++;
     }, true);
