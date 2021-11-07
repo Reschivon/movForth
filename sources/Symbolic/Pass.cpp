@@ -115,6 +115,7 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
     return wordptr;
 }
 
+
 /**
  * Replace the element @it of the host list with the provided list
  * Side effect of linked lists: this function modifies the iterator
@@ -200,8 +201,6 @@ void dfs(iWordptr word, std::set<iWordptr>& visited){
 
 void Analysis::inlining(iWordptr root) {
     std::set<iWordptr> visited;
-
-    dln("inlinng pass");
 
     dfs(root, visited);
 }

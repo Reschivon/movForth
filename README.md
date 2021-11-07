@@ -16,14 +16,16 @@ You can find Forth source and its corresponding compiled forms in `Examples/`
 ## Installation
 - Clone the repository
 
-```git clone https://github.com/Reschivon/movForth```
+```
+git clone https://github.com/Reschivon/movForth
+```
 
 - Have LLVM findable in your include paths (tested with llvm-10). 
-On Ubuntu, you can simply get the apt package:
+On Ubuntu, you can simply get the apt package (otherwise - I don't know!):
 
-```sudo apt install llvm```
-
-I have not been able to get this working on Windows.
+```
+sudo apt install llvm
+```
 
 - Build as CMake project (version 3 or above should do)
 ```
