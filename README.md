@@ -4,7 +4,7 @@
 
 MovForth compiles Forth source code to executable binaries. Using LLVM IR as an intermediate target, it is an experiment in adapting Forth for modern compiler libraries and modern architectures.
 
-- Bottom-up compilation; no dictionary or stack remains in final executable
+- Bottom-up compilation; no dictionary or interpreter remains in final executable
 - Compile time evaluation for immediate words allows programmers to use meta-compilation without fear
 - Imtermediate form LLVM IR allows compilation to pretty much any architecture
 - Modern LLVM optimization passes are run on forth code
