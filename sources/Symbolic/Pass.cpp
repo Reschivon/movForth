@@ -123,13 +123,13 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
  * @param host
  * @param it
  * @param to_insert
- * @return iterator pointing to the first element after the insertion
+ * @return iterator pointing to the last inserted element
  */
 std::list<iData>::iterator replace_with(std::list<iData> host, std::list<iData>::const_iterator it, const std::list<iData>& to_insert){
     // inline it
     for(const auto& sub_word : to_insert)
         host.insert(it, sub_word);
-    return host.erase(it);
+    return std::prev(host.erase(it));
 }
 
 bool can_inline(std::list<iData>::iterator it, ForthWord *host, int maximum_definition_size){
