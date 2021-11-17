@@ -203,7 +203,7 @@ void Interpreter::init_words(){
 
 
     word_generator.register_primitive("allot", primitive_words::ALLOT, [&](IP &ip) {
-        int num_to_allot = stack.pop_number();
+        element num_to_allot = stack.pop_number();
         if(num_to_allot < 0)
             while(num_to_allot --> 0 || dictionary.back().is_number())
                 dictionary.pop_back();
@@ -218,11 +218,11 @@ void Interpreter::init_words(){
 
     word_generator.register_primitive("!", primitive_words::STORE, [&](IP &ip) {
         if(immediate){
-            int address = stack.pop_number();
+            element address = stack.pop_number();
             iData val = stack.pop();
             dictionary.at(address) = val;
         }else{
-            int address = stack.pop_number();
+            element address = stack.pop_number();
             iData val = stack.pop();
 
             if (!dictionary.back().is_forth_word())
@@ -270,6 +270,12 @@ void Interpreter::init_words(){
         std::string next_token = input.next_token();
         //dln("    consume ", next_token);
         dictionary.emplace_back(new ForthWord(next_token, false));
+    });
+
+    word_generator.register_primitive("dealloca", primitive_words::DEALLOCA, [&](IP &ip) {
+        element size_to_alloc = stack.pop_number();
+        auto* ptr = (element*) malloc( sizeof (element) * size_to_alloc);
+        stack.push((element) ptr);
     });
 
 

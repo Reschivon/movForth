@@ -35,9 +35,12 @@ namespace mov{
         {primitive_words::STORE,         new sWord("!",         primitive_words::STORE,        {.num_popped = 2,})},
         {primitive_words::BRANCH,        new sWord("branch",    primitive_words::BRANCH,       Effects::neutral)},
         {primitive_words::BRANCHIF,      new sWord("branchif",  primitive_words::BRANCHIF,     {.num_popped = 1})},
-        {primitive_words::LITERAL,       new sWord("literal",   primitive_words::LITERAL,      {.num_popped=0, .num_pushed = 1})},
-        {primitive_words::HERE,          new sWord("here",      primitive_words::HERE,         {.num_popped=0, .num_pushed = 1})},
-        {primitive_words::CREATE,        new sWord("create",    primitive_words::CREATE,       {.num_popped = 0, .num_pushed = 0, .consume_token = true, .compiled_slots=0, .interpret_state=Effects::interpret_state::NONE, .define_new_word = true})}
+        {primitive_words::LITERAL,       new sWord("literal",   primitive_words::LITERAL,      {.num_popped =0, .num_pushed = 1})},
+        {primitive_words::HERE,          new sWord("here",      primitive_words::HERE,         {.num_popped =0, .num_pushed = 1})},
+        {primitive_words::CREATE,        new sWord("create",    primitive_words::CREATE,       {.num_popped = 0, .num_pushed = 0, .consume_token = true, .compiled_slots=0, .interpret_state=Effects::interpret_state::NONE, .define_new_word = true})},
+        {primitive_words::ALLOCA,        new sWord("alloca",    primitive_words::ALLOCA,       {.num_popped = 1, .num_pushed = 1})},
+        {primitive_words::DEALLOCA,      new sWord("dealloca",  primitive_words::DEALLOCA,     {.num_popped = 1})}
+
     };
 }
 

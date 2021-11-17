@@ -6,6 +6,7 @@
 #include "iWord.h"
 #include "../../headers/Print.h"
 #include "iData.h"
+#include "../Constants.h"
 
 namespace mov {
 
@@ -17,7 +18,7 @@ namespace mov {
         std::vector<iData> stack{};
 
     public:
-        void push(int number) {
+        void push(element number) {
             stack.emplace_back(number);
         }
         void push(iWordptr iWord_pointer) {
@@ -30,7 +31,7 @@ namespace mov {
         /**
          * @return the top number, or 0 is top is not number
          */
-        int pop_number(){
+        element pop_number(){
             if(stack.empty())
                 println("tried popping empty stack");
 

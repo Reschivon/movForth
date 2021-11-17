@@ -4,7 +4,7 @@
 
 using namespace mov;
 
-int iData::as_number()      { return std::get<int>(*this);}
+element iData::as_number()      { return std::get<element>(*this);}
 
 iWord* iData::as_word()
 {

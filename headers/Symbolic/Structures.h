@@ -23,6 +23,8 @@ namespace mov {
 
     typedef sWord *sWordptr;
 
+    struct arrayIndex()
+
     class sData {
         using variant_t = std::variant<std::nullptr_t, int, sWordptr>;
         variant_t data{};
