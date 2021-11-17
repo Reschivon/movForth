@@ -23,7 +23,6 @@ void FBuilder::build_store_register(Value *value, Register reg) {
     CreateStore(value, alloc);
 }
 
-
 Value* FBuilder::create_ptr_to_val(Register reg) {
     bool already_has = val_ptrs.find(reg) != val_ptrs.end();
     if(!already_has) {
@@ -65,8 +64,10 @@ BasicBlock* FBuilder::get_block(uint index) {
 AllocaInst* FBuilder::create_entry_block_alloca(Function *func, const std::string &var_name) {
     IRBuilder<> entry_builder(&func->getEntryBlock(),
                               func->getEntryBlock().begin());
-    return entry_builder.CreateAlloca(Type::getInt32Ty(the_context), nullptr, var_name);
+    return entry_builder.CreateAlloca(Type::getInt64Ty(the_context), nullptr, var_name);
 }
+
+
 
 
 

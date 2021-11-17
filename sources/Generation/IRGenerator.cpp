@@ -60,6 +60,8 @@ IRGenerator::IRGenerator()
 std::pair<IRModule, bool> IRGenerator::generate(mov::sWord *root) {
 
     declare_printf();
+    declare_malloc();
+    declare_free();
 
     Function *func = generate_function(root, true);
     if(!func)
@@ -212,6 +214,57 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     Register push_to_reg = instr->push_nodes[0]->forward_edge_register;
 
                     builder.build_store_register(constant, push_to_reg);
+                    break;
+                }
+
+                case MALLOC: {
+                    Register amount = instr->pop_nodes[0]->backward_edge_register;
+                    Value *amount_v = builder.build_load_register(amount);
+
+                    Value *mem_pointer_void = builder.CreateCall(the_module->getFunction("malloc"), amount_v);
+
+                    Register mem_pointer_register = instr->push_nodes[0]->forward_edge_register;
+                    Value *mem_pointer = builder.CreatePtrToInt(mem_pointer_void, builder.getInt64Ty());
+                    builder.build_store_register(mem_pointer, mem_pointer_register);
+
+                    break;
+                }
+
+                case FREE: {
+                    Register mem_pointer = instr->pop_nodes[0]->backward_edge_register;
+                    Value *mem_pointer_v = builder.build_load_register(mem_pointer);
+
+                    Value *mem_pointer_as_ptr = builder.CreateIntToPtr(mem_pointer_v, builder.getInt8PtrTy());
+
+                    builder.CreateCall(the_module->getFunction("free"), mem_pointer_as_ptr);
+
+                    break;
+                }
+
+                case STORE: {
+                    Register mem_address = instr->pop_nodes[1]->backward_edge_register;
+                    Register value = instr->pop_nodes[0]->backward_edge_register;
+
+                    Value *mem_address_v = builder.build_load_register(mem_address);
+                    Value *mem_pointer_v = builder.CreateIntToPtr(mem_address_v, PointerType::get(builder.getInt64Ty(), 0));
+                    Value *value_v = builder.build_load_register(value);
+
+                    builder.CreateStore(value_v, mem_pointer_v);
+
+                    break;
+                }
+
+                case FETCH: {
+
+                    Register mem_address = instr->pop_nodes[0]->backward_edge_register;
+                    Value *mem_address_v = builder.build_load_register(mem_address);
+                    Value *mem_pointer_v = builder.CreateIntToPtr(mem_address_v, builder.getInt8PtrTy());
+
+                    Value *val = builder.CreateLoad(mem_pointer_v);
+
+                    Register val_register = instr->push_nodes[0]->forward_edge_register;
+                    builder.build_store_register(val, val_register);
+
                     break;
                 }
 
@@ -421,7 +474,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
     }
 
     // see if it's all right?
-    if (verifyFunction(*the_function, &outs())) {
+    if (verifyFunction(*the_function, &errs())) {
         println("Error encountered in generation of ", fword->name);
         return nullptr;
     }
@@ -444,7 +497,7 @@ class stdout_stream : public raw_ostream {
 
     }
 
-    uint64_t current_pos() const override {
+    [[nodiscard]] uint64_t current_pos() const override {
         return pos;
     }
 };
@@ -467,10 +520,21 @@ void IRGenerator::print_module(const std::string &program_name, bool to_file) {
 
 
 void IRGenerator::declare_printf(){
-    // declare printf
     std::vector<Type*> printf_arg_types {Type::getInt8PtrTy(the_context)};
     FunctionType *printf_type = FunctionType::get(Type::getInt64Ty(the_context), printf_arg_types, true);
     Function::Create(printf_type, Function::ExternalLinkage, "printf", the_module.get());
+}
+
+void IRGenerator::declare_malloc() {
+    std::vector<Type*> malloc_arg_types {Type::getInt64Ty(the_context)};
+    FunctionType *malloc_type = FunctionType::get(Type::getInt8PtrTy(the_context), malloc_arg_types, false);
+    Function::Create(malloc_type, Function::ExternalLinkage, "malloc", the_module.get());
+}
+
+void IRGenerator::declare_free() {
+    std::vector<Type*> free_arg_types {Type::getInt8PtrTy(the_context)};
+    FunctionType *free_type = FunctionType::get(Type::getVoidTy(the_context), free_arg_types, false);
+    Function::Create(free_type, Function::ExternalLinkage, "free", the_module.get());
 }
 
 Function* IRGenerator::make_main(){
