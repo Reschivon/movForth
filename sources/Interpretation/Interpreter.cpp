@@ -15,26 +15,41 @@ bool Interpreter::interpret() {
     std::cout << std::endl;
 
     std::string token;
-    while (true){
+    interpretLoop: while (true){
+        // get next token
         token = input.next_token();
         if(!input.open()) break;
 
+        // try to get primitive word for token
         iWordptr iWordptr = find(token);
+
+        // try to get Forth word for token
         if(!iWordptr)
             iWordptr = word_generator.get(token);
 
+        // save for convenience
+        ForthWord *latest_forth_word = nullptr;
+        if(dictionary.back().is_forth_word())
+            latest_forth_word = dictionary.back().as_forth_word();
+
         if(iWordptr == nullptr){
-            // might be a number
+            // might be a number or local
+            if(latest_forth_word != nullptr){
+                auto locals = latest_forth_word->locals;
+                if(locals.find(token) != locals.end())
+                    // compile a FromLocal
+                    latest_forth_word->add(iData(new FromLocal(token)));
+            }
             try{
                 int num = stoi(token);
 
                 if(immediate)
                     stack.push(num);
                 else {
-                    if(dictionary.back().is_forth_word()){
+                    if(latest_forth_word != nullptr){
                         //dln("compile number ", num);
-                        dictionary.back().as_forth_word()->add(iData(find("literal")));
-                        dictionary.back().as_forth_word()->add(iData(num));
+                        latest_forth_word->add(iData(find("literal")));
+                        latest_forth_word->add(iData(num));
                     }else{
                         println("attempted to compile LITERAL to a primitive word");
                         return true;
@@ -46,15 +61,15 @@ bool Interpreter::interpret() {
                 return true;
             }
         }else{
-            // it's a word
+            // is a word
             if(iWordptr->immediate || immediate) {
                 auto dummy_ip = IP();
                  dln("execute word ", iWordptr->name());
                 iWordptr->execute(dummy_ip, *this);
             } else {
-                if(dictionary.back().is_forth_word()){
+                if(latest_forth_word != nullptr){
                     // dln("compile FW ", iWordptr->name());
-                    dictionary.back().as_forth_word()->add(iData(iWordptr));
+                    latest_forth_word->add(iData(iWordptr));
                 }else {
                     println("attempted to compile xts to a primitive word");
                     return true;

@@ -1,8 +1,18 @@
 #include "../../headers/Interpretation/iWord.h"
+
+#include <utility>
 #include "../../headers/Interpretation/iData.h"
 #include "../../headers/Interpretation/Interpreter.h"
 
 using namespace mov;
+
+IP::IP(iWordptr parent, std::list<iData>::iterator it)
+    : std::list<iData>::iterator(it), parent(parent)
+{}
+
+IP::IP()
+    : std::list<iData>::iterator(nullptr), parent(nullptr)
+{}
 
 iWord::iWord(std::string name, bool immediate, bool stateful)
         : _name(std::move(name)), immediate(immediate), stateful(stateful) {}
@@ -22,7 +32,9 @@ ForthWord::ForthWord(std::string name, bool immediate)
     : iWord(std::move(name), immediate, false) {}
 
 void ForthWord::execute(IP &ip, Interpreter &interpreter) {
-    for(auto it = definition.begin(); it != definition.end(); it++) {
+    locals.clear();
+
+    for(IP it(this, definition.begin()); it != definition.end(); it++) {
 
         // println("       [exec] ", (it->is_word()?it->as_word()->name:std::to_string(it->as_number())), " ");
 
@@ -55,17 +67,22 @@ void Primitive::execute(IP &ip, Interpreter &interpreter) {
     action(ip, interpreter);
 }
 
-ToLocal::ToLocal()
+ToLocal::ToLocal(std::string local_name, std::set<std::string> &locals)
         : Primitive("toLocal", primitive_words::TOLOCAL, true, [&](IP &ip, Interpreter &interpreter) {
             std::string next_token = interpreter.input.next_token();
             localname = next_token;
         }, false)
-{}
+{
+    if(locals.find(local_name) == locals.end())
+        locals.insert(local_name);
+}
 
+FromLocal::FromLocal(std::string local_name)
 
-FromLocal::FromLocal()
         : Primitive("toLocal", primitive_words::TOLOCAL, true, [&](IP &ip, Interpreter &interpreter) {
             std::string next_token = interpreter.input.next_token();
             localname = next_token;
-        }, false)
+        }, false),
+
+        localname(std::move(local_name))
 {}

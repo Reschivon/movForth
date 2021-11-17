@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <set>
 
 #include "../PrimitiveEffects.h"
 
@@ -21,7 +22,11 @@ namespace mov{
     /**
      * Iterator over a word's definition
      */
-    typedef std::list<iData>::iterator IP;
+    struct IP : public std::list<iData>::iterator{
+        iWordptr parent;
+        explicit IP(iWordptr parent, std::list<iData>::iterator);
+        explicit IP();
+    };
 
     /**
      * A word in the interpreter's dictionary
@@ -35,7 +40,9 @@ namespace mov{
          * Defined words fall under a general id primitive_words::OTHER
          */
         primitive_words id = primitive_words::OTHER;
+
         bool immediate;
+
         /**
          * Whether the word relies on the Data in the next
          * definition entry during execution
@@ -60,9 +67,11 @@ namespace mov{
         std::list<iData> definition;
 
     public:
-        ForthWord(std::string name, bool immediate);
 
+        ForthWord(std::string name, bool immediate);
         void execute(IP &ip, Interpreter &interpreter) override;
+
+        std::set<std::string> locals;
 
         /**
          * Append definition
@@ -102,15 +111,15 @@ namespace mov{
 
 
     class ToLocal : public Primitive {
-        std::string localname;
     public:
-        ToLocal();
+        std::string localname;
+        ToLocal(std::string local_name, std::set<std::string> &locals);
     };
 
     class FromLocal : public Primitive {
-        std::string localname;
     public:
-        FromLocal();
+        std::string localname;
+        explicit FromLocal(std::string local_name);
     };
 
 }
