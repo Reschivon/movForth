@@ -9,6 +9,7 @@
 #include <iostream>
 #include <functional>
 #include "../Print.h"
+#include "../Constants.h"
 
 /*
  * So many graphs! Graphs, graphs, everywhere!
@@ -23,10 +24,8 @@ namespace mov {
 
     typedef sWord *sWordptr;
 
-    struct arrayIndex()
-
     class sData {
-        using variant_t = std::variant<std::nullptr_t, int, sWordptr>;
+        using variant_t = std::variant<std::nullptr_t, element, sWordptr>;
         variant_t data{};
     public:
         bool is_num() {return data.index() == 1;}
@@ -41,7 +40,7 @@ namespace mov {
                 default: return "";
             }
         }
-        int as_num() {return std::get<int>(data);}
+        element as_num() {return std::get<element>(data);}
         sWordptr as_xt() {return std::get<sWordptr>(data);}
 
         explicit sData(variant_t data) : data(std::move(data)) {}

@@ -112,8 +112,8 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
     // create empty function corresponding to fword
     std::vector<Type*> arg_types;
-    arg_types.insert(arg_types.end(), num_params, Type::getInt32Ty(the_context));
-    arg_types.insert(arg_types.end(), num_returns,Type::getInt32PtrTy(the_context));
+    arg_types.insert(arg_types.end(), num_params, Type::getInt64Ty(the_context));
+    arg_types.insert(arg_types.end(), num_returns,Type::getInt64PtrTy(the_context));
 
     FunctionType *func_type = FunctionType::get(Type::getVoidTy(the_context), arg_types, false);
     Function* the_function = Function::Create(func_type,
@@ -233,7 +233,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     Value *cond_value = builder.build_load_register(condition);
 
                     Value *TF = builder.CreateICmpEQ(
-                            ConstantInt::get(the_context, APInt(32, 0)),
+                            ConstantInt::get(the_context, APInt(64, 0)),
                             cond_value
                     );
 
@@ -258,7 +258,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     Value *two_v = builder.build_load_register(two);
 
                     Value *equals_bool = builder.CreateICmpEQ(one_v, two_v);
-                    Value *equals = builder.CreateIntCast(equals_bool, builder.getInt32Ty(), true);
+                    Value *equals = builder.CreateIntCast(equals_bool, builder.getInt64Ty(), true);
 
                     Register diff_register = instr->push_nodes[0]->forward_edge_register;
                     builder.build_store_register(equals, diff_register);
@@ -469,14 +469,14 @@ void IRGenerator::print_module(const std::string &program_name, bool to_file) {
 void IRGenerator::declare_printf(){
     // declare printf
     std::vector<Type*> printf_arg_types {Type::getInt8PtrTy(the_context)};
-    FunctionType *printf_type = FunctionType::get(Type::getInt32Ty(the_context), printf_arg_types, true);
+    FunctionType *printf_type = FunctionType::get(Type::getInt64Ty(the_context), printf_arg_types, true);
     Function::Create(printf_type, Function::ExternalLinkage, "printf", the_module.get());
 }
 
 Function* IRGenerator::make_main(){
 
     // create empty main function
-    FunctionType *main_type = FunctionType::get(Type::getInt32Ty(the_context), false);
+    FunctionType *main_type = FunctionType::get(Type::getInt64Ty(the_context), false);
     Function *main = Function::Create(main_type, Function::ExternalLinkage, "main", the_module.get());
 
     FBuilder builder(the_context, main);
@@ -487,10 +487,10 @@ Function* IRGenerator::make_main(){
 
     std::vector<Value *> print_args{
             builder.CreateGlobalStringPtr("%d\n"),
-            ConstantInt::get(the_context, APInt(32, 20))
+            ConstantInt::get(the_context, APInt(64, 20))
     };
     builder.CreateCall(the_module->getFunction("printf"), print_args);
-    builder.CreateRet(ConstantInt::get(the_context, APInt(32, 0)));
+    builder.CreateRet(ConstantInt::get(the_context, APInt(64, 0)));
 
     return main;
 }
