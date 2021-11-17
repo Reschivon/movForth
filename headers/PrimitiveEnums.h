@@ -32,8 +32,8 @@ namespace mov{
         EXIT        =24,
         OTHER       =25,
         EQUALS      =26,
-        ALLOCA      =27,
-        DEALLOCA    =28
+        MALLOC      =27,
+        FREE    =28
     };
 }
 #endif //MOVFORTH_PRIMITIVEENUMS_H

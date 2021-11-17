@@ -233,6 +233,8 @@ void Interpreter::init_words(){
         }
     });
 
+
+
     word_generator.register_primitive("branch", primitive_words::BRANCH, [&](IP &ip) {
         std::advance(ip, std::next(ip)->as_number());
     }, true);
@@ -272,10 +274,15 @@ void Interpreter::init_words(){
         dictionary.emplace_back(new ForthWord(next_token, false));
     });
 
-    word_generator.register_primitive("dealloca", primitive_words::DEALLOCA, [&](IP &ip) {
+    word_generator.register_primitive("malloc", primitive_words::MALLOC, [&](IP &ip) {
         element size_to_alloc = stack.pop_number();
-        auto* ptr = (element*) malloc( sizeof (element) * size_to_alloc);
+        auto* ptr = (element*) malloc(size_to_alloc);
         stack.push((element) ptr);
+    });
+
+    word_generator.register_primitive("free", primitive_words::FREE, [&](IP &ip) {
+        element mem_pointer = stack.pop_number();
+        free((void*) mem_pointer);
     });
 
 

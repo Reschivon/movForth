@@ -28,18 +28,18 @@ namespace mov{
         {primitive_words::COMMA,         new sWord(",",         primitive_words::COMMA,        {.num_popped = 1,  .num_pushed=0, .consume_token=false, .compiled_slots = 1})},
         {primitive_words::SEE,           new sWord("see",       primitive_words::SEE,          Effects::neutral)},
         {primitive_words::TOIMMEDIATE,   new sWord("[",         primitive_words::TOIMMEDIATE,  {.num_popped = 0, .num_pushed = 0, .consume_token=false, .compiled_slots=0, .interpret_state = Effects::interpret_state::TOIMM})},
-        {primitive_words::TOCOMPILE,     new sWord("]",         primitive_words::TOCOMPILE,    {.num_popped = 0, .num_pushed = 0, .consume_token=false, .compiled_slots=0, .interpret_state = Effects::interpret_state::TOCOMP})},
-        {primitive_words::IMMEDIATE,     new sWord("immediate", primitive_words::IMMEDIATE,    Effects::neutral)}, // very rare this ends up in compiled code, consider warn on encounter
-        {primitive_words::ALLOT,         new sWord("allot",     primitive_words::ALLOT,        {.num_popped = 1})},
-        {primitive_words::FETCH,         new sWord("@",         primitive_words::FETCH,        {.num_popped = 1, .num_pushed = 1})},
-        {primitive_words::STORE,         new sWord("!",         primitive_words::STORE,        {.num_popped = 2,})},
-        {primitive_words::BRANCH,        new sWord("branch",    primitive_words::BRANCH,       Effects::neutral)},
-        {primitive_words::BRANCHIF,      new sWord("branchif",  primitive_words::BRANCHIF,     {.num_popped = 1})},
-        {primitive_words::LITERAL,       new sWord("literal",   primitive_words::LITERAL,      {.num_popped =0, .num_pushed = 1})},
-        {primitive_words::HERE,          new sWord("here",      primitive_words::HERE,         {.num_popped =0, .num_pushed = 1})},
-        {primitive_words::CREATE,        new sWord("create",    primitive_words::CREATE,       {.num_popped = 0, .num_pushed = 0, .consume_token = true, .compiled_slots=0, .interpret_state=Effects::interpret_state::NONE, .define_new_word = true})},
-        {primitive_words::ALLOCA,        new sWord("alloca",    primitive_words::ALLOCA,       {.num_popped = 1, .num_pushed = 1})},
-        {primitive_words::DEALLOCA,      new sWord("dealloca",  primitive_words::DEALLOCA,     {.num_popped = 1})}
+        {primitive_words::TOCOMPILE, new sWord("]",         primitive_words::TOCOMPILE,    {.num_popped = 0, .num_pushed = 0, .consume_token=false, .compiled_slots=0, .interpret_state = Effects::interpret_state::TOCOMP})},
+        {primitive_words::IMMEDIATE, new sWord("immediate", primitive_words::IMMEDIATE,    Effects::neutral)}, // very rare this ends up in compiled code, consider warn on encounter
+        {primitive_words::ALLOT,     new sWord("allot",     primitive_words::ALLOT,        {.num_popped = 1})},
+        {primitive_words::FETCH,     new sWord("@",         primitive_words::FETCH,        {.num_popped = 1, .num_pushed = 1})},
+        {primitive_words::STORE,     new sWord("!",         primitive_words::STORE,        {.num_popped = 2,})},
+        {primitive_words::BRANCH,    new sWord("branch",    primitive_words::BRANCH,       Effects::neutral)},
+        {primitive_words::BRANCHIF,  new sWord("branchif",  primitive_words::BRANCHIF,     {.num_popped = 1})},
+        {primitive_words::LITERAL,   new sWord("literal",   primitive_words::LITERAL,      {.num_popped =0, .num_pushed = 1})},
+        {primitive_words::HERE,      new sWord("here",      primitive_words::HERE,         {.num_popped =0, .num_pushed = 1})},
+        {primitive_words::CREATE,    new sWord("create",    primitive_words::CREATE,       {.num_popped = 0, .num_pushed = 0, .consume_token = true, .compiled_slots=0, .interpret_state=Effects::interpret_state::NONE, .define_new_word = true})},
+        {primitive_words::MALLOC,    new sWord("alloca", primitive_words::MALLOC, {.num_popped = 1, .num_pushed = 1})},
+        {primitive_words::FREE, new sWord("dealloca", primitive_words::FREE, {.num_popped = 1})}
 
     };
 }

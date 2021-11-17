@@ -51,6 +51,10 @@ namespace mov {
         void exec_module(const std::string& program_name);
 
         void exec_module2(const std::string &program_name);
+
+        void declare_malloc();
+
+        void declare_free();
     };
 }
 
