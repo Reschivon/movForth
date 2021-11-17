@@ -84,5 +84,7 @@ int main(int argc, char* argv[]) {
 
 
     ir_generator.exec_module2(program_name);
+
+    return 0;
 }
 

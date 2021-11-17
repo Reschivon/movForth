@@ -26,7 +26,7 @@ namespace mov {
 
         Value* get_emit_string_ptr(){
             if(!emit_string_ptr)
-                emit_string_ptr = CreateGlobalStringPtr("%c\n");
+                emit_string_ptr = CreateGlobalStringPtr("%d\n");
             return emit_string_ptr;
         }
 

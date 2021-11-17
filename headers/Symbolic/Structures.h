@@ -24,7 +24,8 @@ namespace mov {
     typedef sWord *sWordptr;
 
     class sData {
-        std::variant<std::nullptr_t, int, sWordptr> data{};
+        using variant_t = std::variant<std::nullptr_t, int, sWordptr>;
+        variant_t data{};
     public:
         bool is_num() {return data.index() == 1;}
         bool is_xt() {return data.index() == 2;}
@@ -41,7 +42,7 @@ namespace mov {
         int as_num() {return std::get<int>(data);}
         sWordptr as_xt() {return std::get<sWordptr>(data);}
 
-        explicit sData(std::variant<std::nullptr_t, int, sWordptr> data) : data(std::move(data)) {}
+        explicit sData(variant_t data) : data(std::move(data)) {}
 
         std::string to_string(){
             if(is_xt())
