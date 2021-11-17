@@ -334,6 +334,36 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     break;
                 }
 
+                case AND: {
+                    Register one = instr->pop_nodes[0]->backward_edge_register;
+                    Register two = instr->pop_nodes[1]->backward_edge_register;
+
+                    Value *one_v = builder.build_load_register(one);
+                    Value *two_v = builder.build_load_register(two);
+
+                    Value *anded = builder.CreateXor(one_v, two_v);
+                    Register anded_register = instr->push_nodes[0]->forward_edge_register;
+
+                    builder.build_store_register(anded, anded_register);
+
+                    break;
+                }
+
+                case LESS: {
+                    Register one = instr->pop_nodes[0]->backward_edge_register;
+                    Register two = instr->pop_nodes[1]->backward_edge_register;
+
+                    Value *one_v = builder.build_load_register(one);
+                    Value *two_v = builder.build_load_register(two);
+
+                    Value *less_than = builder.CreateICmpSLT(two_v, one_v);
+
+                    Register less_than_register = instr->push_nodes[0]->forward_edge_register;
+                    builder.build_store_register(less_than, less_than_register);
+
+                    break;
+                }
+
                 case ADD: {
                     Register one = instr->pop_nodes[0]->backward_edge_register;
                     Register two = instr->pop_nodes[1]->backward_edge_register;

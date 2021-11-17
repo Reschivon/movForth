@@ -12,15 +12,16 @@ namespace mov {
      * Forth Interpreter that holds state
      */
     class Interpreter {
+
+        iWordGenerator word_generator;
+        void init_words();
+
+    public:
         file_input input;
         std::vector<iData> dictionary;
         Stack stack;
         bool immediate = true;
-        iWordGenerator word_generator;
 
-        void init_words();
-
-    public:
         /**
          * Finds the most recent dictionary entry that matches the given name
          * @param name  name of word to be found

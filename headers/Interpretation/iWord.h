@@ -7,12 +7,14 @@
 #include <iostream>
 #include <string>
 #include <list>
+
 #include "../PrimitiveEffects.h"
 
 namespace mov{
     class Stack;
     class iWord;
     class iData;
+    class Interpreter;
 
     typedef iWord *iWordptr;
 
@@ -43,7 +45,7 @@ namespace mov{
         iWord(std::string name, bool immediate, bool stateful);
         iWord(std::string name, primitive_words id, bool immediate, bool stateful);
 
-        virtual void execute(IP &ip) = 0;
+        virtual void execute(IP &ip, Interpreter &interpreter) = 0;
 
         std::string name();
 
@@ -60,7 +62,7 @@ namespace mov{
     public:
         ForthWord(std::string name, bool immediate);
 
-        void execute(IP &ip) override;
+        void execute(IP &ip, Interpreter &interpreter) override;
 
         /**
          * Append definition
@@ -88,13 +90,31 @@ namespace mov{
      * Get singletons from primitive_lookup
      */
     class Primitive : public iWord{
-        std::function<void(IP&)> action;
-        Primitive(std::string name, primitive_words id, bool immediate, std::function<void(IP&)> action, bool stateful);
+        std::function<void(IP&, Interpreter&)> action;
+
         friend class iWordGenerator;
+
     public:
-        void execute(IP &ip) override;
+        Primitive(std::string name, primitive_words id, bool immediate, std::function<void(IP&, Interpreter&)> action, bool stateful);
+
+        void execute(IP &ip, Interpreter &interpreter) override;
+    };
+
+
+    class ToLocal : public Primitive {
+        std::string localname;
+    public:
+        ToLocal();
+    };
+
+    class FromLocal : public Primitive {
+        std::string localname;
+    public:
+        FromLocal();
     };
 
 }
+
+
 
 #endif

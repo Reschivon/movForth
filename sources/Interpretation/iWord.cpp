@@ -1,5 +1,6 @@
 #include "../../headers/Interpretation/iWord.h"
 #include "../../headers/Interpretation/iData.h"
+#include "../../headers/Interpretation/Interpreter.h"
 
 using namespace mov;
 
@@ -20,14 +21,14 @@ bool iWord::branchy() {
 ForthWord::ForthWord(std::string name, bool immediate)
     : iWord(std::move(name), immediate, false) {}
 
-void ForthWord::execute(IP &ip) {
+void ForthWord::execute(IP &ip, Interpreter &interpreter) {
     for(auto it = definition.begin(); it != definition.end(); it++) {
 
-        //println("       [exec] ", (it->is_word()?it->as_word()->to_string():std::_name(it->as_number())), " ");
+        // println("       [exec] ", (it->is_word()?it->as_word()->name:std::to_string(it->as_number())), " ");
 
         iData current_cell = *it;
         if(current_cell.is_word())
-            current_cell.as_word()->execute(it);
+            current_cell.as_word()->execute(it, interpreter);
         else
             println("Too many numbers in definition, no LITERAL to consume them");
     }
@@ -47,10 +48,24 @@ void ForthWord::set(int index, iData value) {
     *front = value;
 }
 
-Primitive::Primitive(std::string name, primitive_words id, bool immediate, std::function<void(IP&)> action, bool stateful)
+Primitive::Primitive(std::string name, primitive_words id, bool immediate, std::function<void(IP&, Interpreter&)> action, bool stateful)
     : iWord(std::move(name), id, immediate, stateful), action(std::move(action)) {}
 
-void Primitive::execute(IP &ip) {
-    action(ip);
+void Primitive::execute(IP &ip, Interpreter &interpreter) {
+    action(ip, interpreter);
 }
 
+ToLocal::ToLocal()
+        : Primitive("toLocal", primitive_words::TOLOCAL, true, [&](IP &ip, Interpreter &interpreter) {
+            std::string next_token = interpreter.input.next_token();
+            localname = next_token;
+        }, false)
+{}
+
+
+FromLocal::FromLocal()
+        : Primitive("toLocal", primitive_words::TOLOCAL, true, [&](IP &ip, Interpreter &interpreter) {
+            std::string next_token = interpreter.input.next_token();
+            localname = next_token;
+        }, false)
+{}

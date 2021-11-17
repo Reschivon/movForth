@@ -33,7 +33,12 @@ namespace mov{
         OTHER       =25,
         EQUALS      =26,
         MALLOC      =27,
-        FREE    =28
+        FREE        =28,
+        AND         =29,
+        LESS        =30,
+        IS          =31,
+        TOLOCAL     =32,
+        FROMLOCAL   =33
     };
 }
 #endif //MOVFORTH_PRIMITIVEENUMS_H

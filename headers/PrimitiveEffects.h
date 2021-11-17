@@ -38,9 +38,13 @@ namespace mov{
         {primitive_words::LITERAL,   new sWord("literal",   primitive_words::LITERAL,      {.num_popped =0, .num_pushed = 1})},
         {primitive_words::HERE,      new sWord("here",      primitive_words::HERE,         {.num_popped =0, .num_pushed = 1})},
         {primitive_words::CREATE,    new sWord("create",    primitive_words::CREATE,       {.num_popped = 0, .num_pushed = 0, .consume_token = true, .compiled_slots=0, .interpret_state=Effects::interpret_state::NONE, .define_new_word = true})},
-        {primitive_words::MALLOC,    new sWord("alloca", primitive_words::MALLOC, {.num_popped = 1, .num_pushed = 1})},
-        {primitive_words::FREE, new sWord("dealloca", primitive_words::FREE, {.num_popped = 1})}
-
+        {primitive_words::MALLOC,    new sWord("alloca",    primitive_words::MALLOC,       {.num_popped = 1, .num_pushed = 1})},
+        {primitive_words::FREE,      new sWord("dealloca",  primitive_words::FREE,         {.num_popped = 1})},
+        {primitive_words::AND,       new sWord("&",         primitive_words::AND,          {.num_popped = 2, .num_pushed = 1})},
+        {primitive_words::LESS,      new sWord("<",         primitive_words::LESS,         {.num_popped = 2, .num_pushed = 1})},
+        {primitive_words::IS,        new sWord("is",        primitive_words::IS,           {.num_popped = 0, .num_pushed = 0, .consume_token = true})},
+        {primitive_words::TOLOCAL,   new sWord("tolocal",   primitive_words::TOLOCAL,      {.num_popped = 1})},
+        {primitive_words::FROMLOCAL,   new sWord("fromlocal",   primitive_words::FROMLOCAL,      {.num_popped = 1})}
     };
 }
 

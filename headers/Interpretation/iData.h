@@ -5,8 +5,8 @@
 
 #include <variant>
 #include <string>
-#include "../../headers/Interpretation/iWord.h"
 #include "../Constants.h"
+#include "iWord.h"
 
 namespace mov{
 
