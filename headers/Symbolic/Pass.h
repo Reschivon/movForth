@@ -6,6 +6,7 @@
 #include "../Symbolic/Structures.h"
 #include "../Interpretation/iWord.h"
 #include "sWord.h"
+#include "../Interpretation/ForthWord.h"
 
 namespace mov {
     class Analysis{
@@ -61,8 +62,8 @@ namespace mov {
          * @return the running stack
          */
         static NodeList
-        basic_block_stack_graph(NodeList &running_stack, Block &bb, NodeList &params, RegisterGen &register_gen,
-                                RegisterGen &param_gen);
+        basic_block_stack_graph(NodeList &running_stack, Block &bb, NodeList &params,
+                                RegisterGen &register_gen, RegisterGen &param_gen);
 
         /**
          * Appends new register edges to the existing register graph, based on
@@ -71,12 +72,19 @@ namespace mov {
          *
          * @param stack current state of stack
          * @param instruction dictates the number of graph edges to be added
-         * @param params if additional parameter nodes are required, they will be added here
+         * @param params if additional parameter nodes are required, they will be added to this
          * @param register_gen to generate_function the names of new registers
          */
         static void
         propagate_stack(NodeList &stack, Instruction *instruction, NodeList &params, RegisterGen &register_gen,
                         RegisterGen &param_gen);
+
+
+        static void
+        propagate_stack_tolocal(NodeList &stack, Instruction *instruction, NodeList &params, sWordptr parent);
+
+        static void
+        propagate_stack_fromlocal(NodeList &stack, Instruction *instruction, NodeList &params, sWordptr parent);
 
         /**
          * If there are stack elements that remain unchanged (but could be shuffled)
@@ -97,6 +105,7 @@ namespace mov {
         sWordptr static_analysis(iWordptr original_word);
         void inlining(iWordptr root);
         static sWordptr show_word_info(sWordptr wordptr);
+
     };
 }
 

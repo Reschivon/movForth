@@ -10,6 +10,7 @@
 #include <functional>
 #include "../Print.h"
 #include "../Constants.h"
+#include "../Interpretation/Local.h"
 
 /*
  * So many graphs! Graphs, graphs, everywhere!
@@ -25,23 +26,26 @@ namespace mov {
     typedef sWord *sWordptr;
 
     class sData {
-        using variant_t = std::variant<std::nullptr_t, element, sWordptr>;
+        using variant_t = std::variant<std::nullptr_t, element, sWordptr, Local>;
         variant_t data{};
     public:
         bool is_num() {return data.index() == 1;}
         bool is_xt() {return data.index() == 2;}
         bool is_empty() {return data.index() == 0;};
+        bool is_local() {return data.index() == 3;};
 
         std::string type(){
             switch(data.index()) {
                 case 0: return "unknown";
                 case 1: return "number";
                 case 2: return "xt";
+                case 3: return "Local";
                 default: return "";
             }
         }
         element as_num() {return std::get<element>(data);}
         sWordptr as_xt() {return std::get<sWordptr>(data);}
+        Local as_local() {return std::get<Local>(data);}
 
         explicit sData(variant_t data) : data(std::move(data)) {}
 

@@ -2,24 +2,27 @@
 #define MOVFORTH_INTER_INTERPRETER_H
 
 #include <vector>
+
 #include "Input.h"
-#include "iWord.h"
-#include "WordGenerator.h"
-#include "Stack.h"
 
 namespace mov {
+    class Stack;
+    class iData;
+    class iWord;
     /**
      * Forth Interpreter that holds state
      */
+
+    class iWordGenerator;
     class Interpreter {
 
-        iWordGenerator word_generator;
+        iWordGenerator &word_generator;
         void init_words();
 
     public:
         file_input input;
         std::vector<iData> dictionary;
-        Stack stack;
+        Stack &stack;
         bool immediate = true;
 
         /**
@@ -27,7 +30,7 @@ namespace mov {
          * @param name  name of word to be found
          * @return a pointer to the word, if found. Otherwise nullptr
          */
-        iWordptr find(const std::string &name);
+        iWord* find(const std::string &name);
 
         /**
          * Creates an interpreter object and run the given Forth file

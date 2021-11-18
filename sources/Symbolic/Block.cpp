@@ -3,7 +3,8 @@
 using namespace mov;
 
 
-Block::Block(BBgen &gen) : index(gen.get()), register_gen((int) index) {}
+Block::Block(BBgen &gen, sWordptr parent)
+    : index(gen.get()), register_gen((int) index), parent(parent) {}
 
 std::vector<Block::bb_ref> Block::nextBBs() {
     if (instructions.back()->id() == primitive_words::BRANCH)

@@ -1,6 +1,7 @@
 
 #include "../../headers/Symbolic/Pass.h"
 #include "../../headers/Interpretation/iData.h"
+#include "../../headers/Interpretation/Primitive.h"
 
 using namespace mov;
 
@@ -65,7 +66,7 @@ public:
     void createBBs(){
         for(int index = 0; index < bbe_lookup_size; index++){
             if(bbe_lookup[index] != -1) {
-                new_word->blocks.emplace_back(gen);
+                new_word->blocks.emplace_back(gen, new_word);
                 bbe_lookup[index] = new_word->blocks.size();
             }
         }
@@ -88,9 +89,14 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
     // cache this word for the future
     visited_words[template_word] = new_word;
 
-
     //dln("Populating Basic Blocks\n");
     BasicBlockBuilder bb_builder(new_word, (short) sizeOf(template_word->def()));
+
+    // register allocation for locals
+    dln("Insert ", template_word->locals.size(), " locals into word ", new_word->name);
+    for(const auto& [local, iData] : template_word->locals) {
+        new_word->locals.insert(std::make_pair(local, new_word->param_gen.get()));
+    }
 
     // precompute BB entry points
     int i = 0;
@@ -134,17 +140,31 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
             next_data = symbolize_data(*std::next(it));
         }
 
-        if(template_sub_def->id == primitive_words::BRANCH) {
-            curr_bb->instructions.push_back(new BranchInstruction(
-                    new_sub_def, next_data,
-                    bb_builder.get_bb_for_branch_at(i).base()));
+        switch (template_sub_def->id) {
+            case BRANCH:
+                curr_bb->instructions.push_back(new BranchInstruction(
+                        new_sub_def, next_data,
+                        bb_builder.get_bb_for_branch_at(i).base()));
+                break;
 
-        } else if(template_sub_def->id == primitive_words::BRANCHIF) {
-            curr_bb->instructions.push_back(new BranchIfInstruction(
-                    new_sub_def, next_data,
-                    bb_builder.get_bb_at_index(i + 2).base(),
-                    bb_builder.get_bb_for_branch_at(i).base()));
-        } else {
+            case BRANCHIF:
+                curr_bb->instructions.push_back(new BranchIfInstruction(
+                        new_sub_def, next_data,
+                        bb_builder.get_bb_at_index(i + 2).base(),
+                        bb_builder.get_bb_for_branch_at(i).base()));
+                break;
+
+            case TOLOCAL:
+                curr_bb->instructions.push_back(new Instruction(new_sub_def,
+                           sData{Local{new_word->name, dynamic_cast<ToLocal*>(template_sub_def)->name()} }));
+                break;
+
+            case FROMLOCAL:
+                curr_bb->instructions.push_back(new Instruction(new_sub_def,
+                          sData{Local{new_word->name, dynamic_cast<FromLocal*>(template_sub_def)->name()} }));
+                break;
+
+            default:
             curr_bb->instructions.push_back(new Instruction(new_sub_def, next_data));
         }
 

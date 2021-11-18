@@ -3,10 +3,14 @@
 
 #include <iostream>
 #include <variant>
-#include "iWord.h"
-#include "../../headers/Print.h"
-#include "iData.h"
+#include <vector>
+#include <functional>
+
 #include "../Constants.h"
+
+#include "iData.h"
+#include "iWord.h"
+
 
 namespace mov {
 
@@ -18,82 +22,26 @@ namespace mov {
         std::vector<iData> stack{};
 
     public:
-        void push(element number) {
-            stack.emplace_back(number);
-        }
-        void push(iWordptr iWord_pointer) {
-            stack.emplace_back(iWord_pointer);
-        }
-        void push(iData thing){
-            stack.push_back(thing);
-        }
+        void push(element number);
+        void push(iWordptr iWord_pointer);
+        void push(iData thing);
 
         /**
          * @return the top number, or 0 is top is not number
          */
-        element pop_number(){
-            if(stack.empty())
-                println("tried popping empty stack");
+        element pop_number();
 
-            if(stack.back().is_number()) { // int
-                auto ret = stack.back().as_number();
-                stack.pop_back();
-                return ret;
-            }
-            if(stack.back().is_word()) { // iWord ptr
-                println("tried popping cfa expecting int");
-                return 0;
-            }
-            return 0;
-        }
-
-        /**
-        * @return the top word, or nullptr is top is not number
-        */
-        iWordptr pop_iWord_pointer(){
-            if(stack.size() == 0) println("tried popping empty stack");
-
-            if(stack.back().is_number()) { // int
-                println("tried popping int expecting cfa");
-                return nullptr;
-            }
-            if(stack.back().is_word()) { // iWord ptr
-                auto ret = stack.back().as_word();
-                stack.pop_back();
-                return ret;
-            }
-            return nullptr;
-        }
 
         /**
         * @return the top Data, or an empty Data if stack is empty
         */
-        iData pop(){
-            if(stack.empty()) {
-                println("tried popping empty stack");
-                return iData(nullptr);
-            }
-            auto ret = stack.back();
-            stack.pop_back();
-            return ret;
-        }
+        iData pop();
 
-        iData top(){
-            if(stack.empty()) {
-                println("tried getting top of empty stack");
-                return iData(nullptr);
-            }
-            return stack.back();
-        }
+        iData top();
 
-        int size(){
-            return stack.size();
-        }
+        int size();
 
-        void for_each(std::function<void(iData)> action){
-            for(auto thing : stack)
-                action(thing);
-        }
+        void for_each(std::function<void(iData)> action);
     };
 
 

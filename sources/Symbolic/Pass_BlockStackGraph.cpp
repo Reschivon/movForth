@@ -15,7 +15,7 @@ void Analysis::propagate_stack(NodeList &stack, Instruction *instruction, NodeLi
     // we must make this comparison in signed integers
     unsigned int nodes_from_params = std::max((int)effects.num_popped - (int)stack.size(), 0);
 
-    // pop param nodes from stack to current instruction
+    // pop input nodes from stack to current instruction
     NodeList::move_top_elements(stack, instruction->pop_nodes,
                                 (int) nodes_from_stack);
 
@@ -52,9 +52,45 @@ void Analysis::propagate_stack(NodeList &stack, Instruction *instruction, NodeLi
         d(" ", thing->forward_edge_register.to_string());
 }
 
+void Analysis::propagate_stack_fromlocal(NodeList &stack, Instruction *instruction, NodeList &params, sWordptr parent) {
 
-NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb, NodeList &params, RegisterGen &register_gen,
-                                           RegisterGen &param_gen) {
+    instruction->pop_nodes.clear(); // not sure why it sometimes already has stuff
+
+    Register locals_register = parent->locals.at(instruction->data.as_local());
+
+    Node::link_bidirection(instruction->push_nodes.back(), stack.new_top(), locals_register);
+
+    dln("fromLocal pops register ", locals_register.to_string());
+}
+
+
+void Analysis::propagate_stack_tolocal(NodeList &stack, Instruction *instruction, NodeList &params, sWordptr parent) {
+
+    instruction->pop_nodes.clear(); // not sure why it sometimes already has stuff
+
+    Register locals_register = parent->locals.at(instruction->data.as_local());
+
+    bool node_from_param = stack.empty();
+    bool node_from_stack = !stack.empty();
+
+    // pop input nodes from stack to current instruction
+    if(node_from_stack) {
+        NodeList::move_top_elements(stack, instruction->pop_nodes, 1);
+        Node *recently_moved = instruction->pop_nodes.back();
+        Node::link_bidirection(recently_moved->prev_node, recently_moved, locals_register);
+    }
+
+    if(node_from_param)
+        Node::link_bidirection(params.new_top(),
+                               instruction->pop_nodes.new_top(),
+                               locals_register);
+
+    dln("toLocal pops register ", locals_register.to_string());
+}
+
+
+NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb, NodeList &params,
+                                           RegisterGen &register_gen, RegisterGen &param_gen) {
 
     dln();
 
@@ -82,7 +118,14 @@ NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb, N
         // propagate the stack state
         dln();
         dln("[", definee->name, "]");
-        Analysis::propagate_stack(running_stack, instruction, params, register_gen, param_gen);
+
+        if(definee->id == primitive_words::TOLOCAL)
+            Analysis::propagate_stack_tolocal(running_stack, instruction, params, bb.parent);
+        else if (definee->id == primitive_words::FROMLOCAL)
+            Analysis::propagate_stack_fromlocal(running_stack, instruction, params, bb.parent);
+        else
+            Analysis::propagate_stack(running_stack, instruction,
+                                      params, register_gen, param_gen);
 
         dln();
         dln("[stack:]");

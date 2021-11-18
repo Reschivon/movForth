@@ -5,6 +5,7 @@
 #include "../../headers/Symbolic/Pass.h"
 #include "../../headers/Print.h"
 #include "../../headers/Interpretation/iData.h"
+#include "../../headers/Interpretation/Primitive.h"
 
 using namespace mov;
 

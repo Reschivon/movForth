@@ -14,12 +14,9 @@ void Analysis::word_stack_graph(sWordptr wordptr) {
 
     // build stack graph
     NodeList stack;
-    // parameters are global (zero means no BB owns it)
-    RegisterGen param_gen(0);
-
 
     // This function does all the heavy lifting
-    explore_graph_dfs(stack, wordptr->blocks.front(), param_gen);
+    explore_graph_dfs(stack, wordptr->blocks.front(), wordptr->param_gen);
 
 
 //    // compute total effects_without_push_pop of word

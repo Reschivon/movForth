@@ -36,7 +36,7 @@ namespace mov{
         FREE        =28,
         AND         =29,
         LESS        =30,
-        IS          =31,
+        TO          =31,
         TOLOCAL     =32,
         FROMLOCAL   =33
     };

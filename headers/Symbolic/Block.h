@@ -20,6 +20,8 @@ namespace mov{
     struct Block{
         typedef std::reference_wrapper<Block> bb_ref;
 
+        sWordptr parent;
+
         unsigned int index = 0; // like Register but I was lazy
 
         std::vector<Instruction*> instructions{}; //TODO reference wrapper
@@ -39,7 +41,7 @@ namespace mov{
         // We never need this statistic anyways
         Effects effects_without_push_pop;
 
-        explicit Block(BBgen& gen);
+        explicit Block(BBgen& gen, sWordptr parent);
 
         std::vector<bb_ref> nextBBs();
         bool is_exit();

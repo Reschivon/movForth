@@ -16,14 +16,19 @@ add_executable(movForth
         sources/Interpretation/iWord.cpp
         sources/Interpretation/iData.cpp
         sources/Interpretation/Interpreter.cpp
+        sources/Interpretation/WordGenerator.cpp
+        sources/Interpretation/ForthWord.cpp
+        sources/Interpretation/Stack.cpp
+        sources/Interpretation/IP.cpp
+        sources/Interpretation/Primitive.cpp
 
         sources/Symbolic/sWord.cpp
         sources/Symbolic/Instruction.cpp
         sources/Symbolic/Block.cpp
         sources/Symbolic/Pass.cpp
-        sources/Symbolic/Pass_TranslateToBasicBlocks.cpp
-        sources/Symbolic/Pass_BBStackGraph.cpp
-        sources/Symbolic/Pass_ComputeMatchingPairs.cpp
+        sources/Symbolic/Pass_ToBasicBlocks.cpp
+        sources/Symbolic/Pass_BlockStackGraph.cpp
+        sources/Symbolic/Pass_MatchingPairs.cpp
         sources/Symbolic/Pass_WordStackGraph.cpp
 
         sources/Generation/IRGenerator.cpp

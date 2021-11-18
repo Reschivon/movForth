@@ -1,9 +1,17 @@
-#include <utility>
-#include <iostream>
-#include "iWord.h"
-
 #ifndef MOVFORTH_INTER_iWordGEN_H
 #define MOVFORTH_INTER_iWordGEN_H
+
+
+#include <utility>
+#include <iostream>
+#include <unordered_map>
+#include <functional>
+
+#include "../PrimitiveEnums.h"
+#include "iWord.h"
+#include "Interpreter.h"
+#include "IP.h"
+
 
 namespace mov {
     class iWordGenerator {
@@ -11,23 +19,11 @@ namespace mov {
     public:
         std::unordered_map<std::string, std::function<iWord*()>> generator_lookup{};
 
-        void register_primitive(const std::string& name, primitive_words id, std::function<void(IP &, Interpreter&)> action, bool stateful = false) {
-            register_lambda_word(name, id, std::move(action), false, stateful);
-        }
+        void register_primitive(const std::string& name, primitive_words id, std::function<void(IP, Interpreter&)> action, bool stateful = false);
 
-        void register_lambda_word(const std::string& name, primitive_words id, std::function<void(IP&, Interpreter&)> action, bool immediate, bool stateful = false){
-            generator_lookup[name] = [=]{
-                return new Primitive(name, id, immediate, action, stateful);
-            };
-        }
+        void register_lambda_word(const std::string& name, primitive_words id, std::function<void(IP, Interpreter&)> action, bool immediate, bool stateful = false);
 
-        iWordptr get(const std::string &name){
-            auto primitive = generator_lookup.find(name);
-            if(primitive == generator_lookup.end())
-                return nullptr;
-
-            return primitive->second();
-        }
+        iWordptr get(const std::string &name);
     };
 
 }
