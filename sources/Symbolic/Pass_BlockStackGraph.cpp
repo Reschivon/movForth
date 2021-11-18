@@ -58,9 +58,9 @@ void Analysis::propagate_stack_fromlocal(NodeList &stack, Instruction *instructi
 
     Register locals_register = parent->locals.at(instruction->data.as_local());
 
-    Node::link_bidirection(instruction->push_nodes.back(), stack.new_top(), locals_register);
+    Node::link_bidirection(instruction->push_nodes.new_top(), stack.new_top(), locals_register);
 
-    dln("fromLocal pops register ", locals_register.to_string());
+    dln("fromLocal takes data from register ", locals_register.to_string());
 }
 
 
@@ -85,7 +85,7 @@ void Analysis::propagate_stack_tolocal(NodeList &stack, Instruction *instruction
                                instruction->pop_nodes.new_top(),
                                locals_register);
 
-    dln("toLocal pops register ", locals_register.to_string());
+    dln("toLocal sends data to register ", locals_register.to_string());
 }
 
 

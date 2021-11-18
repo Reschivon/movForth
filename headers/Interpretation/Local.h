@@ -1,13 +1,25 @@
+#include <utility>
+
 
 #ifndef MOVFORTH_LOCAL_H
 #define MOVFORTH_LOCAL_H
 
 struct Local {
+
     std::string word; std::string name;
 
     bool operator==(const Local &other) const {
         return name == name && other.word == word;
     }
+
+    Local(std::string word, std::string name)
+        : word(std::move(word)), name(std::move(name)){
+    }
+
+    std::string to_string() const{
+        return "Local(" + word + " " + name + ")";
+    }
+
 };
 
 struct LocalHasher

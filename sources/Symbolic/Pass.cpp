@@ -171,8 +171,10 @@ void dfs(iWordptr word, std::set<iWordptr>& visited){
         dln("[", word->name(), "] looking to inline words in definition");
         indent();
 
+
         auto &definition = fw->def();
         int branch_offset = 0;
+        // Loop over def, see which words we can inline...
         for(auto it = definition.begin(); it != definition.end(); it++){
 
             if(!it->is_word())
@@ -180,8 +182,15 @@ void dfs(iWordptr word, std::set<iWordptr>& visited){
 
             dfs(it->as_word(), visited);
 
+            // Great, let's inline this XT
             if(can_inline(it, fw, INLINE_WORD_MAX_XTS)) {
                 auto *iterator_forthword = dynamic_cast<ForthWord *>(it->as_word());
+
+                // add locals
+                for(auto [local, val] : iterator_forthword->locals) {
+                    fw->locals.insert(std::make_pair(local, iData(nullptr)));
+                }
+
                 it = replace_with(definition, it, iterator_forthword->def());
                 branch_offset += (short) iterator_forthword->def().size() - 1;
             }else{

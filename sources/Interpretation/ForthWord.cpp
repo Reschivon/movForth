@@ -11,11 +11,13 @@ ForthWord::ForthWord(std::string name, bool immediate)
         : iWord(name, immediate, false) {}
 
 void ForthWord::execute(IP ip, Interpreter &interpreter) {
-    locals.clear();
+    for(auto &[local, value] : locals) {
+        locals[local] = iData(nullptr);
+    }
 
     for(auto it = definition.begin(); it != definition.end(); it++) {
 
-        // println("       [exec] ", (it->is_word()?it->as_word()->name:std::to_string(it->as_number())), " ");
+        // println("       [exec] ", (it->is_word()?it->as_word()->name():std::to_string(it->as_number())), " ");
 
         iData current_cell = *it;
         if(current_cell.is_word())

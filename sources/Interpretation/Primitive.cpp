@@ -18,7 +18,8 @@ void Primitive::execute(IP ip, Interpreter &interpreter) {
 
 ToLocal::ToLocal(Local local, std::unordered_map<Local, iData, LocalHasher> &locals)
         : Primitive("toLocal", primitive_words::TOLOCAL, false,[&](IP ip, Interpreter &interpreter) {
-    locals.at(local) = interpreter.stack.pop();
+
+            locals.at(this->local) = interpreter.stack.pop();
 }, false),
 
           local(local),
@@ -35,8 +36,10 @@ std::string ToLocal::name() {
 FromLocal::FromLocal(Local local, std::unordered_map<Local, iData, LocalHasher> &locals)
 
         : Primitive("fromLocal", primitive_words::FROMLOCAL, false, [&](IP ip, Interpreter &interpreter) {
-    interpreter.stack.push(locals[local]);
-}, false),
+
+            // println("Push local ", this->locals[this->local].to_string(), " to stack ");
+            interpreter.stack.push(this->locals[this->local]);
+        }, false),
 
           local(local),
           locals(locals)
@@ -52,9 +55,8 @@ TO::TO()
                   auto parent = interpreter.dictionary.back().as_forth_word();
 
                   std::string next_token = interpreter.input.next_token();
-                  println("add Local ", next_token, " to ", parent->name());
 
-                  Local this_local = Local{parent->name(), next_token};
+                  Local this_local = Local(parent->name(), next_token);
                   parent->locals.insert(std::make_pair(this_local, iData(0)));
                   parent->add(iData(new ToLocal(this_local, parent->locals)));
             }

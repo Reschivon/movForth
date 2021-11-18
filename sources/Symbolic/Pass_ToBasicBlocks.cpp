@@ -95,6 +95,7 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
     // register allocation for locals
     dln("Insert ", template_word->locals.size(), " locals into word ", new_word->name);
     for(const auto& [local, iData] : template_word->locals) {
+        println("\t", local.to_string());
         new_word->locals.insert(std::make_pair(local, new_word->param_gen.get()));
     }
 
@@ -154,18 +155,24 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
                         bb_builder.get_bb_for_branch_at(i).base()));
                 break;
 
-            case TOLOCAL:
-                curr_bb->instructions.push_back(new Instruction(new_sub_def,
-                           sData{Local{new_word->name, dynamic_cast<ToLocal*>(template_sub_def)->name()} }));
+            case TOLOCAL: {
+                auto *toLocal = dynamic_cast<ToLocal *>(template_sub_def);
+                println("Convert local to symbolic: ", toLocal->name());
+                curr_bb->instructions.push_back(
+                        new Instruction(new_sub_def,sData{toLocal->local}));
                 break;
+            }
 
-            case FROMLOCAL:
-                curr_bb->instructions.push_back(new Instruction(new_sub_def,
-                          sData{Local{new_word->name, dynamic_cast<FromLocal*>(template_sub_def)->name()} }));
+            case FROMLOCAL: {
+                auto *fromLocal = dynamic_cast<FromLocal *>(template_sub_def);
+                println("Convert local to symbolic: ", fromLocal->name());
+                curr_bb->instructions.push_back(
+                        new Instruction(new_sub_def,sData{fromLocal->local}));
                 break;
+            }
 
             default:
-            curr_bb->instructions.push_back(new Instruction(new_sub_def, next_data));
+                curr_bb->instructions.push_back(new Instruction(new_sub_def, next_data));
         }
 
         // the next word will be consumed, so skip

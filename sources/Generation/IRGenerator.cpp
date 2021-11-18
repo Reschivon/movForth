@@ -157,6 +157,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
         builder.build_store_register(arg, reg);
     }
+
     // register all reference params as AllocInst* in the lookup
     uint word_ret = 0;
     for (uint i = fword->effects.num_popped; i < fword->effects.num_popped + fword->effects.num_pushed; i++) {
@@ -469,6 +470,27 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     builder.build_store_register(one_v, two_out);
                     builder.build_store_register(two_v, one_out);
                     builder.build_store_register(three_v, three_out);
+
+                    break;
+                }
+
+                case FROMLOCAL:{
+                    Register in = fword->locals.at(instr->data.as_local());
+                    Value *in_v = builder.build_load_register(in);
+
+                    Register out = instr->push_nodes[0]->forward_edge_register;
+                    builder.build_store_register(in_v, out);
+
+                    break;
+                }
+
+                case TOLOCAL: {
+                    Register in = instr->pop_nodes[0]->backward_edge_register;
+                    Value *in_v = builder.build_load_register(in);
+
+
+                    Register out = fword->locals.at(instr->data.as_local());
+                    builder.build_store_register(in_v, out);
 
                     break;
                 }

@@ -42,13 +42,10 @@ bool Interpreter::interpret() {
             // might be a number or Local
 
             if(latest_forth_word != nullptr){
-                auto locals = latest_forth_word->locals;
-                Local local = Local{latest_forth_word->name(), token};
-
-                println("finding Local ", token, " in ", latest_forth_word->name());
+                auto &locals = latest_forth_word->locals;
+                Local local = Local(latest_forth_word->name(), token);
 
                 if(locals.find(local) != locals.end()) {
-                    println("found");
                     // compile a FromLocal
                     latest_forth_word->add(iData(new FromLocal(local, latest_forth_word->locals)));
                     continue;
@@ -78,12 +75,12 @@ bool Interpreter::interpret() {
         }else{
             // is a word
             if(wordptr->immediate || immediate) {
-                dln("execute word ", wordptr->name());
+                // dln("execute word ", wordptr->name());
                 auto dummy = (new std::list<iData>())->begin();
                 wordptr->execute(dummy, *this);
             } else {
                 if(latest_forth_word != nullptr){
-                    dln("compile FW ", wordptr->name());
+                    // dln("compile FW ", wordptr->name());
                     latest_forth_word->add(iData(wordptr));
                 }else {
                     println("attempted to compile xts to a primitive word");
