@@ -312,7 +312,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     Value *two_v = builder.build_load_register(two);
 
                     Value *equals_bool = builder.CreateICmpEQ(one_v, two_v);
-                    Value *equals = builder.CreateIntCast(equals_bool, builder.getInt64Ty(), true);
+                    Value *equals = builder.CreateIntCast(equals_bool, builder.getInt64Ty(), false);
 
                     Register diff_register = instr->push_nodes[0]->forward_edge_register;
                     builder.build_store_register(equals, diff_register);
@@ -358,9 +358,10 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     Value *two_v = builder.build_load_register(two);
 
                     Value *less_than = builder.CreateICmpSLT(two_v, one_v);
+                    Value *less_than64 = builder.CreateIntCast(less_than, builder.getInt64Ty(), false);
 
                     Register less_than_register = instr->push_nodes[0]->forward_edge_register;
-                    builder.build_store_register(less_than, less_than_register);
+                    builder.build_store_register(less_than64, less_than_register);
 
                     break;
                 }

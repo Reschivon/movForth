@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <limits>
 #include "../Print.h"
 
 namespace mov {
