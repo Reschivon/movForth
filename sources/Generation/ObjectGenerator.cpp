@@ -4,9 +4,11 @@
 #include "llvm/Support/TargetRegistry.h"
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/Target/TargetMachine.h"
+#include "llvm/Support/Host.h"
+
+#include "llvm/IR/LegacyPassManager.h"
 
 #include "../../headers/Generation/ObjectGenerator.h"
-#include "llvm/IR/LegacyPassManager.h"
 #include "../../headers/SystemExec.h"
 #include "../../headers/Print.h"
 #include "../../headers/Generation/IRGenerator.h"
@@ -59,7 +61,7 @@ bool ObjectGenerator::generate(const std::string &filename, IRModule mod) {
     module.setTargetTriple(TargetTriple);
 
     std::error_code EC;
-    raw_fd_ostream dest(filename, EC, sys::fs::OpenFlags::F_None);
+    raw_fd_ostream dest(filename, EC, sys::fs::OpenFlags::OF_None);
 
     if (EC) {
        println("Could not open file: ", EC.message());
@@ -68,9 +70,9 @@ bool ObjectGenerator::generate(const std::string &filename, IRModule mod) {
 
     legacy::PassManager pass;
     // auto FileType = TargetMachine::CGFT_ObjectFile;
-    auto FileType = TargetMachine::CGFT_AssemblyFile;
+    auto FileType = CGFT_AssemblyFile;
 
-    if (TargetMachine->addPassesToEmitFile(pass, dest, FileType)) {
+    if (TargetMachine->addPassesToEmitFile(pass, dest, &dest, FileType)) {
         println("TargetMachine can't emit a file of this type");
         return true;
     }

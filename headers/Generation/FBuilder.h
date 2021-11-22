@@ -59,7 +59,7 @@ namespace mov {
         Value *CreateForthConstant(element val) {
             return CreateAdd(
                     ConstantInt::get(Context, APInt(64, val, true)),
-                    ConstantInt::get(Context, APInt(1, 0, true))
+                    ConstantInt::get(Context, APInt(64, 0, true))
             );
         }
 

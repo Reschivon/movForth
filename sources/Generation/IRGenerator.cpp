@@ -9,7 +9,11 @@
 #include "llvm/Support/FileSystem.h"
 
 #include "llvm/Transforms/Scalar.h" // for some reason some passes live here
-//#include "llvm/Transforms/Scalar/GVN.h"
+#include "llvm/Transforms/Utils/Mem2Reg.h"
+#include "llvm/Transforms/Utils/PromoteMemToReg.h"
+#include "llvm/Transforms/Utils.h"
+
+#include "llvm/Transforms/InstCombine/InstCombine.h"
 
 // #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/IPO/Inliner.h"
@@ -49,7 +53,7 @@ IRGenerator::IRGenerator()
 
 // constant folding pass
     fpm->add(createSROAPass());
-    fpm->add(createConstantPropagationPass());
+    fpm->add(createCorrelatedValuePropagationPass());
     fpm->add(createReassociatePass());
     fpm->add(createCFGSimplificationPass());
 
@@ -261,7 +265,9 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     Value *mem_address_v = builder.build_load_register(mem_address);
                     Value *mem_pointer_v = builder.CreateIntToPtr(mem_address_v, builder.getInt8PtrTy());
 
-                    Value *val = builder.CreateLoad(mem_pointer_v);
+                    Value *val = builder.CreateLoad(
+                            PointerType::get(builder.getInt64Ty(), 0),
+                            mem_pointer_v);
 
                     Register val_register = instr->push_nodes[0]->forward_edge_register;
                     builder.build_store_register(val, val_register);
@@ -528,7 +534,9 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
     // see if it's all right?
     if (verifyFunction(*the_function, &errs())) {
-        println("Error encountered in generation of ", fword->name);
+        println("Faulty IR for word ", fword->name);
+        println("(Specific error dumped to error stream. Try scrolling up)");
+        the_function->print(errs());
         return nullptr;
     }
 
@@ -544,10 +552,6 @@ class stdout_stream : public raw_ostream {
     void write_impl(const char *Ptr, size_t Size) override {
         pos += Size;
         std::cout << Ptr;
-    }
-
-    void handle() override {
-
     }
 
     [[nodiscard]] uint64_t current_pos() const override {
@@ -566,7 +570,7 @@ void IRGenerator::print_module(const std::string &program_name, bool to_file) {
     // print to file
     if (to_file) {
         std::error_code ec;
-        raw_fd_ostream file_out_stream(program_name + ".ll", ec, sys::fs::OpenFlags::F_None);
+        raw_fd_ostream file_out_stream(program_name + ".ll", ec, sys::fs::OpenFlags::OF_None);
         the_module->print(file_out_stream, nullptr, true, true);
     }
 }

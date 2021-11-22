@@ -35,7 +35,7 @@ namespace mov {
         Function* generate_function(sWord *fword, bool is_root);
         Function* get_function(sWordptr word);
 
-        bool do_optimize = true;
+        bool do_optimize = false;
 
     public:
         IRGenerator();

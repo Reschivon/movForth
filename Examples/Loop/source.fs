@@ -22,4 +22,3 @@
     dup repeatif
     drop
 ;
-
