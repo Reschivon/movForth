@@ -59,7 +59,7 @@ namespace mov {
         explicit file_input(const std::string& path) {
             file.open(path);
             if (!file.is_open())
-                println("Cannot open file");
+                println("Cannot open file " + path);
         }
 
         std::string next_token() override {

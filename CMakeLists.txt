@@ -6,6 +6,12 @@ project(movForth)
 set(CMAKE_CXX_STANDARD 17)
 set(LLVM_ENABLE_NEW_PASS_MANAGER OFF)
 
+# finding libz may be a bit buggy on some systems;
+# cmake expects to find it in /lib/ but it may be in /lib/x86_64-linux-gnu/
+# if you have installed libz-dev but cmake still fails,
+# you can try sym linking it or setting ZLIB_LIBRARY to the location of the .so
+find_package(ZLIB REQUIRED)
+
 add_executable(movForth
 
         main.cpp
