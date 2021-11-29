@@ -33,6 +33,8 @@ cmake ..
 make -j4
 ```
 
+- Optionally, you can install `clang++`. MovForth uses clang++ to link the generated assembly file with stdlibc++ and produce a binary. If clang++ is not installed, you can link and assemble the .S file manually.
+
 Alternatively, you can check `Releases` for precompiled binaries.
 
 ## Running
@@ -66,11 +68,20 @@ MovForth is powerful becasue operations that are immediate in a traditional inte
 
 Words available during immediate mode:
 
-```+ - * / SWAP ROT DUP DROP . = SHOW ' , SEE [ ] IMMEDIATE ALLOT @ ~ BRANCH BRANCHIF LITERAL HERE CREATE```
+```+ - * / SWAP ROT DUP DROP . = SHOW ' , SEE [ ] IMMEDIATE ALLOT @ ! BRANCH BRANCHIF LITERAL HERE CREATE```
 
 Words available during runtime:
 
 ```+ - * / BRANCH BRANCHIF . DUP DROP = LITERAL ! @ MALLOC ```
+
+Literals are unstable right now, but they can be used in both compile and runtime.
+Assign 42 to literal named "life":
+
+`42 to life`
+
+Push the value stored in liteal "life" to stack:
+
+`life`
 
 ## Contribute
 I welcome all tips, comments, or help! I'll do my best to respond in a timely manner.
