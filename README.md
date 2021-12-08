@@ -75,11 +75,11 @@ Words available during runtime:
 ```+ - * / BRANCH BRANCHIF . DUP DROP = LITERAL ! @ MALLOC ```
 
 Locals are unstable right now, but they can be used in both compile and runtime.
-Assign 42 to literal named "life":
+Assign 42 to local named "life":
 
 `42 to life`
 
-Push the value stored in liteal "life" to stack:
+Push the value stored in local "life" to stack:
 
 `life`
 
