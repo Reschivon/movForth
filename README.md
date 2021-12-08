@@ -74,7 +74,7 @@ Words available during runtime:
 
 ```+ - * / BRANCH BRANCHIF . DUP DROP = LITERAL ! @ MALLOC ```
 
-Literals are unstable right now, but they can be used in both compile and runtime.
+Locals are unstable right now, but they can be used in both compile and runtime.
 Assign 42 to literal named "life":
 
 `42 to life`
