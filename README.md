@@ -4,6 +4,8 @@
 
 MovForth compiles Forth source code to executable binaries. Using LLVM IR as an intermediate target, it is an experiment in adapting Forth for modern compiler libraries and modern architectures.
 
+My presentation to F2020 is [here](https://youtu.be/CgxwbeLWSZM?t=9963)
+
 - Bottom-up compilation; no dictionary or interpreter remains in final executable
 - Compile time evaluation for immediate words allows programmers to use meta-compilation without fear
 - Compiling to LLVM IR allows for compilation to pretty much [any architecture](https://en.wikipedia.org/wiki/LLVM#Back_ends)
