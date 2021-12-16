@@ -82,8 +82,7 @@ int main(int argc, char* argv[]) {
     // May not work on every system
     mov::ObjectGenerator::link(program_name + ".S", program_name);
 
-
-    ir_generator.exec_module2(program_name);
+    //ir_generator.exec_module2(program_name);
 
     return 0;
 }

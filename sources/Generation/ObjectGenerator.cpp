@@ -86,6 +86,6 @@ bool ObjectGenerator::generate(const std::string &filename, IRModule mod) {
 void ObjectGenerator::link(const std::string &assembly_name, const std::string &executable_name) {
     println();
     println("==========[Linking]===========");
-    auto command = "clang++ " + assembly_name + " -stdlib=libstdc++ -o " + executable_name;
+    auto command = "clang++ " + assembly_name + " -stdlib=libstdc++ -fPIE -o " + executable_name;
     println(exec(command));
 }
