@@ -15,6 +15,7 @@ FBuilder::FBuilder(LLVMContext &context, Function *the_function) :
 
 Value* FBuilder::build_load_register(Register reg) {
     Value *alloc = get_ptr_to_val(reg);
+
     return CreateLoad(alloc);
 }
 
@@ -45,6 +46,10 @@ Value* FBuilder::get_ptr_to_val(Register reg) {
         return nullptr;
     }
     //println("retrived register " + reg.to_string_allowed_chars());
+
+    if(ptr_to_val == nullptr)
+        println("WHAT THE FUCKKKK");
+
     return ptr_to_val;
 }
 

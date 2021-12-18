@@ -159,6 +159,8 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
         Register reg = param_name_gen.get_param();
         arg->setName(reg.to_string_allowed_chars() + "reg");
 
+        println("Store argument at register ", arg->getName().str());
+
         builder.build_store_register(arg, reg);
     }
 
@@ -185,8 +187,8 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
         builder.SetInsertPoint(bb);
 
         for(auto instr : block.instructions) {
-            //println();
 
+            println("Generating IR for [", instr->name(), "]");
             switch (instr->id()) {
                 case OTHER: {
                     //println("other");
@@ -263,10 +265,12 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
 
                     Register mem_address = instr->pop_nodes[0]->backward_edge_register;
                     Value *mem_address_v = builder.build_load_register(mem_address);
-                    Value *mem_pointer_v = builder.CreateIntToPtr(mem_address_v, builder.getInt8PtrTy());
+                    // Value *mem_pointer_v = builder.CreateIntToPtr(mem_address_v, builder.getInt8PtrTy());
+                    Value *mem_pointer_v = builder.CreateIntToPtr(mem_address_v, Type::getInt64PtrTy(builder.getContext()));
 
                     Value *val = builder.CreateLoad(
-                            PointerType::get(builder.getInt64Ty(), 0),
+                            //PointerType::get(builder.getInt64Ty(), 0),
+                            builder.getInt64Ty(),
                             mem_pointer_v);
 
                     Register val_register = instr->push_nodes[0]->forward_edge_register;

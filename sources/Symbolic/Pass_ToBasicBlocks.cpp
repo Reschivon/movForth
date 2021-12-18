@@ -92,13 +92,6 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
     //dln("Populating Basic Blocks\n");
     BasicBlockBuilder bb_builder(new_word, (short) sizeOf(template_word->def()));
 
-    // register allocation for locals
-    dln("Insert ", template_word->locals.size(), " locals into word ", new_word->name);
-    for(const auto& [local, iData] : template_word->locals) {
-        println("\t", local.to_string());
-        new_word->locals.insert(std::make_pair(local, new_word->param_gen.get()));
-    }
-
     // precompute BB entry points
     int i = 0;
     std::list<iData> template_def = template_word->def();

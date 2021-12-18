@@ -18,19 +18,6 @@ void Analysis::word_stack_graph(sWordptr wordptr) {
     // This function does all the heavy lifting
     explore_graph_dfs(stack, wordptr->blocks.front(), wordptr->param_gen);
 
-
-//    // compute total effects_without_push_pop of word
-//    // propagate Effects through a single control path
-//    // TODO this is dumb and doesn't work
-//    auto *curr_bb = wordptr->blocks.begin().base();
-//    Effects net_effects;
-//    while (!curr_bb->is_exit()){
-//        net_effects.acquire_side_effects_ignore_push_pop(curr_bb->effects_without_push_pop);
-//        curr_bb = &curr_bb->nextBBs().begin().base()->get();
-//    }
-//    wordptr->effects = net_effects;
-
-
     // mark remaining registers as return
     NodeList &return_nodes = wordptr->blocks.back().outputs;
     wordptr->my_graphs_returns = return_nodes;

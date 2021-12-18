@@ -26,7 +26,7 @@
     0 ,
     literal = ,
 
-    <jumpif 
+    <jumpif
 ;
 
 : repeatif immediate
@@ -37,27 +37,19 @@
     <jumpif
 ;
 
-
-: show-under
-    
-;
-
-: fib
-    
-;
-
 : main
     1 1
-    1000000 while
-        rot rot 
-        dup rot +
-        rot rot dup . rot
-        rot   
+    40 while
+        rot rot     \ send the two fib numbers to top
+        dup rot +   \ add the fib numbers and destroy the smaller one
+        dup .       \ print the first fib number
+        rot         \ put index back on top
     until0
-    
+
     drop drop drop
 ;
 
-main
+
+\ main \ you can run it during interpretation too
 
 

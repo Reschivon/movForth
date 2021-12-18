@@ -22,7 +22,6 @@ int main(int argc, char* argv[]) {
     std::string program_name = forth_path.substr(0, forth_path.find_last_of('.'));
 
 
-    indent();
     // Create a plain old interpreter that interprets
     // the contents of the Forth file boot.fs
     mov::Interpreter interpreter(forth_path);
@@ -70,8 +69,7 @@ int main(int argc, char* argv[]) {
     // May not work on every system
     //ir_generator.exec_module(program_name);
 
-    bool generate_error = mov::ObjectGenerator::generate(
-            program_name + ".S", module_result.first);
+    bool generate_error = mov::ObjectGenerator::generate(program_name + ".S", module_result.first);
     if(generate_error) {
         println("Error during executable generation");
         return 1;
@@ -82,7 +80,7 @@ int main(int argc, char* argv[]) {
     // May not work on every system
     mov::ObjectGenerator::link(program_name + ".S", program_name);
 
-    //ir_generator.exec_module2(program_name);
+    ir_generator.exec_module2(program_name);
 
     return 0;
 }

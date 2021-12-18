@@ -91,17 +91,15 @@ sWordptr Analysis::show_word_info(sWordptr wordptr) {
             println("[", instr->name(), "]");
 
             if(!instr->pop_nodes.empty()) {
-                print("pops:");
+                println("pops:");
                 for (auto node: instr->pop_nodes)
                     print(" ", node->backward_edge_register.to_string());
-                println();
             }
 
             if(!instr->push_nodes.empty()) {
-                print("pushes:");
+                println("pushes:");
                 for (auto thing: instr->push_nodes)
                     print(" ", thing->forward_edge_register.to_string());
-                println();
             }
         }
 
@@ -153,7 +151,7 @@ bool can_inline(std::list<iData>::iterator it, ForthWord *host, int maximum_defi
     return false;
 }
 
-const static uint INLINE_WORD_MAX_XTS = 50;
+const static uint INLINE_WORD_MAX_XTS = 2;
 void dfs(iWordptr word, std::set<iWordptr>& visited){
 
     if(visited.find(word) != visited.end()) {

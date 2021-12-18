@@ -81,7 +81,8 @@ namespace mov {
 
 
         static void
-        propagate_stack_tolocal(NodeList &stack, Instruction *instruction, NodeList &params, sWordptr parent);
+        propagate_stack_tolocal(NodeList &stack, Instruction *instruction, NodeList &params, RegisterGen &param_gen,
+                                RegisterGen &register_gen, sWordptr parent);
 
         static void
         propagate_stack_fromlocal(NodeList &stack, Instruction *instruction, NodeList &params, sWordptr parent);

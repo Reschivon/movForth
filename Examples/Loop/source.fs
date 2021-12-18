@@ -1,8 +1,8 @@
 
-: land< \ equivalent of MARK?
+: land< \ equivalent of MARK
     here ;
 
-: <jumpif \ equivalent of RESOLVE?
+: <jumpif \ equivalent of RESOLVE
     literal branchif ,
     here - , ;
 

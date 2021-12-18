@@ -64,28 +64,30 @@ void Analysis::propagate_stack_fromlocal(NodeList &stack, Instruction *instructi
 }
 
 
-void Analysis::propagate_stack_tolocal(NodeList &stack, Instruction *instruction, NodeList &params, sWordptr parent) {
+void Analysis::propagate_stack_tolocal(NodeList &stack, Instruction *instruction,
+                                       NodeList &params, RegisterGen &param_gen,
+                                       RegisterGen &register_gen, sWordptr parent) {
 
     instruction->pop_nodes.clear(); // not sure why it sometimes already has stuff
-
-    Register locals_register = parent->locals.at(instruction->data.as_local());
 
     bool node_from_param = stack.empty();
     bool node_from_stack = !stack.empty();
 
     // pop input nodes from stack to current instruction
-    if(node_from_stack) {
+    if(node_from_stack)
         NodeList::move_top_elements(stack, instruction->pop_nodes, 1);
-        Node *recently_moved = instruction->pop_nodes.back();
-        Node::link_bidirection(recently_moved->prev_node, recently_moved, locals_register);
-    }
 
     if(node_from_param)
         Node::link_bidirection(params.new_top(),
                                instruction->pop_nodes.new_top(),
-                               locals_register);
+                               param_gen.get_param());
 
-    dln("toLocal sends data to register ", locals_register.to_string());
+    const Register& local_storage = register_gen.get();
+    parent->locals.insert(std::make_pair(instruction->data.as_local(), local_storage));
+
+    dln("toLocal gets data from register ", instruction->pop_nodes[0]->backward_edge_register.to_string());
+    dln("toLocal sends data to special register ", local_storage.to_string());
+
 }
 
 
@@ -120,7 +122,8 @@ NodeList Analysis::basic_block_stack_graph(NodeList &running_stack, Block &bb, N
         dln("[", definee->name, "]");
 
         if(definee->id == primitive_words::TOLOCAL)
-            Analysis::propagate_stack_tolocal(running_stack, instruction, params, bb.parent);
+            Analysis::propagate_stack_tolocal(running_stack, instruction,
+                                              params, param_gen, register_gen, bb.parent);
         else if (definee->id == primitive_words::FROMLOCAL)
             Analysis::propagate_stack_fromlocal(running_stack, instruction, params, bb.parent);
         else

@@ -1,13 +1,23 @@
+\ Some simple array utilities
+
 : cells 4 * ;
 
+: get-index \ pointer index -- value
+    cells + @ ;
+
+: set-index \ pointer index value --
+    rot rot
+    cells +
+    swap ! ;
+
 : main
-    2 cells malloc
+    2 cells malloc to array
 
-    dup 99 !
-    dup 1 cells + 100 !
+    array 0 99 set-index
+    array 1 100 set-index
 
-    dup @ .
-    dup 1 cells + @ .
+    array 0 get-index .
+    array 1 get-index .
 
-    free
+    array free
 ;
