@@ -16,20 +16,20 @@ MovForth compiles Forth source code to executable binaries. Using LLVM IR as an 
 You can find Forth source and its corresponding compiled forms in `Examples/`
 
 ## Installation
+
+- Have LLVM installed (LLVM-10 and above). For Ubuntu/Debian-based distros, simply run:
+
+```
+sudo apt install llvm
+```
+
 - Clone the repository
 
 ```
 git clone https://github.com/Reschivon/movForth
 ```
 
-- Have LLVM findable in your include paths (use llvm-10 and above). 
-On platforms with a package manager, this is as simple as one command. Below is the command to install LLVM for ubuntu.
-
-```
-sudo apt install llvm
-```
-
-- Build as CMake project (version 3 or above should do)
+- Build as CMake project
 ```
 cd movForth
 mkdir build && cd build
@@ -39,7 +39,7 @@ make -j4
 
 - Optionally, you can install `clang++`. MovForth uses clang++ to link the generated assembly file with stdlibc++ and produce a binary. If clang++ is not installed, you can link and assemble the .S file manually.
 
-Alternatively, you can check `Releases` for precompiled binaries.
+Alternatively, you can check `Releases` for precompiled binaries, but it is highly unlikely I will remember to update them.
 
 ## Running
 
@@ -79,11 +79,10 @@ Words available during runtime:
 ```< = + - * / BRANCH BRANCHIF . DUP DROP LITERAL ! @ MALLOC ```
 
 Locals can be used in both compile and runtime, and compile to the
-exact same machine code as an equivalent stack-based counterpart.
-They use the word `to` for assignment. You do not need
-to worry about creating locals; they are done automatically.
+exact same machine code as their stack-based counterpart.
+They use the word `to` for assignment. 
 
-Assign 42 to local named "life":
+Push 42 to local named "life" (creation of locals is implicit):
 
 `42 to life`
 
