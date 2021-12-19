@@ -486,6 +486,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                 }
 
                 case FROMLOCAL:{
+                    println("from local ", instr->data.as_local().to_string());
                     Register in = fword->locals.at(instr->data.as_local());
                     Value *in_v = builder.build_load_register(in);
 
@@ -496,6 +497,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                 }
 
                 case TOLOCAL: {
+                    println("to local ", instr->data.as_local().to_string());
                     Register in = instr->pop_nodes[0]->backward_edge_register;
                     Value *in_v = builder.build_load_register(in);
 

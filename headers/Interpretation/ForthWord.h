@@ -46,6 +46,17 @@ namespace mov {
         std::list<iData> &def() {
             return definition;
         }
+
+        /**
+         *
+         * @return the size of definition
+         */
+        uint def_size(){
+            int size = 0;
+            for(auto thing : definition)
+                size++;
+            return size;
+        }
     };
 
 

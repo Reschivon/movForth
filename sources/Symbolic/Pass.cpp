@@ -138,9 +138,12 @@ bool can_inline(std::list<iData>::iterator it, ForthWord *host, int maximum_defi
 
         auto *sub_fw = dynamic_cast<ForthWord *>(it->as_word());
         auto &sub_def = sub_fw->def();
+        uint sub_def_size = sub_fw->def_size();
 
-        if (host->def().size() + sub_def.size() < maximum_definition_size) {
-            dln("Inlining word ", sub_fw->name(), " into ", host->name());
+        if (host->def_size() + sub_def_size < maximum_definition_size) {
+            d("Inlining word ", sub_fw->name(), " into ", host->name());
+            sub_fw->definition_to_string();
+            dln();
             return true;
         } else {
             dln("Not inlining word ", sub_fw->name(), " into ", host->name());
@@ -151,7 +154,7 @@ bool can_inline(std::list<iData>::iterator it, ForthWord *host, int maximum_defi
     return false;
 }
 
-const static uint INLINE_WORD_MAX_XTS = 2;
+const static uint INLINE_WORD_MAX_XTS = 50;
 void dfs(iWordptr word, std::set<iWordptr>& visited){
 
     if(visited.find(word) != visited.end()) {
@@ -170,15 +173,19 @@ void dfs(iWordptr word, std::set<iWordptr>& visited){
         indent();
 
 
+
         auto &definition = fw->def();
+
+        for(auto sub_word : definition)
+            if(sub_word.is_word())
+                dfs(sub_word.as_word(), visited);
+
         int branch_offset = 0;
         // Loop over def, see which words we can inline...
         for(auto it = definition.begin(); it != definition.end(); it++){
 
             if(!it->is_word())
                 continue;
-
-            dfs(it->as_word(), visited);
 
             // Great, let's inline this XT
             if(can_inline(it, fw, INLINE_WORD_MAX_XTS)) {
@@ -190,7 +197,10 @@ void dfs(iWordptr word, std::set<iWordptr>& visited){
                 }
 
                 it = replace_with(definition, it, iterator_forthword->def());
-                branch_offset += (short) iterator_forthword->def().size() - 1;
+
+                // grrr!! std::list does not update its size when inserted into
+                println("inlining added ", iterator_forthword->def_size() - 1, " words ");
+                branch_offset += (int) iterator_forthword->def_size() - 1;
             }else{
                 // fix branch jumps
                 auto iterator_word = it->as_word();
@@ -201,6 +211,10 @@ void dfs(iWordptr word, std::set<iWordptr>& visited){
                 }
             }
         }
+
+        println();
+        for(auto w : definition)
+            print(w.to_string(), " ");
 
         unindent();
 

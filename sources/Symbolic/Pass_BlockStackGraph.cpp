@@ -82,11 +82,22 @@ void Analysis::propagate_stack_tolocal(NodeList &stack, Instruction *instruction
                                instruction->pop_nodes.new_top(),
                                param_gen.get_param());
 
-    const Register& local_storage = register_gen.get();
-    parent->locals.insert(std::make_pair(instruction->data.as_local(), local_storage));
+    const auto &curr_local = instruction->data.as_local();
+    const auto &local_search = parent->locals.find(curr_local);
+    if(local_search == parent->locals.end()) {
+        // we haven't already allocated register space for this local
+        const Register& local_reg = register_gen.get();
+        parent->locals.insert(std::make_pair(curr_local, local_reg));
 
-    dln("toLocal gets data from register ", instruction->pop_nodes[0]->backward_edge_register.to_string());
-    dln("toLocal sends data to special register ", local_storage.to_string());
+        dln("toLocal gets data from register ", instruction->pop_nodes[0]->backward_edge_register.to_string());
+        dln("toLocal sends data to special register ", local_reg.to_string());
+    }else{
+        // we already encountered this local, its register is stored
+        dln("toLocal gets data from register ", instruction->pop_nodes[0]->backward_edge_register.to_string());
+        dln("toLocal sends data to special register ", local_search->second.to_string());
+    }
+
+
 
 }
 
