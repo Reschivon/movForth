@@ -8,7 +8,7 @@
 : set-index \ pointer index value --
     rot rot
     cells +
-    swap ! ;
+     ! ;
 
 : main
     2 cells malloc to array

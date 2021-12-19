@@ -352,7 +352,7 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                     Value *one_v = builder.build_load_register(one);
                     Value *two_v = builder.build_load_register(two);
 
-                    Value *anded = builder.CreateXor(one_v, two_v);
+                    Value *anded = builder.CreateAnd(one_v, two_v);
                     Register anded_register = instr->push_nodes[0]->forward_edge_register;
 
                     builder.build_store_register(anded, anded_register);

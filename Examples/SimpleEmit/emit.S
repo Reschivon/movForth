@@ -10,8 +10,9 @@ main:
 	movl	$.L__unnamed_1, %edi
 	movl	$42, %esi
 	xorl	%eax, %eax
-	callq	printf
+	callq	printf@PLT
 	popq	%rax
+	.cfi_def_cfa_offset 8
 	retq
 .Lfunc_end0:
 	.size	main, .Lfunc_end0-main
@@ -22,6 +23,5 @@ main:
 .L__unnamed_1:
 	.asciz	"%d\n"
 	.size	.L__unnamed_1, 4
-
 
 	.section	".note.GNU-stack","",@progbits

@@ -82,20 +82,29 @@
 ;
 
 
-: main
-    10 to length
-    length cells malloc to array
+: random \ seed -- seed
+    1309 * 13849 + 65535 &
+;
 
-    array 0  28 set-index
-    array 1  10 set-index
-    array 2  29 set-index
-    array 3  11 set-index
-    array 4  12 set-index
-    array 5  21 set-index
-    array 6  45 set-index
-    array 7  27 set-index
-    array 8  33 set-index
-    array 9  36 set-index
+: populate \ length -- pointer
+    to length
+    42 to seed
+    length 8 * malloc to pointer
+
+    0 to i
+    while
+        seed random to seed
+        pointer i seed set-index
+        i 1 + to i
+    i length < repeatif
+
+    pointer
+;
+
+
+: main
+    20000 to length
+    length populate to array
 
     0 to i
     while
@@ -113,7 +122,8 @@
         i 1 + to i
     i length 1 - < repeatif
 
-    array 10 print-array
+    array length print-array
 
     array free
 ;
+
