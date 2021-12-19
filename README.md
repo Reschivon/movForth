@@ -68,17 +68,21 @@ MovForth achieves LLVM IR generation in three steps
 - Interfacing with libraries that follow the C ABI
 
 ## Supported Primitives
-MovForth is powerful becasue operations that are immediate in a traditional interpreted Forth are run during compile time. Therefore, meta-compilation words like `IF`, `DO`, and `COLON` incur no runtime penalty.
+MovForth is powerful because operations that are immediate in a traditional interpreted Forth are run during compile time. Therefore, meta-compilation words like `IF`, `DO`, and `COLON` incur no runtime penalty.
 
 Words available during immediate mode:
 
-```+ - * / SWAP ROT DUP DROP . = SHOW ' , SEE [ ] IMMEDIATE ALLOT @ ! BRANCH BRANCHIF LITERAL HERE CREATE```
+```< = + - * / SWAP ROT DUP DROP . SHOW ' , SEE [ ] IMMEDIATE ALLOT @ ! BRANCH BRANCHIF LITERAL HERE CREATE```
 
 Words available during runtime:
 
-```+ - * / BRANCH BRANCHIF . DUP DROP = LITERAL ! @ MALLOC ```
+```< = + - * / BRANCH BRANCHIF . DUP DROP LITERAL ! @ MALLOC ```
 
-Locals are unstable right now, but they can be used in both compile and runtime.
+Locals can be used in both compile and runtime, and compile to the
+exact same machine code as an equivalent stack-based counterpart.
+They use the word `to` for assignment. You do not need
+to worry about creating locals; they are done automatically.
+
 Assign 42 to local named "life":
 
 `42 to life`
