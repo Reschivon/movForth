@@ -249,8 +249,8 @@ Function *IRGenerator::generate_function(mov::sWord *fword, bool is_root) {
                 }
 
                 case STORE: {
-                    Register mem_address = instr->pop_nodes[1]->backward_edge_register;
-                    Register value = instr->pop_nodes[0]->backward_edge_register;
+                    Register mem_address = instr->pop_nodes[0]->backward_edge_register;
+                    Register value = instr->pop_nodes[1]->backward_edge_register;
 
                     Value *mem_address_v = builder.build_load_register(mem_address);
                     Value *mem_pointer_v = builder.CreateIntToPtr(mem_address_v, PointerType::get(builder.getInt64Ty(), 0));

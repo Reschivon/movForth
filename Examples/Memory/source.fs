@@ -1,6 +1,6 @@
 \ Some simple array utilities
 
-: cells 4 * ;
+: cells 8 * ; \ movForth uses 64 bit only for now
 
 : get-index \ pointer index -- value
     cells + @ ;

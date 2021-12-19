@@ -75,7 +75,7 @@ bool Interpreter::interpret() {
         }else{
             // is a word
             if(wordptr->immediate || immediate) {
-                // dln("execute word ", wordptr->name());
+               // dln("execute word ", wordptr->name());
                 auto dummy = (new std::list<iData>())->begin();
                 wordptr->execute(dummy, *this);
             } else {
@@ -263,13 +263,32 @@ void Interpreter::init_words(){
     });
 
     word_generator.register_primitive("!", primitive_words::STORE, [&](IP ip, Interpreter &interpreter) {
-        element value = stack.pop_number();
-        element ptr = stack.pop_number();
+        if(immediate){
+            // words being executed, no point in setting xts since nothing
+            // is in state of half-compilation. User must be setting memory
+            element ptr = stack.pop_number();
+            element value = stack.pop_number();
 
-        auto *addr = (element*) ptr;
-        *addr = value;
+            auto *addr = (element*) ptr;
+            *addr = value;
+        }else{
+            // words being compiled, very bad time for setting dictionary memory right now
+            // therefore we can assume user wants to set xts
+            if (!dictionary.back().is_forth_word())
+                println("Define some words before calling HERE");
+            else {
+                element location = stack.pop_number();
+                iData value = stack.pop();
+
+                auto it = dictionary.back().as_forth_word()->def().begin();
+                std::advance(it, location);
+                *it = value;
+
+                println("Set index ", location, " of word ", dictionary.back().to_string(), " to ", value.to_string());
+            }
+        }
+
     });
-
 
 
     word_generator.register_primitive("branch", primitive_words::BRANCH, [&](IP ip, Interpreter &interpreter) {
@@ -292,7 +311,7 @@ void Interpreter::init_words(){
     // Does not represent specific address
     word_generator.register_primitive("here", primitive_words::HERE, [&](IP ip, Interpreter &interpreter) {
         if(immediate){
-            // words being execud, no point in compiling branches since nothing
+            // words being executed, no point in compiling branches since nothing
             // is in state of half-compilation. Prime time for ALLOTing
             dictionary.emplace_back(0);
         }else{
@@ -301,7 +320,7 @@ void Interpreter::init_words(){
             if (!dictionary.back().is_forth_word())
                 println("Define some words before calling HERE");
             else
-                stack.push((int) dictionary.back().as_forth_word()->def().size());
+                stack.push((element) dictionary.back().as_forth_word()->def().size());
         }
     });
 
