@@ -141,12 +141,9 @@ bool can_inline(std::list<iData>::iterator it, ForthWord *host, int maximum_defi
         uint sub_def_size = sub_fw->def_size();
 
         if (host->def_size() + sub_def_size < maximum_definition_size) {
-            d("Inlining word ", sub_fw->name(), " into ", host->name());
-            sub_fw->definition_to_string();
-            dln();
+            dln("Inlining word ", sub_fw->name(), " into ", host->name());
             return true;
         } else {
-            dln("Not inlining word ", sub_fw->name(), " into ", host->name());
             return false;
         }
     }
@@ -158,8 +155,11 @@ const static uint INLINE_WORD_MAX_XTS = 50;
 void dfs(iWordptr word, std::set<iWordptr>& visited){
 
     if(visited.find(word) != visited.end()) {
-        visited.insert(word);
+        // this word has already been visited
         return;
+    }else {
+        // this word has not been visited
+        visited.insert(word);
     }
 
     if(dynamic_cast<Primitive*>(word)){
@@ -168,10 +168,8 @@ void dfs(iWordptr word, std::set<iWordptr>& visited){
 
 
     if(auto *fw = dynamic_cast<ForthWord*>(word)){
-        dln();
         dln("[", word->name(), "] looking to inline words in definition");
         indent();
-
 
 
         auto &definition = fw->def();
@@ -199,7 +197,6 @@ void dfs(iWordptr word, std::set<iWordptr>& visited){
                 it = replace_with(definition, it, iterator_forthword->def());
 
                 // grrr!! std::list does not update its size when inserted into
-                println("inlining added ", iterator_forthword->def_size() - 1, " words ");
                 branch_offset += (int) iterator_forthword->def_size() - 1;
             }else{
                 // fix branch jumps
@@ -211,11 +208,6 @@ void dfs(iWordptr word, std::set<iWordptr>& visited){
                 }
             }
         }
-
-        println();
-        for(auto w : definition)
-            print(w.to_string(), " ");
-
         unindent();
 
     }

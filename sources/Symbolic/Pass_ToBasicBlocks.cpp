@@ -150,7 +150,6 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
 
             case TOLOCAL: {
                 auto *toLocal = dynamic_cast<ToLocal *>(template_sub_def);
-                println("Convert local to symbolic: ", toLocal->name());
                 curr_bb->instructions.push_back(
                         new Instruction(new_sub_def,sData{toLocal->local}));
                 break;
@@ -158,7 +157,6 @@ sWordptr Analysis::translate_to_basic_blocks(ForthWord *template_word){
 
             case FROMLOCAL: {
                 auto *fromLocal = dynamic_cast<FromLocal *>(template_sub_def);
-                println("Convert local to symbolic: ", fromLocal->name());
                 curr_bb->instructions.push_back(
                         new Instruction(new_sub_def,sData{fromLocal->local}));
                 break;
