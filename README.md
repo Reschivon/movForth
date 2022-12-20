@@ -8,10 +8,10 @@ MovForth compiles Forth source code to executable binaries. Using LLVM IR as an 
 
 #### **[Forth 2020 Presentation Recording](https://youtu.be/CgxwbeLWSZM?t=9963)**
 
-- Bottom-up compilation; no dictionary or interpreter remains in final executable
-- Compile time evaluation for immediate words allows programmers to use meta-compilation without fear
-- Compiling to LLVM IR allows for compilation to pretty much [any architecture](https://en.wikipedia.org/wiki/LLVM#Back_ends)
-- Modern LLVM optimization passes used on Forth code
+- No dictionary or interpreter remains in final executable
+- Immediate words are evaluated at compile time to eliminate runtime for meta-compilation words
+- Use of LLVM IR allows for machine code generation on virtually [any architecture](https://en.wikipedia.org/wiki/LLVM#Back_ends)
+- Modern LLVM optimization passes are run on Forth code
 
 You can find Forth source and its corresponding compiled forms in `Examples/`
 
