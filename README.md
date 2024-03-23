@@ -15,6 +15,13 @@ MovForth compiles Forth source code to executable binaries. Using LLVM IR as an 
 
 You can find Forth source and its corresponding compiled forms in `Examples/`
 
+> [!NOTE]
+> Q: What's the point of a purely compiled Forth, ie. without interactivity? 
+> 
+> That's a good question. Short answer is for speed. Long answer is that this project was a proof of concept for mixing traditional and modern tools and I 
+> simply did it for fun and not as anything practical. But perhaps this can be addressed by having an interpreter dynamically link to a 
+> compiled lib. 
+
 ## Installation
 
 - Have LLVM installed (LLVM-10 and above). For Ubuntu/Debian-based distros, simply run:
